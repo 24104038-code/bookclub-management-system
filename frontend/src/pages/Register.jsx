@@ -63,19 +63,30 @@ export default function Register() {
   // Resolve Google Client ID
   useEffect(() => {
     async function loadGoogleClientId() {
-      const stored = localStorage.getItem('bookforge_google_client_id');
-      if (stored) {
-        setActiveGoogleClientId(stored);
-        setGoogleClientIdInput(stored);
+      // 1. Check environment variable
+      const envId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (envId) {
+        setActiveGoogleClientId(envId);
+        setGoogleClientIdInput(envId);
         return;
       }
+
+      // 2. Check backend configuration
       try {
         const res = await BookClubAPI.auth.getGoogleConfig();
         if (res.success && res.clientId) {
           setActiveGoogleClientId(res.clientId);
           setGoogleClientIdInput(res.clientId);
+          return;
         }
       } catch (e) {}
+
+      // 3. Fallback to localStorage
+      const stored = localStorage.getItem('bookforge_google_client_id');
+      if (stored) {
+        setActiveGoogleClientId(stored);
+        setGoogleClientIdInput(stored);
+      }
     }
     loadGoogleClientId();
   }, []);
