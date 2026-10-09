@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Details — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <p class="text-soft mb-30"><a href="events.html">← Back to All Events</a></p>
+
+    <!-- EVENT HERO CARD -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, #16291F, #33473A); color: #fff;">
+      <div class="flex-between" style="flex-wrap: wrap; gap: 20px;">
+        <div>
+          <span class="badge" style="background: var(--shell-gold); color: var(--shell-green-deep);" id="evTypeTag">Book Club Meeting</span>
+          <h1 style="color: #fff; margin: 10px 0 6px 0;" id="evTitle">Event Title</h1>
+          <p style="color: #B9C7BC; max-width: 600px; margin: 0 0 16px 0;" id="evDesc"></p>
+
+          <div class="flex gap-16" style="font-size: 0.9rem; color: #E7D9C6; flex-wrap: wrap;">
+            <span id="evMetaDate">📅 Date</span>
+            <span id="evMetaTime">🕒 Time</span>
+            <span id="evMetaLoc">📍 Location</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); padding: 20px 24px; text-align: center; min-width: 220px;">
+          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--shell-text-dim); margin-bottom: 4px;">Attendance Status</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: var(--shell-gold); margin-bottom: 12px;" id="evRsvpState">Confirmed RSVP</div>
+          <button type="button" class="btn btn-primary btn-sm btn-block" id="btnToggleRSVPMain">RSVP Now</button>
+          <div class="flex gap-4" style="margin-top: 10px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-ghost btn-sm" id="btnTrackWhatsAppEv" style="color:#25D366; font-size:0.78rem;">📲 WhatsApp</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnTrackEmailEv" style="color:#fff; font-size:0.78rem;">✉️ Email</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnAddToCalendar" style="color:#fff; font-size:0.78rem;">📅 .ics</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TWO COLUMN -->
+    <div class="grid grid-2" style="gap: 30px; align-items: start;">
+      <!-- LEFT: Schedule & Meeting Link -->
+      <div>
+        <div class="card panel mb-30">
+          <h3>Virtual Salon Meeting Link</h3>
+          <div class="card" style="background: var(--cream-deep); padding: 16px; margin-top: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 700; color: var(--brown-deep);" id="evMeetingUrl">https://meet.bookclub.internal/salon</div>
+              <span class="text-soft" style="font-size: 0.8rem;">Room opens 10 minutes before kickoff</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="btnCopyMeetingLink">Copy Link</button>
+          </div>
+        </div>
+
+        <div class="card panel mb-30">
+          <h3>Event Agenda & Schedule</h3>
+          <div class="feed-list" id="evScheduleList"></div>
+        </div>
+
+        <div class="card panel">
+          <h3>Discussion Guidelines</h3>
+          <ul style="padding-left: 20px; color: var(--ink-soft); line-height: 1.8;" id="evRulesList"></ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Host & Participants & Certificate -->
+      <div>
+        <!-- EVENT PARTICIPATION & CERTIFICATE -->
+        <div class="card panel mb-30" id="evCertificateCard">
+          <div class="panel-head">
+            <h3>Participation & Certificate</h3>
+            <span class="badge" id="evCertBadge">In Progress</span>
+          </div>
+
+          <p class="text-soft" style="font-size: 0.88rem; margin: 4px 0 16px;">
+            Complete all event participation milestones to earn your official verified certificate.
+          </p>
+
+          <!-- Tasks List -->
+          <div id="evTasksContainer" style="margin-bottom: 14px;">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Status Banner -->
+          <div id="evCertStatusBanner" class="cert-status-banner pending">
+            <span>ℹ️ Complete all tasks to unlock your certificate.</span>
+          </div>
+
+          <!-- Actions -->
+          <div id="evCertActions" style="margin-top: 14px;">
+            <button type="button" class="btn btn-primary btn-block" id="btnGenerateCert" disabled>
+              🎓 Generate Certificate
+            </button>
+          </div>
+        </div>
+
+        <div class="card panel mb-30">
+          <h3>Event Host</h3>
+          <div class="feed-row" style="margin-top: 12px; border-bottom: none;">
+            <div class="avatar-chip" style="width: 52px; height: 52px; font-size: 1.2rem; background: var(--clay);" id="evHostAvatar">AK</div>
+            <div class="feed-body">
+              <h4 style="margin: 0;" id="evHostName">Host Name</h4>
+              <p class="text-soft" style="margin: 2px 0 0 0;" id="evHostRole">Lead Organizer</p>
+            </div>
+            <a href="profile.html" class="btn btn-outline btn-sm">Host Profile</a>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <div class="panel-head">
+            <h3>Confirmed Attendees</h3>
+            <span class="text-soft" id="evAttendeesCount">38 Attending</span>
+          </div>
+          <div class="feed-list" id="evAttendeesList">
+            <div class="feed-row" style="align-items:center;">
+              <div class="avatar-chip" style="background:var(--clay); margin:0 8px 0 0;">JR</div>
+              <div class="feed-body"><strong>Jordan Rivera (You)</strong><div class="feed-time">Registered RSVP</div></div>
+              <span class="badge badge-completed">Confirmed</span>
+            </div>
+            <div class="feed-row" style="align-items:center;">
+              <div class="avatar-chip" style="background:var(--green-shelf); margin:0 8px 0 0;">RT</div>
+              <div class="feed-body"><strong>Rahul Thomas</strong><div class="feed-time">Registered 2 days ago</div></div>
+              <span class="badge badge-completed">Confirmed</span>
+            </div>
+            <div class="feed-row" style="align-items:center;">
+              <div class="avatar-chip" style="background:var(--gold); margin:0 8px 0 0;">MJ</div>
+              <div class="feed-body"><strong>Meera Joseph</strong><div class="feed-time">Registered 4 days ago</div></div>
+              <span class="badge badge-completed">Confirmed</span>
+            </div>
+            <div class="feed-row" style="align-items:center;">
+              <div class="avatar-chip" style="background:#6A4C93; margin:0 8px 0 0;">SP</div>
+              <div class="feed-body"><strong>Sam Park</strong><div class="feed-time">Registered 5 days ago</div></div>
+              <span class="badge badge-completed">Confirmed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('events');
+
+  const currentUser = (typeof BookClubAuth !== 'undefined' && BookClubAuth.getCurrentUser())
+    ? BookClubAuth.getCurrentUser()
+    : { name: 'Jordan Rivera', email: 'reader@bookclub.com', phone: '+919876543210', userId: 1 };
+
+  const params = new URLSearchParams(window.location.search);
+  const evId = Number(params.get('id')) || 1;
+  let eventItem = (typeof BookClubStore !== 'undefined') ? BookClubStore.getEventById(evId) : null;
+  if (!eventItem && typeof BookClubStore !== 'undefined') {
+    const list = BookClubStore.getEvents();
+    if (list && list.length) {
+      eventItem = list.find(e => e.id === evId) || list[0];
+    }
+  }
+  if (!eventItem && typeof MOCK_EVENTS !== 'undefined' && MOCK_EVENTS.length) {
+    eventItem = MOCK_EVENTS.find(e => e.id === evId) || MOCK_EVENTS[0];
+  }
+
+  if (!eventItem) {
+    eventItem = {
+      id: 1,
+      title: "Monthly Book Discussion: Winter's Ledger",
+      type: "Book Club Meeting",
+      date: "2026-10-14",
+      time: "6:00 PM - 7:30 PM",
+      day: "14",
+      month: "Oct",
+      location: "Community Library Hall & Virtual Room",
+      organizer: "Aditi Krishnan",
+      organizerRole: "Lead Organizer",
+      organizerAvatar: "AK",
+      participants: 41,
+      maxSeats: 50,
+      description: "Join us for our monthly breakdown of Colin Reyes's Winter's Ledger. We will dissect the accounting clues, debate the morality of the town mayor's choice, and vote on next month's selection.",
+      meetingLink: "https://meet.bookclub.internal/winter-ledger-oct",
+      rules: [
+        "Read through Chapter 18 before attending if you want to avoid minor spoilers.",
+        "Mute microphones upon entering virtual room.",
+        "Be respectful and allow equal sharing time for all members."
+      ],
+      schedule: [
+        { time: "6:00 PM", activity: "Welcome, Tea & Warm-up impressions" },
+        { time: "6:20 PM", activity: "Plot & Suspense Analysis: The Red Herrings" },
+        { time: "7:00 PM", activity: "Character motivations & Author interview clip" },
+        { time: "7:25 PM", activity: "Voting on Next Month's Book & Close" }
+      ],
+      rsvpd: true,
+      attendanceStatus: "Confirmed"
+    };
+  }
+
+  // Render Topbar
+  if (typeof BookClubUI !== 'undefined') {
+    BookClubUI.renderTopbar(
+      eventItem.title,
+      `${eventItem.type} · ${eventItem.date || `${eventItem.month} ${eventItem.day}, 2026`} at ${eventItem.time}`,
+      `<a href="events.html" class="btn btn-outline btn-sm">All Events</a>`
+    );
+  }
+
+  // Populate Hero & Details elements
+  const elTitle = document.getElementById('evTitle');
+  if (elTitle) elTitle.textContent = eventItem.title;
+
+  const elDesc = document.getElementById('evDesc');
+  if (elDesc) elDesc.textContent = eventItem.description || '';
+
+  const elTypeTag = document.getElementById('evTypeTag');
+  if (elTypeTag) elTypeTag.textContent = eventItem.type || 'Book Club Meeting';
+
+  const elMetaDate = document.getElementById('evMetaDate');
+  if (elMetaDate) elMetaDate.textContent = `📅 ${eventItem.date || `${eventItem.month} ${eventItem.day}, 2026`}`;
+
+  const elMetaTime = document.getElementById('evMetaTime');
+  if (elMetaTime) elMetaTime.textContent = `🕒 ${eventItem.time || '6:00 PM'}`;
+
+  const elMetaLoc = document.getElementById('evMetaLoc');
+  if (elMetaLoc) elMetaLoc.textContent = `📍 ${eventItem.location || 'Virtual Salon'}`;
+
+  const elMeetingUrl = document.getElementById('evMeetingUrl');
+  const meetingUrl = eventItem.meetingLink || 'https://meet.bookclub.internal/salon';
+  if (elMeetingUrl) elMeetingUrl.textContent = meetingUrl;
+
+  const btnCopyLink = document.getElementById('btnCopyMeetingLink');
+  if (btnCopyLink) {
+    btnCopyLink.addEventListener('click', () => {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(meetingUrl);
+        BookClubUI.showToast('Meeting link copied to clipboard! 📋', 'success');
+      } else {
+        prompt('Copy meeting link:', meetingUrl);
+      }
+    });
+  }
+
+  const elHostName = document.getElementById('evHostName');
+  if (elHostName) elHostName.textContent = eventItem.organizer || 'Lead Organizer';
+
+  const elHostAvatar = document.getElementById('evHostAvatar');
+  if (elHostAvatar) elHostAvatar.textContent = eventItem.organizerAvatar || (eventItem.organizer ? eventItem.organizer.slice(0, 2).toUpperCase() : 'AK');
+
+  const elHostRole = document.getElementById('evHostRole');
+  if (elHostRole) elHostRole.textContent = eventItem.organizerRole || 'Event Host & Curator';
+
+  const elAttendeesCount = document.getElementById('evAttendeesCount');
+  if (elAttendeesCount) elAttendeesCount.textContent = `${eventItem.participants || 0} Confirmed Attendees`;
+
+  // RSVP Management
+  const rsvpBtn = document.getElementById('btnToggleRSVPMain');
+  const stateLabel = document.getElementById('evRsvpState');
+
+  function updateRSVPButton() {
+    if (!rsvpBtn || !stateLabel) return;
+    if (eventItem.rsvpd) {
+      rsvpBtn.textContent = 'Cancel My Seat';
+      rsvpBtn.className = 'btn btn-danger btn-sm btn-block';
+      stateLabel.textContent = 'Confirmed RSVP ✅';
+      stateLabel.style.color = 'var(--shell-gold)';
+    } else {
+      rsvpBtn.textContent = 'Reserve My Seat';
+      rsvpBtn.className = 'btn btn-primary btn-sm btn-block';
+      stateLabel.textContent = 'Seats Available';
+      stateLabel.style.color = '#fff';
+    }
+  }
+  updateRSVPButton();
+
+  if (rsvpBtn) {
+    rsvpBtn.addEventListener('click', () => {
+      const isRsvpd = (typeof BookClubStore !== 'undefined') ? BookClubStore.toggleRSVP(eventItem.id) : !eventItem.rsvpd;
+      eventItem.rsvpd = isRsvpd;
+      updateRSVPButton();
+      BookClubUI.showToast(isRsvpd ? 'You are registered for this event! 🎉' : 'Seat reservation cancelled.', isRsvpd ? 'success' : 'info');
+      setTimeout(loadCertificateStatus, 250);
+    });
+  }
+
+  // Event Tracking Actions (WhatsApp, Email, ICS)
+  const btnWhatsApp = document.getElementById('btnTrackWhatsAppEv');
+  if (btnWhatsApp) {
+    btnWhatsApp.addEventListener('click', () => {
+      const msg = BookClubStore.formatWhatsAppEventText({
+        groupName: 'Book Club',
+        title: eventItem.title,
+        schedule: eventItem.date || `${eventItem.month} ${eventItem.day}, 2026`,
+        time: eventItem.time,
+        location: eventItem.location,
+        milestone: 'Discussion Session',
+        url: window.location.href
+      });
+      BookClubStore.trackGatheringOrEvent({
+        type: 'event',
+        id: eventItem.id,
+        method: 'whatsapp',
+        contact: currentUser.phone || '',
+        details: { title: eventItem.title }
+      });
+      BookClubStore.openWhatsAppTracker(msg, currentUser.phone);
+      BookClubUI.showToast('📲 Opened event in WhatsApp! Reminder active.', 'success');
+    });
+  }
+
+  const btnEmail = document.getElementById('btnTrackEmailEv');
+  if (btnEmail) {
+    btnEmail.addEventListener('click', () => {
+      const emailAddr = currentUser.email || 'reader@bookclub.com';
+      BookClubStore.trackGatheringOrEvent({
+        type: 'event',
+        id: eventItem.id,
+        method: 'email',
+        contact: emailAddr,
+        details: { title: eventItem.title, schedule: eventItem.date, location: eventItem.location }
+      });
+      BookClubStore.downloadICSFile({
+        title: eventItem.title,
+        description: eventItem.description || 'BookClub gathering session',
+        location: eventItem.location,
+        filename: `event-${eventItem.id}`
+      });
+      BookClubUI.showToast(`✉️ Event details & .ics calendar invite sent to ${emailAddr}!`, 'success');
+    });
+  }
+
+  const btnCalendar = document.getElementById('btnAddToCalendar');
+  if (btnCalendar) {
+    btnCalendar.addEventListener('click', () => {
+      BookClubStore.downloadICSFile({
+        title: eventItem.title,
+        description: eventItem.description || 'BookClub gathering session',
+        location: eventItem.location,
+        filename: `event-${eventItem.id}`
+      });
+      BookClubUI.showToast('📅 Calendar invite (.ics) downloaded!', 'success');
+    });
+  }
+
+  // Event Agenda & Schedule list
+  const schedList = document.getElementById('evScheduleList');
+  if (schedList) {
+    if (eventItem.schedule && eventItem.schedule.length) {
+      schedList.innerHTML = eventItem.schedule.map(s => `
+        <div class="feed-row" style="display:flex; gap:16px; padding:10px 0; border-bottom:1px solid var(--line); align-items:flex-start;">
+          <div style="font-weight:700; min-width:85px; color:var(--clay); font-size:0.88rem;">${BookClubUI.escapeHtml(s.time)}</div>
+          <div class="feed-body" style="font-size:0.88rem; color:var(--ink); line-height:1.45;">${BookClubUI.escapeHtml(s.activity || s.title || '')}</div>
+        </div>
+      `).join('');
+    } else {
+      schedList.innerHTML = `
+        <div class="feed-row" style="padding:10px 0;"><div class="feed-body text-soft">Schedule agenda details will be provided at the beginning of the salon session.</div></div>
+      `;
+    }
+  }
+
+  // Discussion Guidelines list
+  const rulesList = document.getElementById('evRulesList');
+  if (rulesList) {
+    if (eventItem.rules && eventItem.rules.length) {
+      rulesList.innerHTML = eventItem.rules.map(r => `<li>${BookClubUI.escapeHtml(r)}</li>`).join('');
+    } else {
+      rulesList.innerHTML = `
+        <li>Be respectful of diverse viewpoints and literary interpretations.</li>
+        <li>Please keep your microphone muted during introductory remarks.</li>
+        <li>Tag spoiler questions appropriately in the chat pane.</li>
+        <li>Have fun and share the joy of books!</li>
+      `;
+    }
+  }
+
+  // CERTIFICATE & PARTICIPATION LOGIC
+  const certBadge = document.getElementById('evCertBadge');
+  const tasksContainer = document.getElementById('evTasksContainer');
+  const certBanner = document.getElementById('evCertStatusBanner');
+  const certActions = document.getElementById('evCertActions');
+
+  let currentCertData = null;
+
+  async function loadCertificateStatus() {
+    try {
+      let statusData = null;
+      if (typeof BookClubAPI !== 'undefined' && BookClubAPI.getToken()) {
+        const res = await BookClubAPI.events.getCertificateStatus(eventItem.id).catch(() => null);
+        if (res && res.success && res.data) {
+          statusData = res.data;
+        }
+      }
+
+      // Fallback local state if backend is offline or empty
+      if (!statusData) {
+        const existingCert = (typeof BookClubStore !== 'undefined')
+          ? BookClubStore.getCertificates().find(c => c.eventId === eventItem.id)
+          : null;
+        const isRsvpd = !!eventItem.rsvpd;
+        const localTasks = [
+          { id: 'rsvp', title: 'RSVP & Confirm Attendance', description: 'Reserve your seat for the event.', required: true, completed: isRsvpd },
+          { id: 'agenda', title: 'Review Event Agenda & Guidelines', description: 'Review the discussion schedule.', required: true, completed: true },
+          { id: 'participate', title: 'Active Discussion Participation', description: 'Participate in the live breakdown.', required: true, completed: false }
+        ];
+        const allCompleted = isRsvpd && localTasks.every(t => t.completed);
+        statusData = {
+          isRsvpd,
+          allTasksCompleted: allCompleted,
+          eligible: allCompleted && !existingCert,
+          hasCertificate: !!existingCert,
+          certificate: existingCert || null,
+          tasks: localTasks,
+          totalTasks: 3,
+          completedTasks: localTasks.filter(t => t.completed).length
+        };
+      }
+
+      currentCertData = statusData;
+      renderCertificateUI(statusData);
+    } catch (err) {
+      console.warn('Failed to load certificate status:', err);
+    }
+  }
+
+  function renderCertificateUI(data) {
+    if (!data) return;
+
+    // Render tasks list
+    if (tasksContainer) {
+      tasksContainer.innerHTML = (data.tasks || []).map(t => `
+        <div class="cert-task-item ${t.completed ? 'completed' : ''}" data-task-id="${t.id}" style="cursor:pointer; display:flex; align-items:center; gap:12px; padding:10px 12px; background:${t.completed ? '#F0FDF4' : 'var(--cream-deep)'}; border-radius:8px; margin-bottom:8px; border:1px solid ${t.completed ? '#BBF7D0' : 'var(--line)'};">
+          <div class="cert-task-checkbox" style="font-weight:700; width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:4px; border:2px solid ${t.completed ? 'var(--green-shelf)' : 'var(--ink-soft)'}; color:var(--green-shelf);">
+            ${t.completed ? '✓' : ''}
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:600; font-size:0.92rem; color:${t.completed ? 'var(--green-shelf)' : 'var(--ink)'};">
+              ${BookClubUI.escapeHtml(t.title)}
+            </div>
+            <div class="text-soft" style="font-size:0.78rem;">${BookClubUI.escapeHtml(t.description || '')}</div>
+          </div>
+          ${t.completed ? '<span class="badge badge-completed" style="font-size:0.7rem;">Done</span>' : '<span class="badge" style="font-size:0.7rem; background:rgba(0,0,0,0.06);">Click to Complete</span>'}
+        </div>
+      `).join('');
+
+      // Attach task completion click listeners
+      tasksContainer.querySelectorAll('.cert-task-item').forEach(item => {
+        item.addEventListener('click', async () => {
+          const taskId = item.getAttribute('data-task-id');
+          if (taskId === 'rsvp') {
+            if (rsvpBtn) rsvpBtn.click();
+            return;
+          }
+
+          const taskObj = data.tasks.find(t => t.id === taskId);
+          if (!taskObj) return;
+
+          // Toggle task state
+          taskObj.completed = !taskObj.completed;
+          data.completedTasks = data.tasks.filter(t => t.completed).length;
+          data.allTasksCompleted = data.tasks.every(t => t.completed);
+          data.eligible = data.allTasksCompleted && !data.hasCertificate;
+
+          renderCertificateUI(data);
+          BookClubUI.showToast(taskObj.completed ? `Task "${taskObj.title}" completed! ✅` : `Task marked pending.`, 'info');
+        });
+      });
+    }
+
+    // Check certificate state
+    if (data.hasCertificate && data.certificate) {
+      const cert = data.certificate;
+      if (certBadge) {
+        certBadge.textContent = 'Issued';
+        certBadge.className = 'badge badge-completed';
+      }
+
+      if (certBanner) {
+        certBanner.className = 'cert-status-banner issued';
+        certBanner.innerHTML = `<span>✓ <strong>Certificate Issued</strong> (ID: <code>${BookClubUI.escapeHtml(cert.certificateId || cert.id || 'BC-EVT-001')}</code>)</span>`;
+      }
+
+      if (certActions) {
+        certActions.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button type="button" class="btn btn-primary btn-block" id="btnViewCertAction">View Certificate</button>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn-outline btn-sm" id="btnDownloadCertAction" style="flex:1;">View & Download</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnPrintCertAction" style="flex:1;">Print Certificate</button>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('btnViewCertAction')?.addEventListener('click', () => {
+          BookClubUI.showCertificateModal(cert);
+        });
+        document.getElementById('btnDownloadCertAction')?.addEventListener('click', () => {
+          BookClubUI.showCertificateModal(cert);
+        });
+        document.getElementById('btnPrintCertAction')?.addEventListener('click', () => {
+          BookClubUI.showCertificateModal(cert);
+          setTimeout(() => window.print(), 350);
+        });
+      }
+
+    } else if (data.allTasksCompleted) {
+      if (certBadge) {
+        certBadge.textContent = 'Eligible';
+        certBadge.className = 'badge';
+        certBadge.style.background = '#D8F3DC';
+        certBadge.style.color = '#1B4332';
+      }
+
+      if (certBanner) {
+        certBanner.className = 'cert-status-banner eligible';
+        certBanner.innerHTML = `<span>🏆 <strong>Certificate Eligible</strong>! You have completed all participation requirements.</span>`;
+      }
+
+      if (certActions) {
+        certActions.innerHTML = `
+          <button type="button" class="btn btn-primary btn-block" id="btnGenerateCertAction">
+            🎓 Generate Official Certificate
+          </button>
+        `;
+
+        document.getElementById('btnGenerateCertAction')?.addEventListener('click', async function () {
+          const btn = this;
+          btn.disabled = true;
+          btn.textContent = 'Generating Certificate...';
+
+          try {
+            if (typeof BookClubAPI !== 'undefined' && BookClubAPI.getToken()) {
+              const genRes = await BookClubAPI.events.generateCertificate(eventItem.id).catch(() => null);
+              if (genRes && genRes.success && genRes.data) {
+                BookClubUI.showToast('Congratulations! Certificate generated! 🎓', 'success');
+                if (typeof BookClubStore !== 'undefined') {
+                  BookClubStore.addCertificate(genRes.data);
+                }
+                await loadCertificateStatus();
+                BookClubUI.showCertificateModal(genRes.data);
+                return;
+              }
+            }
+
+            // Fallback offline generator
+            const certId = `BC-EVT-${new Date().getFullYear()}-${String(eventItem.id).padStart(4, '0')}`;
+            const mockCert = {
+              certificateId: certId,
+              id: certId,
+              userId: currentUser.userId || 1,
+              eventId: eventItem.id,
+              recipient: currentUser.name || 'Jordan Rivera',
+              participantName: currentUser.name || 'Jordan Rivera',
+              eventName: eventItem.title,
+              title: `${eventItem.title} — Verified Salon Participation`,
+              eventDate: eventItem.date || `${eventItem.month} ${eventItem.day}, 2026`,
+              issuer: eventItem.organizer || 'BOOK FORGE Reading Guild',
+              organizerName: eventItem.organizer || 'Lead Organizer',
+              issueDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              verificationCode: 'BF-V' + Math.floor(Math.random() * 89999 + 10000),
+              status: 'valid'
+            };
+
+            if (typeof BookClubStore !== 'undefined') {
+              BookClubStore.addCertificate(mockCert);
+            }
+            data.hasCertificate = true;
+            data.certificate = mockCert;
+            BookClubUI.showToast('Certificate generated successfully! 🎓', 'success');
+            renderCertificateUI(data);
+            BookClubUI.showCertificateModal(mockCert);
+          } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Generate Official Certificate';
+            BookClubUI.showToast(err.message || 'Failed to generate certificate.', 'error');
+          }
+        });
+      }
+
+    } else {
+      if (certBadge) {
+        certBadge.textContent = 'In Progress';
+        certBadge.className = 'badge';
+        certBadge.style.background = 'var(--cream-deep)';
+        certBadge.style.color = 'var(--brown-deep)';
+      }
+
+      if (certBanner) {
+        certBanner.className = 'cert-status-banner pending';
+        certBanner.innerHTML = `<span>ℹ️ Complete all tasks above to unlock your certificate.</span>`;
+      }
+
+      if (certActions) {
+        certActions.innerHTML = `
+          <button type="button" class="btn btn-primary btn-block" disabled style="opacity:0.6; cursor:not-allowed;">
+            Complete all tasks to unlock certificate
+          </button>
+        `;
+      }
+    }
+  }
+
+  // Initial certificate check
+  loadCertificateStatus();
+});
+</script>
+</body>
+</html>

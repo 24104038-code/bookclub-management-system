@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Events — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- FILTER TABS -->
+    <div class="tabs" id="eventTabs">
+      <span class="tab active" data-filter="upcoming">Upcoming Gatherings</span>
+      <span class="tab" data-filter="my-rsvps">My RSVPs & Attendance</span>
+      <span class="tab" data-filter="all">All Events</span>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-box" style="flex:2;">
+        <span>🔎</span>
+        <input type="text" id="eventSearchInput" placeholder="Search events by title, organizer, or location...">
+      </div>
+
+      <select id="eventTypeFilter">
+        <option value="all">All Event Types</option>
+        <option value="Book Club Meeting">Book Club Meeting</option>
+        <option value="Author Talk">Author Talk</option>
+        <option value="Reading Session">Reading Session</option>
+        <option value="Writing Workshop">Writing Workshop</option>
+        <option value="Social Event">Social Event</option>
+      </select>
+
+      <a href="calendar.html" class="btn btn-outline btn-sm">Interactive Calendar View 📆</a>
+    </div>
+
+    <!-- EVENTS GRID -->
+    <div class="grid grid-3" id="eventsGrid" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('events');
+  BookClubUI.renderTopbar(
+    'Community Events & Salons',
+    'Join live author Q&As, scheduled group discussions, and silent reading rooms.',
+    `<button class="btn btn-primary btn-sm" id="btnHostEvent">+ Host Event</button>`
+  );
+
+  let currentTab = 'upcoming';
+  const searchInput = document.getElementById('eventSearchInput');
+  const typeFilter = document.getElementById('eventTypeFilter');
+
+  function renderEvents() {
+    const list = BookClubStore.getEvents();
+    const container = document.getElementById('eventsGrid');
+    const query = searchInput.value.trim().toLowerCase();
+    const type = typeFilter.value;
+
+    let filtered = list;
+    if (currentTab === 'my-rsvps') filtered = filtered.filter(e => e.rsvpd);
+
+    if (query) {
+      filtered = filtered.filter(e => e.title.toLowerCase().includes(query) || e.organizer.toLowerCase().includes(query) || e.location.toLowerCase().includes(query));
+    }
+    if (type !== 'all') {
+      filtered = filtered.filter(e => e.type === type);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('📅', 'No events found', 'Try choosing a different category or clear search.', 'Reset Filters', '#')}</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(e => `
+      <div class="card event-card" style="flex-direction: column; align-items: stretch; justify-content: space-between;">
+        <div>
+          <div class="flex-between" style="margin-bottom: 14px;">
+            <div class="event-date-badge"><span class="d">${e.day}</span><span class="m">${e.month}</span></div>
+            <span class="badge ${e.rsvpd ? 'badge-completed' : 'badge-reading'}">${e.rsvpd ? '✓ Registered' : e.type}</span>
+          </div>
+
+          <h3 style="margin: 0 0 8px 0; font-size: 1.15rem;">
+            <a href="event-details.html?id=${e.id}">${e.title}</a>
+          </h3>
+
+          <p class="event-meta">🕒 ${e.time}</p>
+          <p class="event-meta">📍 ${e.location}</p>
+          <p class="event-meta">🎤 Host: ${e.organizer}</p>
+          <p class="event-meta">👥 ${e.participants} / ${e.maxSeats} seats reserved</p>
+
+          <p style="font-size: 0.88rem; color: var(--ink-soft); margin-top: 10px;">${e.description.slice(0, 85)}...</p>
+        </div>
+
+        <div class="flex gap-8" style="margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 14px;">
+          <button type="button" class="btn ${e.rsvpd ? 'btn-danger' : 'btn-primary'} btn-sm" style="flex:1;" onclick="handleToggleRSVP(${e.id})">
+            ${e.rsvpd ? 'Cancel RSVP' : 'RSVP Now'}
+          </button>
+          <a href="event-details.html?id=${e.id}" class="btn btn-outline btn-sm">Details →</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.handleToggleRSVP = function (id) {
+    const isRsvpd = BookClubStore.toggleRSVP(id);
+    BookClubUI.showToast(isRsvpd ? 'Seat reserved! See you there! 🎉' : 'RSVP cancelled.', isRsvpd ? 'success' : 'info');
+    renderEvents();
+  };
+
+  document.querySelectorAll('#eventTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#eventTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      currentTab = this.getAttribute('data-filter');
+      renderEvents();
+    });
+  });
+
+  searchInput.addEventListener('input', renderEvents);
+  typeFilter.addEventListener('change', renderEvents);
+
+  // Host Event Modal
+  document.getElementById('btnHostEvent').addEventListener('click', () => {
+    BookClubUI.showModal(
+      'Schedule a Community Event',
+      `
+        <div class="field">
+          <label>Event Title</label>
+          <input type="text" id="evNewTitle" placeholder="e.g. Victorian Poetry Evening">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Event Type</label>
+            <select id="evNewType">
+              <option value="Book Club Meeting">Book Club Meeting</option>
+              <option value="Author Talk">Author Talk</option>
+              <option value="Reading Session">Reading Session</option>
+              <option value="Writing Workshop">Writing Workshop</option>
+              <option value="Social Event">Social Event</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Max Seats</label>
+            <input type="number" id="evNewSeats" value="30">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Date</label><input type="date" id="evNewDate" value="2026-11-20"></div>
+          <div class="field"><label>Time</label><input type="text" id="evNewTime" value="6:00 PM - 7:30 PM"></div>
+        </div>
+        <div class="field">
+          <label>Location / Meeting Link</label>
+          <input type="text" id="evNewLoc" placeholder="e.g. City Library Room 2 or Zoom link">
+        </div>
+        <div class="field">
+          <label>Event Description</label>
+          <textarea id="evNewDesc" rows="3" placeholder="Explain what books or discussion topics you will cover..."></textarea>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSaveNewEvent()">Create Event</button>
+      `
+    );
+  });
+
+  window.handleSaveNewEvent = function () {
+    const title = document.getElementById('evNewTitle').value.trim();
+    if (!title) { alert('Please enter an event title.'); return; }
+    BookClubStore.createEvent({
+      title: title,
+      type: document.getElementById('evNewType').value,
+      maxSeats: document.getElementById('evNewSeats').value,
+      date: document.getElementById('evNewDate').value,
+      time: document.getElementById('evNewTime').value,
+      location: document.getElementById('evNewLoc').value,
+      description: document.getElementById('evNewDesc').value
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Event created and published to calendar! 📅', 'success');
+    renderEvents();
+  };
+
+  renderEvents();
+});
+</script>
+</body>
+</html>

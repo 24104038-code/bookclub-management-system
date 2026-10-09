@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Discussions — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- CATEGORY PILLS -->
+    <div class="filter-bar" style="gap: 8px;">
+      <div class="search-box" style="flex:2; min-width:240px;">
+        <span>🔎</span>
+        <input type="text" id="discSearchInput" placeholder="Search discussion topics, book theories, spoilers...">
+      </div>
+
+      <select id="discCatFilter">
+        <option value="all">All Categories</option>
+        <option value="General">General</option>
+        <option value="Books">Books & Plot</option>
+        <option value="Reviews">Reviews</option>
+        <option value="Reading Progress">Reading Progress</option>
+        <option value="Recommendations">Recommendations</option>
+        <option value="Events">Events</option>
+        <option value="Groups">Groups</option>
+        <option value="Off Topic">Off Topic</option>
+      </select>
+
+      <button type="button" class="btn btn-primary btn-sm" id="btnNewDiscussion">+ Start Discussion</button>
+    </div>
+
+    <!-- DISCUSSIONS LIST / GRID -->
+    <div class="grid grid-2" id="discussionsListGrid" style="margin-bottom: 40px;">
+      <!-- Rendered dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('discussions');
+  BookClubUI.renderTopbar(
+    'Community Forums & Salons',
+    'Talk endings, character motivations, theories, and book tips with fellow readers.',
+    `<button class="btn btn-primary btn-sm" id="topbarNewDisc">+ New Topic</button>`
+  );
+
+  const searchInput = document.getElementById('discSearchInput');
+  const catFilter = document.getElementById('discCatFilter');
+
+  function renderDiscussions() {
+    const list = BookClubStore.getDiscussions();
+    const container = document.getElementById('discussionsListGrid');
+    const q = searchInput.value.trim().toLowerCase();
+    const cat = catFilter.value;
+
+    let filtered = list;
+    if (q) {
+      filtered = filtered.filter(d => d.title.toLowerCase().includes(q) || d.content.toLowerCase().includes(q) || (d.bookTag || '').toLowerCase().includes(q));
+    }
+    if (cat !== 'all') {
+      filtered = filtered.filter(d => d.category === cat);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('💬', 'No discussions found', 'Be the first to start a conversation in this category.', 'Start Discussion', '#')}</div>`;
+      const btn = container.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openNewDiscModal(); });
+      return;
+    }
+
+    container.innerHTML = filtered.map(d => `
+      <div class="card discussion-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="discussion-top">
+            <span class="discussion-book-tag">${d.bookTag || d.category}</span>
+            <span class="text-soft" style="font-size: 0.8rem;">${d.timeAgo} · 👁️ ${d.views} views</span>
+          </div>
+
+          <h3 class="discussion-title">
+            <a href="discussion-details.html?id=${d.id}">${d.title}</a>
+          </h3>
+
+          <p class="discussion-content">${d.content.slice(0, 120)}...</p>
+
+          ${d.hasSpoiler ? `
+            <div class="spoiler-box" style="padding:8px 12px; margin: 8px 0;">
+              <small style="color:var(--clay); font-weight:700;">⚠️ Contains Plot Spoilers</small>
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="discussion-footer">
+          <div class="author-line">
+            <div class="avatar-chip" style="background:var(--clay); margin-left:0;">${d.avatar || 'JR'}</div>
+            <span>${d.author}</span>
+          </div>
+          <div class="flex gap-12" style="align-items:center;">
+            <span>💬 ${(d.replies || []).length} replies</span>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="handleLikeDisc(${d.id})">
+              ${d.isLiked ? '❤️' : '🤍'} ${d.likes}
+            </button>
+            <a href="discussion-details.html?id=${d.id}" class="btn btn-outline btn-sm">Join Chat →</a>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.handleLikeDisc = function (id) {
+    BookClubStore.toggleLikeDiscussion(id);
+    renderDiscussions();
+  };
+
+  function openNewDiscModal() {
+    BookClubUI.showModal(
+      'Start a New Discussion Thread',
+      `
+        <div class="field">
+          <label>Topic Title</label>
+          <input type="text" id="discTitle" placeholder="e.g. Margaret's choice at the end of Chapter 24">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Category</label>
+            <select id="discCategory">
+              <option value="Books">Books & Plot</option>
+              <option value="General">General</option>
+              <option value="Reading Progress">Reading Progress</option>
+              <option value="Recommendations">Recommendations</option>
+              <option value="Events">Events</option>
+              <option value="Groups">Groups</option>
+              <option value="Off Topic">Off Topic</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Related Book (Optional)</label>
+            <input type="text" id="discBookTag" placeholder="e.g. The Silent Orchard">
+          </div>
+        </div>
+        <div class="field">
+          <label>Conversation Starter / Question</label>
+          <textarea id="discBody" rows="4" placeholder="Share your perspective and ask what fellow members thought..."></textarea>
+        </div>
+        <div class="checkbox-row" style="margin-bottom:14px;">
+          <input type="checkbox" id="discSpoilerCheck">
+          <label for="discSpoilerCheck">Flag this thread as containing plot spoilers</label>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSaveNewDiscussion()">Publish Topic</button>
+      `
+    );
+  }
+
+  window.handleSaveNewDiscussion = function () {
+    const title = document.getElementById('discTitle').value.trim();
+    const content = document.getElementById('discBody').value.trim();
+    if (!title || !content) { alert('Please enter both title and content.'); return; }
+
+    BookClubStore.addDiscussion({
+      title: title,
+      category: document.getElementById('discCategory').value,
+      bookTag: document.getElementById('discBookTag').value || 'General Discussion',
+      content: content,
+      hasSpoiler: document.getElementById('discSpoilerCheck').checked
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Discussion thread created! 💬', 'success');
+    renderDiscussions();
+  };
+
+  searchInput.addEventListener('input', renderDiscussions);
+  catFilter.addEventListener('change', renderDiscussions);
+  document.getElementById('btnNewDiscussion').addEventListener('click', openNewDiscModal);
+  document.getElementById('topbarNewDisc').addEventListener('click', openNewDiscModal);
+
+  renderDiscussions();
+});
+</script>
+</body>
+</html>

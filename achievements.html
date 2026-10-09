@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achievements & Badges — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- LEVEL & XP BANNER -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, #1E3A2E, #16291F); color: #fff;">
+      <div class="flex-between" style="flex-wrap:wrap; gap: 20px;">
+        <div>
+          <span class="eyebrow" style="color:var(--shell-gold);">Reader Level 8</span>
+          <h1 style="color:#fff; margin:6px 0;">Literary Sage</h1>
+          <p style="color:#B9C7BC; max-width:500px; margin:0 0 16px 0;">Level up by completing challenges, writing thoughtful reviews, and logging your daily pages.</p>
+          <div class="flex gap-16" style="font-size: 0.9rem; color: #E7D9C6;">
+            <span>🔥 Streak: <strong>14 Days</strong></span>
+            <span>🏆 Unlocked: <strong>5 / 11 Badges</strong></span>
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:var(--radius-md); padding: 18px 24px; min-width: 240px;">
+          <div class="flex-between" style="font-size:0.85rem; color:#B9C7BC; margin-bottom:6px;">
+            <span>XP Progress</span>
+            <strong style="color:var(--shell-gold);">2,340 / 3,000 XP</strong>
+          </div>
+          <div class="progress-track" style="height:10px; background:rgba(255,255,255,0.15);">
+            <div class="progress-fill" style="width: 78%; background: var(--shell-gold);"></div>
+          </div>
+          <div class="text-soft" style="font-size:0.75rem; margin-top:8px; color:#B9C7BC;">660 XP until Level 9: Grand Scholar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="badgeTabs">
+      <span class="tab active" data-filter="all">All Badges (11)</span>
+      <span class="tab" data-filter="unlocked">Unlocked (5)</span>
+      <span class="tab" data-filter="in_progress">In Progress (3)</span>
+      <span class="tab" data-filter="locked">Locked (3)</span>
+    </div>
+
+    <!-- BADGES GRID -->
+    <div class="badges-grid" id="badgesGridContainer" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('achievements');
+  BookClubUI.renderTopbar(
+    'Achievements & Badges',
+    'Earn rewards for your dedication to the reading life.',
+    `<a href="leaderboards.html" class="btn btn-outline btn-sm">Community Rankings 🏅</a>`
+  );
+
+  let currentFilter = 'all';
+
+  function renderBadges() {
+    const list = (typeof MOCK_ACHIEVEMENTS !== 'undefined') ? MOCK_ACHIEVEMENTS : [];
+    const container = document.getElementById('badgesGridContainer');
+
+    let filtered = list;
+    if (currentFilter !== 'all') {
+      filtered = list.filter(b => b.status === currentFilter);
+    }
+
+    container.innerHTML = filtered.map(b => {
+      const isUnlocked = b.status === 'unlocked';
+      const isLocked = b.status === 'locked';
+
+      return `
+        <div class="badge-card ${isLocked ? 'locked' : ''}">
+          <div class="badge-icon-lg">${b.icon}</div>
+          <h4>${b.title}</h4>
+          <p>${b.description}</p>
+
+          ${isUnlocked ? `
+            <div style="font-size:0.75rem; color:var(--green-shelf); font-weight:700; margin-bottom:8px;">✓ Unlocked on ${b.dateUnlocked}</div>
+          ` : (b.progress ? `
+            <div style="font-size:0.75rem; color:var(--clay); font-weight:700; margin-bottom:8px;">Progress: ${b.progress}</div>
+          ` : `
+            <div style="font-size:0.75rem; color:var(--ink-soft); margin-bottom:8px;">🔒 Locked milestone</div>
+          `)}
+
+          <span class="badge-xp-tag">+${b.xp} XP</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.querySelectorAll('#badgeTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#badgeTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.getAttribute('data-filter');
+      renderBadges();
+    });
+  });
+
+  renderBadges();
+});
+</script>
+</body>
+</html>

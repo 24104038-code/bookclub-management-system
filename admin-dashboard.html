@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 24px;
+  padding-bottom: 4px;
+}
+.admin-tab {
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.admin-tab.active {
+  background: var(--brown-deep);
+  color: #fff;
+  border-color: var(--brown-deep);
+}
+</style>
+</head>
+<body data-auth-required="true" data-role-required="admin">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- KPI STATS CARDS -->
+    <div class="grid grid-4" style="margin-bottom: 24px;">
+      <div class="card stat-card">
+        <div class="stat-title">Total Users</div>
+        <div class="stat-value tone-gold">1,250</div>
+        <div class="stat-delta up">↑ 48 this month</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Catalog Books</div>
+        <div class="stat-value tone-green">320</div>
+        <div class="stat-delta">Across 9 genres</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Active Circles</div>
+        <div class="stat-value tone-blue">48</div>
+        <div class="stat-delta">4 new forming</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Open Reports</div>
+        <div class="stat-value" style="color:var(--chart-red);">2</div>
+        <div class="stat-delta">Requires attention</div>
+      </div>
+    </div>
+
+    <!-- ADMIN SECTION TABS -->
+    <div class="admin-tabs" id="adminSectionTabs">
+      <button class="admin-tab active" data-sec="users">Users Management</button>
+      <button class="admin-tab" data-sec="books">Books Catalog</button>
+      <button class="admin-tab" data-sec="groups">Reading Circles</button>
+      <button class="admin-tab" data-sec="events">Events & Salons</button>
+      <button class="admin-tab" data-sec="reports">Moderation Queue</button>
+    </div>
+
+    <!-- TAB 1: USERS -->
+    <div id="secUsers" class="admin-panel-section">
+      <div class="flex-between mb-30">
+        <h3>Platform Registered Users</h3>
+        <button class="btn btn-primary btn-sm" id="btnAddUserAdmin">+ Add New User</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Genre</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: BOOKS -->
+    <div id="secBooks" class="admin-panel-section" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3>Catalog Management</h3>
+        <button class="btn btn-primary btn-sm" id="btnAddBookAdmin">+ Add Book to Catalog</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cover</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Genre</th>
+              <th>Pages</th>
+              <th>Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminBooksTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: GROUPS -->
+    <div id="secGroups" class="admin-panel-section" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3>Reading Groups Overview</h3>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Group Name</th>
+              <th>Genre</th>
+              <th>Lead Organizer</th>
+              <th>Members</th>
+              <th>Schedule</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminGroupsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: EVENTS -->
+    <div id="secEvents" class="admin-panel-section" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3>Community Events Registry</h3>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Type</th>
+              <th>Date & Time</th>
+              <th>Host</th>
+              <th>Attendees</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminEventsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: REPORTS -->
+    <div id="secReports" class="admin-panel-section" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3>Moderation Reports</h3>
+        <a href="reports.html" class="btn btn-outline btn-sm">Full Moderation Center →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Target</th>
+              <th>Reason</th>
+              <th>Reported Item</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminReportsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Enforce Admin role protection: unauthenticated -> login.html, user -> dashboard.html with access denied notice
+  const hasAccess = BookClubAuth.requireRole(['admin'], 'dashboard.html?access_denied=1');
+  if (!hasAccess) return;
+  const user = BookClubAuth.getCurrentUser();
+
+  BookClubUI.renderSidebar('admin-dashboard');
+  BookClubUI.renderTopbar(
+    'Admin Command Console',
+    'Oversee platform operations, manage books, reading circles, and member safety.',
+    `<a href="dashboard.html" class="btn btn-outline btn-sm">↩ Member View</a>`
+  );
+
+  // Users Table
+  function renderUsersTable() {
+    const users = BookClubAuth.getUsers();
+    document.getElementById('adminUsersTbody').innerHTML = users.map(u => `
+      <tr>
+        <td>#${u.userId}</td>
+        <td>
+          <div class="author-line">
+            <div class="avatar-chip" style="background:var(--clay);">${u.avatar || 'U'}</div>
+            <div><strong>${u.name}</strong><div class="text-soft" style="font-size:0.75rem;">@${u.username}</div></div>
+          </div>
+        </td>
+        <td>${u.email}</td>
+        <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : (u.role === 'organizer' ? 'badge-active' : 'badge-member')}">${u.role}</span></td>
+        <td>${u.favoriteGenre || 'General'}</td>
+        <td><span class="badge badge-active">Active</span></td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="BookClubUI.showToast('User account #${u.userId} inspected.', 'info')">Edit</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderUsersTable();
+
+  // Books Table
+  function renderBooksTable() {
+    const books = BookClubStore.getBooks();
+    document.getElementById('adminBooksTbody').innerHTML = books.map(b => `
+      <tr>
+        <td><div style="width:36px; height:50px;">${BookClubUI.renderBookCover(b)}</div></td>
+        <td><strong>${b.title}</strong></td>
+        <td>${b.author}</td>
+        <td><span class="badge badge-member">${b.genre}</span></td>
+        <td>${b.totalPages}</td>
+        <td>★ ${b.rating}</td>
+        <td>
+          <a href="book-details.html?id=${b.id}" class="btn btn-outline btn-sm">View</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderBooksTable();
+
+  // Groups Table
+  function renderGroupsTable() {
+    const groups = BookClubStore.getGroups();
+    document.getElementById('adminGroupsTbody').innerHTML = groups.map(g => `
+      <tr>
+        <td><strong>${g.name}</strong></td>
+        <td><span class="badge badge-member">${g.genre}</span></td>
+        <td>${g.organizerName}</td>
+        <td>${g.membersCount} / ${g.maxMembers}</td>
+        <td>${g.meetingSchedule}</td>
+        <td>
+          <a href="group-details.html?id=${g.id}" class="btn btn-outline btn-sm">Manage</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderGroupsTable();
+
+  // Events Table
+  function renderEventsTable() {
+    const events = BookClubStore.getEvents();
+    document.getElementById('adminEventsTbody').innerHTML = events.map(e => `
+      <tr>
+        <td><strong>${e.title}</strong></td>
+        <td><span class="badge badge-reading">${e.type}</span></td>
+        <td>${e.date} · ${e.time}</td>
+        <td>${e.organizer}</td>
+        <td>${e.participants} / ${e.maxSeats}</td>
+        <td>
+          <a href="event-details.html?id=${e.id}" class="btn btn-outline btn-sm">View</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderEventsTable();
+
+  // Reports Table
+  function renderReportsTable() {
+    const reports = BookClubStore.getReports();
+    document.getElementById('adminReportsTbody').innerHTML = reports.map(r => `
+      <tr>
+        <td><strong>${r.targetType}</strong></td>
+        <td><span class="badge badge-inactive">${r.reason}</span></td>
+        <td><span class="text-soft">${r.targetTitle}</span></td>
+        <td><span class="badge ${r.status === 'Pending' ? 'badge-want' : 'badge-completed'}">${r.status}</span></td>
+        <td>
+          <a href="reports.html" class="btn btn-outline btn-sm">Review</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderReportsTable();
+
+  // Add User Modal
+  document.getElementById('btnAddUserAdmin').addEventListener('click', () => {
+    BookClubUI.showModal(
+      'Register New Platform User',
+      `
+        <div class="field-row">
+          <div class="field"><label>Full Name</label><input type="text" id="admNewName" placeholder="Full Name"></div>
+          <div class="field"><label>Username</label><input type="text" id="admNewUser" placeholder="username"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Email</label><input type="email" id="admNewEmail" placeholder="user@bookclub.com"></div>
+          <div class="field">
+            <label>Role</label>
+            <select id="admNewRole">
+              <option value="member">Member</option>
+              <option value="organizer">Organizer</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+      `,
+      `
+        <button class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="handleSaveAdminUser()">Create Account</button>
+      `
+    );
+  });
+
+  window.handleSaveAdminUser = function () {
+    const name = document.getElementById('admNewName').value.trim();
+    if (!name) return;
+    const users = BookClubAuth.getUsers();
+    users.push({
+      userId: users.length + 1,
+      name: name,
+      username: document.getElementById('admNewUser').value || 'newuser',
+      email: document.getElementById('admNewEmail').value || 'new@example.com',
+      role: document.getElementById('admNewRole').value,
+      avatar: 'NU',
+      level: 1,
+      xp: 50,
+      streak: 1
+    });
+    localStorage.setItem('bookclub_users', JSON.stringify(users));
+    BookClubUI.closeModal();
+    BookClubUI.showToast('User created successfully!', 'success');
+    renderUsersTable();
+  };
+
+  // Add Book Modal
+  document.getElementById('btnAddBookAdmin').addEventListener('click', () => {
+    BookClubUI.showModal(
+      'Add New Book to Platform Catalog',
+      `
+        <div class="field"><label>Book Title</label><input type="text" id="admBTitle" placeholder="Title"></div>
+        <div class="field-row">
+          <div class="field"><label>Author</label><input type="text" id="admBAuthor" placeholder="Author"></div>
+          <div class="field">
+            <label>Genre</label>
+            <select id="admBGenre">
+              <option>Fiction</option><option>Mystery</option><option>Fantasy</option><option>Non-Fiction</option><option>Classic</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Pages</label><input type="number" id="admBPages" value="320"></div>
+          <div class="field"><label>Year</label><input type="number" id="admBYear" value="2026"></div>
+        </div>
+      `,
+      `
+        <button class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="handleSaveAdminBook()">Add Book</button>
+      `
+    );
+  });
+
+  window.handleSaveAdminBook = function () {
+    const title = document.getElementById('admBTitle').value.trim();
+    if (!title) return;
+    const books = BookClubStore.getBooks();
+    books.unshift({
+      id: books.length + 1,
+      title: title,
+      author: document.getElementById('admBAuthor').value || 'Unknown',
+      genre: document.getElementById('admBGenre').value,
+      totalPages: Number(document.getElementById('admBPages').value) || 300,
+      publicationYear: Number(document.getElementById('admBYear').value) || 2026,
+      rating: 4.5,
+      reviewCount: 0,
+      description: 'Newly indexed book in the platform collection.',
+      gradient: 'linear-gradient(160deg, #4C6A50, #2E4532)'
+    });
+    localStorage.setItem('bookclub_books_data', JSON.stringify(books));
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`"${title}" added to catalog!`, 'success');
+    renderBooksTable();
+  };
+
+  // Tab switcher
+  document.querySelectorAll('#adminSectionTabs .admin-tab').forEach(btn => {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#adminSectionTabs .admin-tab').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const sec = this.getAttribute('data-sec');
+      document.getElementById('secUsers').style.display = sec === 'users' ? 'block' : 'none';
+      document.getElementById('secBooks').style.display = sec === 'books' ? 'block' : 'none';
+      document.getElementById('secGroups').style.display = sec === 'groups' ? 'block' : 'none';
+      document.getElementById('secEvents').style.display = sec === 'events' ? 'block' : 'none';
+      document.getElementById('secReports').style.display = sec === 'reports' ? 'block' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>

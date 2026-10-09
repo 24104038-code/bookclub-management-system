@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Reading Calendar — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* Calendar Styling */
+.calendar-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.cal-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cal-nav-btn {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.cal-nav-btn:hover {
+  background: var(--line);
+  border-color: var(--ink-soft);
+}
+.cal-current-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  min-width: 170px;
+}
+.view-switchers {
+  display: flex;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.view-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+.view-btn.active {
+  background: var(--primary, var(--brown-deep));
+  color: #fff;
+}
+
+/* Month Grid */
+.calendar-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.calendar-day-header {
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+.calendar-day-cell {
+  min-height: 110px;
+  padding: 8px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--card-bg);
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.calendar-day-cell:nth-child(7n) {
+  border-right: none;
+}
+.calendar-day-cell.other-month {
+  background: rgba(0, 0, 0, 0.02);
+  opacity: 0.45;
+}
+.calendar-day-cell.today {
+  background: rgba(44, 76, 52, 0.04);
+}
+.calendar-day-cell.today .day-number {
+  background: var(--forest);
+  color: #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.day-number {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.cal-event-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  display: block;
+  text-align: left;
+  line-height: 1.2;
+}
+.cal-event-pill.meeting {
+  background: rgba(44, 76, 52, 0.15);
+  color: var(--forest-deep);
+  border-left: 3px solid var(--forest);
+}
+.cal-event-pill.author {
+  background: rgba(176, 138, 62, 0.18);
+  color: #725210;
+  border-left: 3px solid var(--gold);
+}
+.cal-event-pill.reading {
+  background: rgba(184, 91, 53, 0.15);
+  color: #8C3918;
+  border-left: 3px solid var(--clay);
+}
+.cal-event-pill.comp {
+  background: rgba(56, 92, 140, 0.15);
+  color: #20416E;
+  border-left: 3px solid var(--blue);
+}
+
+/* Agenda View */
+.agenda-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.agenda-item {
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.agenda-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.agenda-date-box {
+  min-width: 65px;
+  text-align: center;
+  padding: 10px;
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+}
+.agenda-day {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--forest);
+  line-height: 1;
+}
+.agenda-month {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.agenda-details {
+  flex: 1;
+}
+.agenda-details h4 {
+  margin: 0 0 6px 0;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.agenda-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  flex-wrap: wrap;
+}
+.agenda-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .calendar-day-cell {
+    min-height: 80px;
+    padding: 4px;
+  }
+  .cal-event-pill {
+    font-size: 0.65rem;
+    padding: 2px 4px;
+  }
+  .agenda-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .agenda-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- CALENDAR CONTROLS & FILTER STRIP -->
+    <div class="calendar-controls">
+      <div class="cal-nav-group">
+        <button class="cal-nav-btn" id="calPrevBtn" title="Previous Month">‹ Prev</button>
+        <div class="cal-current-title" id="calMonthTitle">October 2026</div>
+        <button class="cal-nav-btn" id="calNextBtn" title="Next Month">Next ›</button>
+        <button class="cal-nav-btn" id="calTodayBtn">Today</button>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <select id="calTypeFilter" style="padding:6px 12px; border-radius:6px; border:1px solid var(--line); font-size:0.85rem; background:var(--card-bg);">
+          <option value="all">All Gatherings & Dates</option>
+          <option value="Book Club Meeting">Book Club Meetings</option>
+          <option value="Author Talk">Author Talks</option>
+          <option value="Reading Session">Reading Sessions</option>
+          <option value="Competition">Competitions & Cups</option>
+        </select>
+
+        <div class="view-switchers">
+          <button class="view-btn active" id="btnViewMonth">Month Grid</button>
+          <button class="view-btn" id="btnViewAgenda">Agenda List</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 1: MONTH CALENDAR GRID -->
+    <div id="containerMonthView">
+      <div class="calendar-month-grid" id="calendarMonthGrid">
+        <!-- Day headers -->
+        <div class="calendar-day-header">Sun</div>
+        <div class="calendar-day-header">Mon</div>
+        <div class="calendar-day-header">Tue</div>
+        <div class="calendar-day-header">Wed</div>
+        <div class="calendar-day-header">Thu</div>
+        <div class="calendar-day-header">Fri</div>
+        <div class="calendar-day-header">Sat</div>
+        <!-- Day Cells Generated by JS -->
+      </div>
+    </div>
+
+    <!-- VIEW 2: AGENDA LIST VIEW -->
+    <div id="containerAgendaView" style="display:none;">
+      <div class="agenda-list" id="agendaList">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+    <!-- CALENDAR LEGEND -->
+    <div class="card" style="margin-top: 24px; padding: 14px 20px; display:flex; gap:20px; align-items:center; flex-wrap:wrap; font-size:0.82rem;">
+      <strong style="color:var(--ink);">Calendar Legend:</strong>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:12px; height:12px; border-radius:2px; background:var(--forest); display:inline-block;"></span>
+        <span>Book Club Meeting</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:12px; height:12px; border-radius:2px; background:var(--gold); display:inline-block;"></span>
+        <span>Author Talk / Q&A</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:12px; height:12px; border-radius:2px; background:var(--clay); display:inline-block;"></span>
+        <span>Silent Reading / Salon</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:12px; height:12px; border-radius:2px; background:var(--blue); display:inline-block;"></span>
+        <span>Competition / Race</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('calendar');
+  BookClubUI.renderTopbar(
+    'Community Calendar',
+    'Explore scheduled discussions, book club salons, and reading tournaments across time.',
+    `<a href="events.html" class="btn btn-primary btn-sm">Browse Events Grid 📋</a>`
+  );
+
+  // Set default view date to October 2026 (matching mock events)
+  let currentYear = 2026;
+  let currentMonth = 9; // 0-indexed: 9 = October
+  let currentView = 'month'; // 'month' or 'agenda'
+  let filterType = 'all';
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Helper: Aggregate all calendar occurrences
+  function getCalendarEntries() {
+    const events = BookClubStore.getEvents();
+    const comps = BookClubStore.getCompetitions();
+
+    const entries = [];
+
+    // 1. Events
+    events.forEach(e => {
+      entries.push({
+        id: e.id,
+        kind: 'event',
+        title: e.title,
+        type: e.type,
+        date: e.date,
+        time: e.time,
+        location: e.location,
+        organizer: e.organizer,
+        participants: e.participants,
+        maxSeats: e.maxSeats,
+        rsvpd: e.rsvpd,
+        link: `event-details.html?id=${e.id}`
+      });
+    });
+
+    // 2. Competitions (Start & End dates)
+    comps.forEach(c => {
+      if (c.startDate) {
+        entries.push({
+          id: c.id,
+          kind: 'comp',
+          title: `Starts: ${c.title}`,
+          type: 'Competition',
+          date: c.startDate,
+          time: '12:00 AM',
+          location: 'Tournament Arena',
+          organizer: 'Platform',
+          participants: c.participants,
+          rsvpd: c.joined,
+          link: `competition-details.html?id=${c.id}`
+        });
+      }
+      if (c.endDate) {
+        entries.push({
+          id: c.id,
+          kind: 'comp',
+          title: `Deadline: ${c.title}`,
+          type: 'Competition',
+          date: c.endDate,
+          time: '11:59 PM',
+          location: 'Tournament Arena',
+          organizer: 'Platform',
+          participants: c.participants,
+          rsvpd: c.joined,
+          link: `competition-details.html?id=${c.id}`
+        });
+      }
+    });
+
+    return entries;
+  }
+
+  // Render Month Grid
+  function renderMonthGrid() {
+    const titleEl = document.getElementById('calMonthTitle');
+    titleEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+    const grid = document.getElementById('calendarMonthGrid');
+    // Remove existing day cells, preserve 7 day headers
+    while (grid.children.length > 7) {
+      grid.removeChild(grid.lastChild);
+    }
+
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+    const allEntries = getCalendarEntries();
+
+    // Leading days from previous month
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      const prevDayNum = daysInPrevMonth - i;
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day-cell other-month';
+      cell.innerHTML = `<span class="day-number">${prevDayNum}</span>`;
+      grid.appendChild(cell);
+    }
+
+    // Days in current month
+    const today = new Date();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day-cell';
+
+      // Format ISO string YYYY-MM-DD
+      const mStr = String(currentMonth + 1).padStart(2, '0');
+      const dStr = String(d).padStart(2, '0');
+      const dateKey = `${currentYear}-${mStr}-${dStr}`;
+
+      if (
+        currentYear === today.getFullYear() &&
+        currentMonth === today.getMonth() &&
+        d === today.getDate()
+      ) {
+        cell.classList.add('today');
+      }
+
+      let cellHtml = `<span class="day-number">${d}</span>`;
+
+      // Filter entries for this date
+      const dayEntries = allEntries.filter(item => {
+        if (item.date !== dateKey) return false;
+        if (filterType !== 'all' && item.type !== filterType) return false;
+        return true;
+      });
+
+      dayEntries.forEach(item => {
+        let pillClass = 'meeting';
+        if (item.type === 'Author Talk') pillClass = 'author';
+        else if (item.type === 'Reading Session' || item.type === 'Writing Workshop') pillClass = 'reading';
+        else if (item.type === 'Competition') pillClass = 'comp';
+
+        cellHtml += `
+          <div class="cal-event-pill ${pillClass}" onclick="openEventQuickView('${item.kind}', ${item.id})" title="${item.title} (${item.time})">
+            ${item.title}
+          </div>
+        `;
+      });
+
+      cell.innerHTML = cellHtml;
+      grid.appendChild(cell);
+    }
+
+    // Trailing days for next month
+    const totalCells = firstDayIndex + daysInMonth;
+    const remainingCells = (7 - (totalCells % 7)) % 7;
+    for (let nextDay = 1; nextDay <= remainingCells; nextDay++) {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day-cell other-month';
+      cell.innerHTML = `<span class="day-number">${nextDay}</span>`;
+      grid.appendChild(cell);
+    }
+  }
+
+  // Render Agenda View
+  function renderAgendaView() {
+    const container = document.getElementById('agendaList');
+    const allEntries = getCalendarEntries();
+
+    // Filter by type & sort chronologically
+    const filtered = allEntries.filter(item => {
+      if (filterType !== 'all' && item.type !== filterType) return false;
+      return true;
+    }).sort((a, b) => (a.date > b.date ? 1 : -1));
+
+    if (!filtered.length) {
+      container.innerHTML = `
+        <div class="card empty-state" style="padding:40px; text-align:center;">
+          <div style="font-size:2.5rem; margin-bottom:12px;">📆</div>
+          <h3>No events found for this filter</h3>
+          <p class="text-soft">Try switching the event category filter above.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(item => {
+      const parts = item.date.split('-');
+      const day = parts[2] || '14';
+      const mIdx = Number(parts[1]) - 1;
+      const mon = monthNames[mIdx] ? monthNames[mIdx].substring(0, 3) : 'Oct';
+
+      return `
+        <div class="agenda-item">
+          <div class="agenda-date-box">
+            <div class="agenda-day">${day}</div>
+            <div class="agenda-month">${mon}</div>
+          </div>
+          <div class="agenda-details">
+            <h4>${item.title}</h4>
+            <div class="agenda-meta">
+              <span>⏰ ${item.time}</span>
+              <span>📍 ${item.location || 'Online Room'}</span>
+              <span>👤 Host: ${item.organizer || 'BOOK FORGE'}</span>
+              ${item.participants ? `<span>👥 ${item.participants} attending</span>` : ''}
+              <span class="badge ${item.kind === 'comp' ? 'badge-gold' : 'badge-reading'}">${item.type}</span>
+            </div>
+          </div>
+          <div class="agenda-actions">
+            ${item.kind === 'event' ? `
+              <button class="btn ${item.rsvpd ? 'btn-outline' : 'btn-primary'} btn-sm" onclick="handleAgendaRSVP(${item.id})">
+                ${item.rsvpd ? '✓ RSVP\'d' : 'RSVP'}
+              </button>
+            ` : ''}
+            <a href="${item.link}" class="btn btn-ghost btn-sm">Details →</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Quick Event Preview Modal
+  window.openEventQuickView = function(kind, id) {
+    if (kind === 'event') {
+      const e = BookClubStore.getEventById(id);
+      if (!e) return;
+      BookClubUI.showModal(
+        e.title,
+        `
+          <div style="margin-bottom:16px;">
+            <span class="badge badge-reading">${e.type}</span>
+            <span class="badge ${e.rsvpd ? 'badge-active' : 'badge-clay'}">${e.rsvpd ? '✓ You are RSVP\'d' : 'Open Registration'}</span>
+          </div>
+          <p style="font-size:0.92rem; line-height:1.6; color:var(--ink-soft);">${e.description || 'Join us for this curated community gathering.'}</p>
+          <div class="card" style="background:var(--paper); padding:12px 16px; margin:14px 0; font-size:0.85rem; line-height:1.8;">
+            <div>📅 <strong>Date:</strong> ${e.date}</div>
+            <div>⏰ <strong>Time:</strong> ${e.time}</div>
+            <div>📍 <strong>Location:</strong> ${e.location}</div>
+            <div>👤 <strong>Organizer:</strong> ${e.organizer}</div>
+            <div>👥 <strong>Attendance:</strong> ${e.participants || 0} / ${e.maxSeats || 50} members</div>
+          </div>
+        `,
+        `
+          <button class="btn btn-outline" onclick="exportICalSim('${e.title}', '${e.date}')">📥 Export iCal</button>
+          <button class="btn ${e.rsvpd ? 'btn-ghost' : 'btn-primary'}" onclick="toggleEventModalRSVP(${e.id})">
+            ${e.rsvpd ? 'Cancel RSVP' : 'Confirm RSVP'}
+          </button>
+          <a href="event-details.html?id=${e.id}" class="btn btn-primary">Full Event Page →</a>
+        `
+      );
+    } else {
+      const c = BookClubStore.getCompetitionById(id);
+      if (!c) return;
+      BookClubUI.showModal(
+        c.title,
+        `
+          <div style="margin-bottom:12px;"><span class="badge badge-gold">${c.type}</span></div>
+          <p style="color:var(--ink-soft);">${c.description}</p>
+          <div class="card" style="background:var(--paper); padding:12px; margin:14px 0; font-size:0.85rem; line-height:1.7;">
+            <div>🏁 <strong>Timeline:</strong> ${c.startDate} to ${c.endDate}</div>
+            <div>🏆 <strong>Grand Prize:</strong> ${c.prize}</div>
+            <div>⭐ <strong>Reward:</strong> +${c.xpReward} XP</div>
+          </div>
+        `,
+        `
+          <button class="btn btn-ghost" onclick="BookClubUI.closeModal()">Close</button>
+          <a href="competition-details.html?id=${c.id}" class="btn btn-primary">Go to Competition Arena →</a>
+        `
+      );
+    }
+  };
+
+  window.handleAgendaRSVP = function(id) {
+    const isNowRsvpd = BookClubStore.toggleRSVP(id);
+    BookClubUI.showToast(isNowRsvpd ? 'RSVP confirmed! Added to your schedule.' : 'RSVP cancelled.', isNowRsvpd ? 'success' : 'info');
+    renderMonthGrid();
+    renderAgendaView();
+  };
+
+  window.toggleEventModalRSVP = function(id) {
+    const isNowRsvpd = BookClubStore.toggleRSVP(id);
+    BookClubUI.closeModal();
+    BookClubUI.showToast(isNowRsvpd ? 'RSVP confirmed!' : 'RSVP cancelled.', isNowRsvpd ? 'success' : 'info');
+    renderMonthGrid();
+    renderAgendaView();
+  };
+
+  window.exportICalSim = function(title, date) {
+    BookClubUI.showToast(`Downloaded .ics calendar invite for "${title}" on ${date}.`, 'success');
+  };
+
+  // Nav Handlers
+  document.getElementById('calPrevBtn').addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    renderMonthGrid();
+  });
+
+  document.getElementById('calNextBtn').addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    renderMonthGrid();
+  });
+
+  document.getElementById('calTodayBtn').addEventListener('click', () => {
+    // Reset to October 2026 for rich mock context
+    currentYear = 2026;
+    currentMonth = 9;
+    renderMonthGrid();
+  });
+
+  document.getElementById('calTypeFilter').addEventListener('change', (e) => {
+    filterType = e.target.value;
+    if (currentView === 'month') renderMonthGrid();
+    else renderAgendaView();
+  });
+
+  // Switch views
+  const btnMonth = document.getElementById('btnViewMonth');
+  const btnAgenda = document.getElementById('btnViewAgenda');
+  const contMonth = document.getElementById('containerMonthView');
+  const contAgenda = document.getElementById('containerAgendaView');
+
+  btnMonth.addEventListener('click', () => {
+    currentView = 'month';
+    btnMonth.classList.add('active');
+    btnAgenda.classList.remove('active');
+    contMonth.style.display = 'block';
+    contAgenda.style.display = 'none';
+    renderMonthGrid();
+  });
+
+  btnAgenda.addEventListener('click', () => {
+    currentView = 'agenda';
+    btnAgenda.classList.add('active');
+    btnMonth.classList.remove('active');
+    contMonth.style.display = 'none';
+    contAgenda.style.display = 'block';
+    renderAgendaView();
+  });
+
+  // Initial render
+  renderMonthGrid();
+});
+</script>
+</body>
+</html>

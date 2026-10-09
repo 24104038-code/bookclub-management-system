@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discussion Thread — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.comment-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  margin-bottom: 14px;
+}
+.nested-reply-wrap {
+  margin-left: 36px;
+  padding-left: 18px;
+  border-left: 2px dashed var(--line);
+  margin-top: 10px;
+}
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <p class="text-soft mb-30"><a href="discussions.html">← Back to Discussions</a></p>
+
+    <!-- ORIGINAL POST CARD -->
+    <div class="card panel mb-30">
+      <div class="flex-between mb-0">
+        <span class="discussion-book-tag" id="threadCategoryTag">Books</span>
+        <span class="text-soft" style="font-size:0.85rem;" id="threadMetaTime">2 hours ago</span>
+      </div>
+
+      <h1 style="margin: 12px 0 8px 0; font-size: 1.8rem;" id="threadTitle">Discussion Title</h1>
+
+      <div class="author-line" style="margin-bottom: 18px;">
+        <div class="avatar-chip" style="background:var(--clay); margin-left:0;" id="threadAuthorAvatar">AK</div>
+        <div>
+          <strong id="threadAuthorName">Author</strong>
+          <span class="text-soft" style="font-size:0.82rem;" id="threadAuthorUsername">@username</span>
+        </div>
+      </div>
+
+      <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px;" id="threadContent"></p>
+
+      <!-- SPOILER CONTAINER -->
+      <div id="threadSpoilerBox" style="display:none;">
+        <div class="spoiler-box">
+          <div class="flex-between">
+            <strong>⚠️ Plot Spoiler Warning:</strong>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnRevealSpoiler">Reveal Spoiler</button>
+          </div>
+          <div class="spoiler-blur" id="spoilerContentText" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <div class="flex-between" style="border-top:1px solid var(--line); padding-top:14px; margin-top:16px;">
+        <div class="flex gap-12" style="align-items:center;">
+          <button type="button" class="btn btn-ghost btn-sm" id="btnLikeThread">
+            <span id="threadLikeIcon">🤍</span> <span id="threadLikeCount">32</span> Likes
+          </button>
+          <span class="text-soft" id="threadRepliesCount">💬 2 Replies</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="btnJumpToReply">Reply to Thread ↓</button>
+      </div>
+    </div>
+
+    <!-- COMMENTS SECTION -->
+    <div class="flex-between mb-30">
+      <h2 style="margin:0;">Community Replies</h2>
+    </div>
+
+    <div id="threadRepliesContainer" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- REPLY FORM -->
+    <div class="card panel" id="replyBoxAnchor">
+      <h3>Leave a Reply</h3>
+      <form id="newReplyForm">
+        <input type="hidden" id="parentReplyId" value="">
+        <div id="replyingToBanner" style="display:none; background:var(--cream-deep); padding:8px 12px; border-radius:6px; margin-bottom:12px; font-size:0.85rem;" class="flex-between">
+          <span id="replyingToText">Replying to comment...</span>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="cancelNestedReply()">Cancel</button>
+        </div>
+        <div class="field">
+          <textarea id="replyTextarea" rows="4" placeholder="Join the discussion... Be respectful and constructive." required></textarea>
+        </div>
+        <div class="flex-between">
+          <label class="checkbox-row">
+            <input type="checkbox" id="replySpoilerCheck">
+            <span>Mark reply as spoiler</span>
+          </label>
+          <button type="submit" class="btn btn-primary">Post Reply</button>
+        </div>
+      </form>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('discussions');
+
+  const params = new URLSearchParams(window.location.search);
+  const discId = Number(params.get('id')) || 1;
+  const disc = BookClubStore.getDiscussionById(discId) || BookClubStore.getDiscussions()[0];
+
+  BookClubUI.renderTopbar(
+    disc.title,
+    `Forum: ${disc.category} · By ${disc.author}`,
+    `<a href="discussions.html" class="btn btn-outline btn-sm">All Topics</a>`
+  );
+
+  document.getElementById('threadTitle').textContent = disc.title;
+  document.getElementById('threadCategoryTag').textContent = disc.bookTag || disc.category;
+  document.getElementById('threadAuthorName').textContent = disc.author;
+  document.getElementById('threadAuthorUsername').textContent = `@${disc.username || 'reader'}`;
+  document.getElementById('threadAuthorAvatar').textContent = disc.avatar || 'JR';
+  document.getElementById('threadMetaTime').textContent = `${disc.timeAgo || 'Recently'} · 👁️ ${disc.views || 1} views`;
+  document.getElementById('threadContent').textContent = disc.content;
+  document.getElementById('threadLikeCount').textContent = disc.likes;
+  document.getElementById('threadLikeIcon').textContent = disc.isLiked ? '❤️' : '🤍';
+
+  if (disc.hasSpoiler) {
+    const box = document.getElementById('threadSpoilerBox');
+    box.style.display = 'block';
+    document.getElementById('spoilerContentText').textContent = disc.spoilerContent || 'A major story revelation is discussed in this segment.';
+    document.getElementById('btnRevealSpoiler').addEventListener('click', function () {
+      const sp = document.getElementById('spoilerContentText');
+      sp.classList.toggle('revealed');
+      this.textContent = sp.classList.contains('revealed') ? 'Hide Spoiler' : 'Reveal Spoiler';
+    });
+  }
+
+  // Like Thread
+  document.getElementById('btnLikeThread').addEventListener('click', () => {
+    BookClubStore.toggleLikeDiscussion(disc.id);
+    disc.isLiked = !disc.isLiked;
+    disc.likes += disc.isLiked ? 1 : -1;
+    document.getElementById('threadLikeCount').textContent = disc.likes;
+    document.getElementById('threadLikeIcon').textContent = disc.isLiked ? '❤️' : '🤍';
+  });
+
+  document.getElementById('btnJumpToReply').addEventListener('click', () => {
+    document.getElementById('replyTextarea').focus();
+  });
+
+  // Render Replies
+  function renderReplies() {
+    const replies = disc.replies || [];
+    const container = document.getElementById('threadRepliesContainer');
+    document.getElementById('threadRepliesCount').textContent = `💬 ${replies.length} Replies`;
+
+    if (replies.length === 0) {
+      container.innerHTML = `<div class="text-soft text-center" style="padding: 24px; background:var(--paper); border-radius:var(--radius-md); border:1px dashed var(--line);">No replies yet. Be the first to chime in!</div>`;
+      return;
+    }
+
+    container.innerHTML = replies.map(r => `
+      <div class="comment-card" id="comment-${r.id}">
+        <div class="flex-between mb-0">
+          <div class="author-line">
+            <div class="avatar-chip" style="background:var(--clay); margin-left:0;">${r.avatar || 'R'}</div>
+            <strong>${r.author}</strong>
+            <span class="text-soft" style="font-size:0.8rem;">${r.timeAgo}</span>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-ghost btn-sm" onclick="likeReply(${r.id})">${r.isLiked ? '❤️' : '🤍'} ${r.likes}</button>
+            <button class="btn btn-outline btn-sm" onclick="setupNestedReply(${r.id}, '${r.author}')">Reply</button>
+          </div>
+        </div>
+
+        <p style="margin: 12px 0 6px 0; font-size: 0.95rem; line-height: 1.5;">${r.content}</p>
+
+        <!-- Nested Replies -->
+        ${(r.nestedReplies || []).length ? `
+          <div class="nested-reply-wrap">
+            ${(r.nestedReplies || []).map(nr => `
+              <div class="comment-card" style="padding: 12px 16px; margin-bottom: 8px; background: var(--cream);">
+                <div class="flex-between mb-0">
+                  <div class="author-line">
+                    <div class="avatar-chip" style="width:24px; height:24px; font-size:0.7rem; background:var(--green-shelf); margin-left:0;">${nr.avatar || 'R'}</div>
+                    <strong>${nr.author}</strong>
+                    <span class="text-soft" style="font-size:0.75rem;">${nr.timeAgo}</span>
+                  </div>
+                </div>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem;">${nr.content}</p>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `).join('');
+  }
+
+  window.likeReply = function (id) {
+    const r = (disc.replies || []).find(x => x.id === id);
+    if (r) {
+      r.isLiked = !r.isLiked;
+      r.likes += r.isLiked ? 1 : -1;
+      renderReplies();
+    }
+  };
+
+  window.setupNestedReply = function (parentId, author) {
+    document.getElementById('parentReplyId').value = parentId;
+    document.getElementById('replyingToBanner').style.display = 'flex';
+    document.getElementById('replyingToText').textContent = `Replying directly to ${author}`;
+    const ta = document.getElementById('replyTextarea');
+    ta.focus();
+    ta.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.cancelNestedReply = function () {
+    document.getElementById('parentReplyId').value = '';
+    document.getElementById('replyingToBanner').style.display = 'none';
+  };
+
+  // Submit new reply
+  document.getElementById('newReplyForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = document.getElementById('replyTextarea').value.trim();
+    const parentId = document.getElementById('parentReplyId').value;
+    if (!text) return;
+
+    BookClubStore.addDiscussionReply(disc.id, text, parentId || null);
+    document.getElementById('replyTextarea').value = '';
+    cancelNestedReply();
+    BookClubUI.showToast('Reply published!', 'success');
+    renderReplies();
+  });
+
+  renderReplies();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Certificate — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell" style="min-height: 100vh; background: var(--bg);">
+  <main class="main-content" id="mainContent" style="max-width: 820px; margin: 40px auto; padding: 20px;">
+    
+    <div style="text-align: center; margin-bottom: 30px;">
+      <a href="index.html" class="brand" style="font-size: 1.6rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+        <span class="mark">📖</span>
+        <span class="brand-text"><span class="brand-book">BOOK</span> <span class="brand-forge">FORGE</span></span>
+      </a>
+      <div style="font-size: 0.95rem; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px;">Credential Verification Portal</div>
+      <p class="text-soft" style="margin-top: 6px;">Authenticate and verify official BOOK FORGE event &amp; challenge credentials.</p>
+    </div>
+
+    <!-- Verification Search Card -->
+    <div class="card panel mb-30" style="padding: 24px;">
+      <form id="verifyForm" style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <input type="text" id="certIdInput" placeholder="e.g. BC-EVT-2026-000001" style="flex: 1; min-width: 240px; font-family: monospace; font-size: 1rem; text-transform: uppercase;" required>
+        <button type="submit" class="btn btn-primary" id="btnVerify">Verify Credential</button>
+      </form>
+    </div>
+
+    <!-- Result Container -->
+    <div id="verifyResult" style="display: none;"></div>
+
+    <p class="text-soft" style="text-align: center; margin-top: 40px; font-size: 0.85rem;">
+      <a href="events.html">← Explore Community Events</a> &nbsp;·&nbsp; <a href="dashboard.html">Reader Dashboard</a>
+    </p>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/api.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('verifyForm');
+  const input = document.getElementById('certIdInput');
+  const resultContainer = document.getElementById('verifyResult');
+
+  // Pre-fill from query parameter if present
+  const params = new URLSearchParams(window.location.search);
+  const certIdParam = params.get('id') || params.get('certificateId');
+  if (certIdParam) {
+    input.value = certIdParam.trim();
+    runVerification(certIdParam.trim());
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const val = input.value.trim();
+    if (val) {
+      runVerification(val);
+    }
+  });
+
+  async function runVerification(certId) {
+    resultContainer.style.display = 'block';
+    resultContainer.innerHTML = `
+      <div class="card panel" style="text-align:center; padding:30px;">
+        <p>⏳ Verifying certificate ID: <strong>${BookClubUI.escapeHtml(certId)}</strong>...</p>
+      </div>
+    `;
+
+    try {
+      const res = await BookClubAPI.certificates.verify(encodeURIComponent(certId));
+      if (res && res.success && res.valid && res.data) {
+        const cert = res.data;
+        const isChallenge = cert.type === 'challenge';
+        const formattedDate = new Date(cert.issueDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        resultContainer.innerHTML = `
+          <div class="card panel" style="border-top: 4px solid ${isChallenge ? '#C5A059' : '#2D6A4F'}; padding: 28px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+              <div>
+                <span class="badge" style="background: #D8F3DC; color: #1B4332; font-size: 0.85rem; padding: 4px 10px;">✓ Official Verified Credential</span>
+                <h2 style="margin: 10px 0 4px 0; color: var(--ink);">
+                  ${isChallenge ? 'Valid Reading Challenge Completion Certificate' : 'Valid Event Participation Certificate'}
+                </h2>
+                <span class="text-soft" style="font-family: monospace;">Certificate ID: <strong>${BookClubUI.escapeHtml(cert.certificateId)}</strong></span>
+              </div>
+              <div style="text-align: right;">
+                <span class="badge badge-completed">Status: ${BookClubUI.escapeHtml(cert.status.toUpperCase())}</span>
+              </div>
+            </div>
+
+            <div class="grid grid-2" style="gap: 16px; margin: 20px 0; background: var(--cream-deep); padding: 18px; border-radius: var(--radius-sm);">
+              <div>
+                <span class="text-soft" style="font-size: 0.8rem; text-transform: uppercase;">Participant</span>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--ink); margin-top: 2px;">${BookClubUI.escapeHtml(cert.participantName)}</div>
+              </div>
+              <div>
+                <span class="text-soft" style="font-size: 0.8rem; text-transform: uppercase;">Credential Type</span>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--brown-deep); margin-top: 2px;">
+                  ${isChallenge ? 'Reading Challenge Completion' : 'Event Participation'}
+                </div>
+              </div>
+              <div>
+                <span class="text-soft" style="font-size: 0.8rem; text-transform: uppercase;">${isChallenge ? 'Challenge Title' : 'Event Name'}</span>
+                <div style="font-size: 1.05rem; font-weight: 700; color: var(--ink); margin-top: 2px;">
+                  ${BookClubUI.escapeHtml(cert.challengeTitle || cert.eventName)}
+                </div>
+              </div>
+              <div>
+                <span class="text-soft" style="font-size: 0.8rem; text-transform: uppercase;">${isChallenge ? 'Target Achieved & Badge' : 'Event Date'}</span>
+                <div style="font-weight: 600; color: var(--ink); margin-top: 2px;">
+                  ${isChallenge 
+                    ? `${BookClubUI.escapeHtml(cert.targetRequirement || '100%')} · ${BookClubUI.escapeHtml(cert.badgeIcon || '⚡')} ${BookClubUI.escapeHtml(cert.badgeName || 'Finisher')}`
+                    : BookClubUI.escapeHtml(cert.eventDate)
+                  }
+                </div>
+              </div>
+              <div>
+                <span class="text-soft" style="font-size: 0.8rem; text-transform: uppercase;">Issue Date</span>
+                <div style="font-weight: 600; color: var(--ink); margin-top: 2px;">${formattedDate}</div>
+              </div>
+              <div>
+                <span class="text-soft" style="font-size: 0.8rem; text-transform: uppercase;">Verified Official</span>
+                <div style="font-weight: 600; color: var(--ink); margin-top: 2px;">
+                  ${BookClubUI.escapeHtml(cert.organizerName)} (${BookClubUI.escapeHtml(cert.organizerRole || 'Official Lead')})
+                </div>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <span class="text-soft" style="font-size: 0.8rem; text-transform: uppercase;">Security Verification Code</span>
+                <div style="font-family: monospace; font-weight: 700; color: var(--shell-gold-deep); margin-top: 2px; font-size: 1.1rem;">
+                  ${BookClubUI.escapeHtml(cert.verificationCode)}
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+              <a href="/api/certificates/${encodeURIComponent(cert.certificateId)}/pdf" class="btn btn-primary btn-sm" target="_blank" download>📥 Download Official PDF</a>
+            </div>
+          </div>
+        `;
+      } else {
+        resultContainer.innerHTML = `
+          <div class="card panel" style="border-top: 4px solid var(--crimson); padding: 24px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">❌</div>
+            <h3 style="color: var(--crimson); margin: 0 0 8px 0;">Certificate Not Found or Invalid</h3>
+            <p class="text-soft" style="max-width: 520px; margin: 0 auto 16px;">
+              The certificate ID <strong>${BookClubUI.escapeHtml(certId)}</strong> could not be verified in our records. Please verify the ID for typographical errors.
+            </p>
+          </div>
+        `;
+      }
+    } catch (err) {
+      resultContainer.innerHTML = `
+        <div class="card panel" style="border-top: 4px solid var(--crimson); padding: 24px; text-align: center;">
+          <h3 style="color: var(--crimson);">Verification Error</h3>
+          <p class="text-soft">${BookClubUI.escapeHtml(err.message || 'Unable to connect to verification service.')}</p>
+        </div>
+      `;
+    }
+  }
+});
+</script>
+</body>
+</html>

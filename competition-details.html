@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournament Arena — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <p class="text-soft mb-30"><a href="competitions.html">← Back to All Tournaments</a></p>
+
+    <!-- TOURNAMENT BANNER -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, #16291F, #33473A); color: #fff;">
+      <div class="flex-between" style="flex-wrap: wrap; gap: 20px;">
+        <div>
+          <span class="eyebrow" style="color: var(--shell-gold);" id="cpTypeTag">30-Day Reading Race</span>
+          <h1 style="color: #fff; margin: 8px 0 6px 0;" id="cpTitle">Competition Title</h1>
+          <p style="color: #B9C7BC; max-width: 600px; margin: 0 0 16px 0;" id="cpDesc"></p>
+          <div class="flex gap-16" style="font-size: 0.88rem; color: #E7D9C6;">
+            <span id="cpDates">Oct 1 – Oct 31, 2026</span>
+            <span id="cpParticipants">👥 185 Competitors</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); padding: 18px 24px; text-align: center;">
+          <div style="font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--shell-text-dim);">Countdown to Finish</div>
+          <div style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: var(--shell-gold); margin: 4px 0 10px;" id="cpCountdown">09d : 14h : 22m</div>
+          <button type="button" class="btn btn-primary btn-sm" id="btnJoinCompAction">Join Competition</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PODIUM FOR TOP 3 -->
+    <div class="card panel mb-30 text-center">
+      <h3 style="margin-top:0;">Tournament Leaders & Podium</h3>
+      <p class="text-soft">Real-time standings based on verified pages logged and reflection checks.</p>
+
+      <div class="podium-wrap" id="cpPodium">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- TWO COLUMN: Rules / Prize and Personal Standing -->
+    <div class="grid grid-2" style="gap: 30px; align-items: start;">
+      <!-- LEFT: Rules & Prize -->
+      <div>
+        <div class="card panel mb-30">
+          <h3>Tournament Grand Prize</h3>
+          <div class="card" style="background: var(--cream-deep); padding: 20px; border-left: 4px solid var(--shell-gold); margin-top: 14px;">
+            <div style="font-size: 1.2rem; font-weight: 700; color: var(--brown-deep);" id="cpPrizeText">Golden Laurel Trophy & $100 Bookshop Voucher</div>
+            <p class="text-soft" style="margin: 6px 0 0 0; font-size: 0.88rem;">Shipped worldwide to the #1 podium finisher plus profile gold laurel badge.</p>
+          </div>
+        </div>
+
+        <div class="card panel mb-30">
+          <h3>Tournament Rules</h3>
+          <ul style="padding-left: 20px; color: var(--ink-soft); line-height: 1.8;" id="cpRulesList"></ul>
+        </div>
+
+        <div class="card panel">
+          <h3>Special Tournament Badges</h3>
+          <div class="feed-list" id="cpAchievementsList"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: My Progress & Full Leaderboard -->
+      <div>
+        <div class="card panel mb-30">
+          <h3>My Tournament Performance</h3>
+          <div class="grid grid-3" style="margin: 16px 0; text-align: center;">
+            <div class="card" style="padding: 12px; background: var(--cream-deep);">
+              <div class="stat-title">Pages Logged</div>
+              <div class="stat-value tone-gold" id="myScore">420</div>
+            </div>
+            <div class="card" style="padding: 12px; background: var(--cream-deep);">
+              <div class="stat-title">Current Standing</div>
+              <div class="stat-value tone-green" id="myRank">Rank #4</div>
+            </div>
+            <div class="card" style="padding: 12px; background: var(--cream-deep);">
+              <div class="stat-title">Behind Leader</div>
+              <div class="stat-value" style="color: var(--chart-red);" id="myBehind">-140 pgs</div>
+            </div>
+          </div>
+          <a href="reading-progress.html" class="btn btn-outline btn-sm btn-block">Log Reading Sprints in Tracker →</a>
+        </div>
+
+        <div class="card panel">
+          <div class="panel-head">
+            <h3>Leaderboard Standings</h3>
+            <span class="text-soft" style="font-size: 0.8rem;">Top 10</span>
+          </div>
+          <div class="feed-list" id="cpLeaderboardRows"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('competitions');
+
+  const params = new URLSearchParams(window.location.search);
+  const cpId = Number(params.get('id')) || 1;
+  const comp = BookClubStore.getCompetitionById(cpId) || BookClubStore.getCompetitions()[0];
+
+  BookClubUI.renderTopbar(
+    comp.title,
+    `Tournament Arena · ${comp.type}`,
+    `<a href="competitions.html" class="btn btn-outline btn-sm">All Competitions</a>`
+  );
+
+  document.getElementById('cpTitle').textContent = comp.title;
+  document.getElementById('cpDesc').textContent = comp.description;
+  document.getElementById('cpTypeTag').textContent = comp.type;
+  document.getElementById('cpDates').textContent = `${comp.startDate} – ${comp.endDate}`;
+  document.getElementById('cpParticipants').textContent = `👥 ${comp.participants} Competitors`;
+  document.getElementById('cpPrizeText').textContent = comp.prize;
+
+  const btnJoin = document.getElementById('btnJoinCompAction');
+  function updateJoinBtn() {
+    btnJoin.textContent = comp.joined ? 'Withdraw from Race' : 'Join Competition';
+    btnJoin.className = comp.joined ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
+  }
+  updateJoinBtn();
+
+  btnJoin.addEventListener('click', () => {
+    const isJoined = BookClubStore.toggleJoinCompetition(comp.id);
+    comp.joined = isJoined;
+    updateJoinBtn();
+    BookClubUI.showToast(isJoined ? 'Entered the competition! May the fastest pages win!' : 'Withdrew from tournament.', isJoined ? 'success' : 'info');
+  });
+
+  // Render Podium
+  const podium = document.getElementById('cpPodium');
+  if ((comp.top3 || []).length >= 3) {
+    podium.innerHTML = `
+      <div class="podium-step podium-rank-2">
+        <div class="podium-avatar" style="background: var(--green-shelf);">${comp.top3[1].avatar}</div>
+        <div class="podium-name">${comp.top3[1].name}</div>
+        <div class="podium-score">${comp.top3[1].score}</div>
+        <div class="podium-pillar"><span>#2 🥈</span></div>
+      </div>
+      <div class="podium-step podium-rank-1">
+        <div class="podium-avatar" style="background: var(--shell-gold-deep);">${comp.top3[0].avatar}</div>
+        <div class="podium-name">${comp.top3[0].name}</div>
+        <div class="podium-score">${comp.top3[0].score}</div>
+        <div class="podium-pillar"><span>#1 👑</span></div>
+      </div>
+      <div class="podium-step podium-rank-3">
+        <div class="podium-avatar" style="background: var(--clay);">${comp.top3[2].avatar}</div>
+        <div class="podium-name">${comp.top3[2].name}</div>
+        <div class="podium-score">${comp.top3[2].score}</div>
+        <div class="podium-pillar"><span>#3 🥉</span></div>
+      </div>
+    `;
+  } else {
+    podium.innerHTML = `<p class="text-soft">Standings forming once kickoff begins.</p>`;
+  }
+
+  // Rules
+  const rulesList = document.getElementById('cpRulesList');
+  rulesList.innerHTML = (comp.rules || []).map(r => `<li>${r}</li>`).join('');
+
+  // Achievements
+  const achList = document.getElementById('cpAchievementsList');
+  achList.innerHTML = (comp.achievements || []).map(a => `
+    <div class="feed-row">
+      <div class="feed-ico" style="background: ${a.unlocked ? 'var(--shell-gold-deep)' : 'var(--line)'};">
+        ${a.unlocked ? '🏆' : '🔒'}
+      </div>
+      <div class="feed-body">
+        <strong>${a.name}</strong>
+        <div class="feed-time">${a.desc}</div>
+      </div>
+      <span class="badge ${a.unlocked ? 'badge-active' : 'badge-inactive'}">${a.unlocked ? 'Unlocked' : 'Locked'}</span>
+    </div>
+  `).join('');
+
+  // Leaderboard rows
+  const lbRows = document.getElementById('cpLeaderboardRows');
+  lbRows.innerHTML = (comp.leaderboard || []).map(row => `
+    <div class="feed-row" style="align-items:center; ${row.isUser ? 'background: rgba(181,101,47,0.1); border-radius:8px; padding:8px;' : ''}">
+      <div style="font-weight:700; width:28px; color:var(--brown-deep);">#${row.rank}</div>
+      <div class="avatar-chip" style="background:var(--clay); margin:0 8px 0 0;">${row.avatar}</div>
+      <div class="feed-body">
+        <strong>${row.name} ${row.isUser ? '(You)' : ''}</strong>
+        <div class="feed-time">Level ${row.level} · Verified Sprints</div>
+      </div>
+      <strong style="color:var(--brown-deep);">${row.score} pgs</strong>
+    </div>
+  `).join('');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity Feed — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="actTabs">
+      <span class="tab active" data-filter="all">Global Community Feed</span>
+      <span class="tab" data-filter="circle">My Circles & Friends</span>
+    </div>
+
+    <div class="card panel mb-30" style="max-width: 800px;">
+      <div class="panel-head">
+        <h2 style="margin:0;">Live Reading Stream</h2>
+        <span class="badge badge-active">Live Updates</span>
+      </div>
+      <div class="feed-list" id="activityFeedList">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('activity');
+  BookClubUI.renderTopbar(
+    'Social Activity Stream',
+    'Follow what fellow readers are finishing, reviewing, and discussing right now.',
+    `<a href="discussions.html" class="btn btn-primary btn-sm">+ Share Thought</a>`
+  );
+
+  function renderFeed() {
+    const list = BookClubStore.getActivities();
+    const container = document.getElementById('activityFeedList');
+
+    if (list.length === 0) {
+      container.innerHTML = BookClubUI.renderEmptyState('⚡', 'No recent activity', 'Start reading or join a circle to trigger social events.', 'Explore Books', 'books.html');
+      return;
+    }
+
+    container.innerHTML = list.map(a => `
+      <div class="feed-row" style="padding: 16px 0;">
+        <div class="feed-ico" style="background: ${a.avatarBg || 'var(--clay)'}; width: 44px; height: 44px; font-size: 1rem; border-radius: 12px;">
+          ${a.avatar || 'JR'}
+        </div>
+        <div class="feed-body" style="padding-left: 4px;">
+          <div class="feed-title" style="font-size: 0.95rem;">
+            <strong>${a.user}</strong>
+            <span style="color:var(--ink-soft); font-weight:normal;">${a.action.replace('_', ' ')}</span>
+            <a href="${a.targetLink || '#'}" style="color:var(--clay); font-weight:700;">${a.targetTitle}</a>
+          </div>
+          <div class="feed-time" style="font-size: 0.82rem; margin: 4px 0 0 0;">
+            ${a.time} · ${a.details || ''}
+          </div>
+        </div>
+        <div>
+          <a href="${a.targetLink || '#'}" class="btn btn-outline btn-sm">View →</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderFeed();
+});
+</script>
+</body>
+</html>

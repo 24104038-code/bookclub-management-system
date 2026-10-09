@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recommendations — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.why-badge {
+  background: var(--cream-deep);
+  border: 1px dashed var(--clay);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  color: var(--brown-deep);
+  margin-bottom: 10px;
+  display: block;
+}
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- BANNER -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, var(--brown-deep), #3E2712); color: #fff;">
+      <span class="eyebrow" style="color:var(--shell-gold);">Personalized Literary Engine</span>
+      <h1 style="color:#fff; margin: 8px 0 6px 0;">Books Tailored to Your Reading Taste</h1>
+      <p style="color:#DCC9AE; max-width:600px; margin:0;">Analyzed from your active library, 5-star reviews, and current reading circle pace.</p>
+    </div>
+
+    <!-- SECTION 1: Recommended For You -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Recommended For You</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">Top matches based on your favorite genre: <strong>Fantasy & Mystery</strong>.</p>
+      </div>
+    </div>
+    <div class="grid grid-4" style="margin-bottom: 40px;" id="recForYouGrid"></div>
+
+    <!-- SECTION 2: Because You Read... -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Because You Read "Winter's Ledger"</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">Twisty investigative plots with sharp pacing and uncovering secrets.</p>
+      </div>
+    </div>
+    <div class="grid grid-4" style="margin-bottom: 40px;" id="recBecauseReadGrid"></div>
+
+    <!-- SECTION 3: Popular in Your Genre -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Popular In Fantasy & Lore</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">High ratings and deep discussions among fellow worldbuilding enthusiasts.</p>
+      </div>
+    </div>
+    <div class="grid grid-4" style="margin-bottom: 40px;" id="recGenreGrid"></div>
+
+    <!-- SECTION 4: Community All-Time Favorites -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Community Hall of Fame</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">The highest rated books across all 48 reading circles on BOOK FORGE.</p>
+      </div>
+    </div>
+    <div class="grid grid-4" style="margin-bottom: 40px;" id="recCommunityFavoritesGrid"></div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('recommendations');
+  BookClubUI.renderTopbar(
+    'Personalized Recommendations',
+    'Discover books matched to your previous ratings and reading pace.',
+    `<a href="library.html" class="btn btn-outline btn-sm">My Shelf Queue 📚</a>`
+  );
+
+  const books = BookClubStore.getBooks();
+
+  function renderRecGrid(containerId, bookList, reasonPrefix) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = bookList.map(b => `
+      <div>
+        <span class="why-badge">💡 ${reasonPrefix || b.recommendedReason || 'Recommended for you'}</span>
+        ${BookClubUI.renderBookCard(b)}
+      </div>
+    `).join('');
+  }
+
+  renderRecGrid('recForYouGrid', books.slice(0, 4), 'Matched to your profile genre (Fantasy & Mystery)');
+  renderRecGrid('recBecauseReadGrid', [books[1], books[9], books[4], books[5]], 'Similar pacing and twisty investigative layers');
+  renderRecGrid('recGenreGrid', [books[3], books[7], books[8], books[0]], 'Popular among fantasy circle members');
+  renderRecGrid('recCommunityFavoritesGrid', [books[1], books[3], books[10], books[0]], '★ 4.6+ Community Consensus');
+});
+</script>
+</body>
+</html>

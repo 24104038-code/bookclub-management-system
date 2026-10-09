@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Challenge Details — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <p class="text-soft mb-30"><a href="challenges.html">← Back to All Challenges</a></p>
+
+    <!-- HERO PANEL -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, var(--brown-deep), #3E2712); color: #fff;">
+      <div class="flex-between" style="flex-wrap:wrap; gap: 20px;">
+        <div>
+          <div class="flex gap-8 mb-0" style="align-items: center;">
+            <span class="badge" style="background: var(--shell-gold); color: var(--shell-green-deep);" id="chStatusBadge">Active</span>
+            <span class="badge-xp-tag" id="chXpTag">+500 XP</span>
+          </div>
+          <h1 style="color: #fff; margin: 12px 0 6px 0;" id="chTitle">Challenge Title</h1>
+          <p style="color: #DCC9AE; max-width: 580px; margin: 0 0 16px 0;" id="chDesc"></p>
+          <div class="flex gap-16" style="font-size: 0.88rem; color: #E7D9C6;">
+            <span id="chParticipants">👥 142 Readers</span>
+            <span id="chDays">⏳ 12 Days Remaining</span>
+          </div>
+        </div>
+
+        <div style="text-align:center; background: rgba(0,0,0,0.25); padding: 20px 30px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1);">
+          <div style="font-size: 3rem;" id="chBadgeIcon">⚡</div>
+          <div style="font-weight: 700; color: var(--shell-gold); margin: 6px 0 12px;" id="chBadgeName">Sprint Finisher</div>
+          <div class="flex gap-8" style="justify-content:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" id="btnJoinChallenge">Join Challenge</button>
+            <button type="button" class="btn btn-sm" id="btnHeroCert" style="display:none; background:var(--shell-gold); color:var(--brown-deep); font-weight:700;">🎓 Certificate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TWO COLUMN LAYOUT -->
+    <div class="grid grid-2" style="gap: 30px; align-items: start;">
+      <!-- LEFT: Rules & Timeline -->
+      <div>
+        <div class="card panel mb-30">
+          <h3>Challenge Rules & Guidelines</h3>
+          <ul style="padding-left: 20px; color: var(--ink-soft); line-height: 1.8;" id="chRulesList"></ul>
+        </div>
+
+        <div class="card panel">
+          <h3>Milestone Timeline</h3>
+          <div class="feed-list" id="chTimelineList"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Leaderboard & Progress & Certificate -->
+      <div>
+        <div class="card panel mb-30" id="chCertCard">
+          <div class="panel-head">
+            <h3>Progress &amp; Certificate</h3>
+            <span class="badge" id="chCertBadge">In Progress</span>
+          </div>
+
+          <p class="text-soft" style="font-size: 0.88rem; margin: 4px 0 16px;">
+            Complete your reading target to earn and download your official verified Certificate of Challenge Completion.
+          </p>
+
+          <div class="progress-track" style="height: 12px; margin: 16px 0 8px;">
+            <div class="progress-fill" id="chMyFill" style="width: 0%;"></div>
+          </div>
+          <div class="flex-between" style="font-size: 0.88rem; color: var(--ink-soft); margin-bottom: 16px;">
+            <span id="chMyProgressText">0 / 5</span>
+            <strong id="chMyProgressPct" style="color: var(--brown-deep);">0%</strong>
+          </div>
+
+          <!-- Quick log & mark complete buttons -->
+          <div class="flex gap-8 mb-16" style="flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnLogChallengeStep" style="flex:1;">+1 Step / Log</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnQuickCompleteChallenge" style="flex:1;">Mark Complete ✓</button>
+          </div>
+
+          <!-- Status Banner -->
+          <div id="chCertBanner" class="cert-status-banner pending" style="margin-bottom: 14px;">
+            <span>ℹ️ Complete all reading goals to unlock your certificate.</span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div id="chCertActionsContainer">
+            <button type="button" class="btn btn-primary btn-block" id="btnGenerateChallengeCert" disabled>
+              🎓 Generate Certificate
+            </button>
+          </div>
+
+          <div style="margin-top: 14px; text-align: center;">
+            <a href="reading-progress.html" class="text-soft" style="font-size: 0.82rem;">Open Reading Tracker →</a>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <div class="panel-head">
+            <h3>Standings & Leaderboard</h3>
+            <a href="leaderboards.html">All Standings →</a>
+          </div>
+          <div class="feed-list" id="chLeaderboardList"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('challenges');
+
+  const params = new URLSearchParams(window.location.search);
+  const chId = Number(params.get('id')) || 1;
+  const challenge = BookClubStore.getChallengeById(chId) || BookClubStore.getChallenges()[0];
+
+  BookClubUI.renderTopbar(
+    challenge.title,
+    `Community Reading Quest · ${challenge.badgeName}`,
+    `<a href="challenges.html" class="btn btn-outline btn-sm">All Challenges</a>`
+  );
+
+  document.getElementById('chTitle').textContent = challenge.title;
+  document.getElementById('chDesc').textContent = challenge.description;
+  document.getElementById('chParticipants').textContent = `👥 ${challenge.participantsCount} Readers`;
+  document.getElementById('chDays').textContent = `⏳ ${challenge.daysRemaining} Days Remaining`;
+  document.getElementById('chBadgeIcon').textContent = challenge.badgeIcon;
+  document.getElementById('chBadgeName').textContent = challenge.badgeName;
+  document.getElementById('chXpTag').textContent = `+${challenge.rewardXp} XP`;
+
+  const btnJoin = document.getElementById('btnJoinChallenge');
+  const btnHeroCert = document.getElementById('btnHeroCert');
+  const heroBadge = document.getElementById('chStatusBadge');
+
+  function updateJoinBtn() {
+    btnJoin.textContent = challenge.joined ? 'Leave Challenge' : 'Join Challenge';
+    btnJoin.className = challenge.joined ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
+  }
+  updateJoinBtn();
+
+  btnJoin.addEventListener('click', () => {
+    const isJoined = BookClubStore.toggleJoinChallenge(challenge.id);
+    challenge.joined = isJoined;
+    updateJoinBtn();
+    BookClubUI.showToast(isJoined ? 'Joined challenge!' : 'Left challenge.', isJoined ? 'success' : 'info');
+    loadCertificateStatus();
+  });
+
+  // Rules
+  const rulesList = document.getElementById('chRulesList');
+  rulesList.innerHTML = (challenge.rules || []).map(r => `<li>${r}</li>`).join('');
+
+  // Milestones Timeline
+  function renderTimeline() {
+    const timelineList = document.getElementById('chTimelineList');
+    timelineList.innerHTML = (challenge.timeline || []).map(m => `
+      <div class="feed-row">
+        <div class="feed-ico" style="background: ${m.completed ? 'var(--green-shelf)' : 'var(--line)'}; color:#fff;">
+          ${m.completed ? '✓' : '○'}
+        </div>
+        <div class="feed-body">
+          <div class="feed-title"><strong>${m.step}</strong>: ${m.desc}</div>
+          <div class="feed-time">${m.completed ? 'Milestone Achieved' : 'In Progress'}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderTimeline();
+
+  // Leaderboard
+  const lbList = document.getElementById('chLeaderboardList');
+  lbList.innerHTML = (challenge.leaderboard || []).map(row => `
+    <div class="feed-row" style="align-items:center;">
+      <div style="font-weight:700; width:24px; color:var(--brown-deep);">#${row.rank}</div>
+      <div class="avatar-chip" style="background:var(--clay); margin:0 8px 0 0;">${row.avatar}</div>
+      <div class="feed-body">
+        <strong>${row.name}</strong>
+        <div class="feed-time">${row.books} ${challenge.unit} · ${row.status}</div>
+      </div>
+      <span class="badge ${row.status === 'Completed' ? 'badge-completed' : 'badge-reading'}">${row.status}</span>
+    </div>
+  `).join('');
+
+  // CERTIFICATE & COMPLETION WORKFLOW
+  const certBadge = document.getElementById('chCertBadge');
+  const certBanner = document.getElementById('chCertBanner');
+  const certActions = document.getElementById('chCertActionsContainer');
+  const myFill = document.getElementById('chMyFill');
+  const myProgressText = document.getElementById('chMyProgressText');
+  const myProgressPct = document.getElementById('chMyProgressPct');
+
+  let currentCertData = null;
+
+  async function loadCertificateStatus() {
+    let certStatus = null;
+    if (typeof BookClubAPI !== 'undefined' && BookClubAPI.getToken()) {
+      try {
+        const res = await BookClubAPI.challenges.getCertificateStatus(challenge.id);
+        if (res && res.success && res.data) {
+          certStatus = res.data;
+          challenge.progress = res.data.progress;
+          challenge.joined = res.data.isJoined;
+          updateJoinBtn();
+        }
+      } catch (e) {
+        console.warn('API getCertificateStatus notice:', e);
+      }
+    }
+
+    if (!certStatus) {
+      const existingCert = BookClubStore.getCertificates().find(c => c.challengeId === challenge.id);
+      const isCompleted = challenge.progress >= challenge.target;
+      certStatus = {
+        challengeId: challenge.id,
+        isJoined: challenge.joined,
+        progress: challenge.progress,
+        target: challenge.target,
+        unit: challenge.unit,
+        percentage: Math.min(100, Math.round((challenge.progress / challenge.target) * 100)),
+        isCompleted,
+        eligible: isCompleted && !existingCert,
+        hasCertificate: !!existingCert,
+        certificate: existingCert || null
+      };
+    }
+
+    currentCertData = certStatus;
+    renderCertificateUI(certStatus);
+  }
+
+  function renderCertificateUI(status) {
+    if (!status) return;
+    const pct = status.percentage || Math.min(100, Math.round((status.progress / status.target) * 100));
+    myFill.style.width = `${pct}%`;
+    myProgressText.textContent = `${status.progress} / ${status.target} ${status.unit}`;
+    myProgressPct.textContent = `${pct}%`;
+
+    const isCompleted = status.isCompleted || (status.progress >= status.target);
+
+    if (isCompleted) {
+      myFill.style.background = 'var(--green-shelf)';
+      heroBadge.textContent = 'Completed ✓';
+      heroBadge.style.background = '#D8F3DC';
+      heroBadge.style.color = '#1B4332';
+      btnHeroCert.style.display = 'inline-block';
+    } else {
+      myFill.style.background = 'var(--shell-gold)';
+      heroBadge.textContent = 'Active';
+      heroBadge.style.background = 'var(--shell-gold)';
+      heroBadge.style.color = 'var(--shell-green-deep)';
+      btnHeroCert.style.display = 'none';
+    }
+
+    if (status.hasCertificate && status.certificate) {
+      const cert = status.certificate;
+      certBadge.textContent = 'Certificate Issued ✓';
+      certBadge.className = 'badge badge-completed';
+      certBanner.className = 'cert-status-banner issued';
+      certBanner.innerHTML = `
+        <div>
+          <strong>✅ Verified Certificate Earned!</strong><br>
+          <span style="font-size:0.8rem;">Credential ID: <code>${BookClubUI.escapeHtml(cert.certificateId)}</code></span>
+        </div>
+      `;
+
+      const pdfUrl = (typeof BookClubAPI !== 'undefined' && BookClubAPI.certificates)
+        ? BookClubAPI.certificates.getPdfUrl(cert.certificateId)
+        : `/api/certificates/${cert.certificateId}/pdf`;
+
+      certActions.innerHTML = `
+        <div class="flex gap-8">
+          <button type="button" class="btn btn-primary" id="btnViewCertLocal" style="flex:1;">👁️ View Certificate</button>
+          <a href="${pdfUrl}" target="_blank" download="Certificate-${cert.certificateId}.pdf" class="btn btn-outline" style="flex:1; text-align:center;">📥 Download PDF</a>
+        </div>
+      `;
+
+      const viewBtn = document.getElementById('btnViewCertLocal');
+      if (viewBtn) {
+        viewBtn.addEventListener('click', () => BookClubUI.showCertificateModal(cert));
+      }
+      btnHeroCert.onclick = () => BookClubUI.showCertificateModal(cert);
+    } else if (isCompleted) {
+      certBadge.textContent = 'Eligible for Certificate 🏆';
+      certBadge.className = 'badge badge-active';
+      certBanner.className = 'cert-status-banner ready';
+      certBanner.innerHTML = `
+        <div>
+          <strong>🎉 Goal Completed!</strong><br>
+          <span>You have reached the reading target and unlocked your official certificate.</span>
+        </div>
+      `;
+
+      certActions.innerHTML = `
+        <button type="button" class="btn btn-primary btn-block" id="btnDoGenerateCert">
+          🎓 Generate Official Certificate
+        </button>
+      `;
+
+      const genBtn = document.getElementById('btnDoGenerateCert');
+      if (genBtn) genBtn.addEventListener('click', handleGenerateCertificate);
+      btnHeroCert.onclick = handleGenerateCertificate;
+    } else {
+      certBadge.textContent = 'In Progress';
+      certBadge.className = 'badge';
+      certBanner.className = 'cert-status-banner pending';
+      const remaining = Math.max(0, status.target - status.progress);
+      certBanner.innerHTML = `
+        <span>ℹ️ Read <strong>${remaining} more ${status.unit}</strong> to complete this challenge and unlock your certificate.</span>
+      `;
+
+      certActions.innerHTML = `
+        <button type="button" class="btn btn-primary btn-block" id="btnDisabledCert" disabled>
+          🎓 Generate Certificate (Locked)
+        </button>
+      `;
+    }
+  }
+
+  async function handleGenerateCertificate() {
+    BookClubUI.showToast('Generating your official verified challenge certificate...', 'info');
+    let cert = null;
+
+    if (typeof BookClubAPI !== 'undefined' && BookClubAPI.getToken()) {
+      try {
+        const res = await BookClubAPI.challenges.generateCertificate(challenge.id);
+        if (res && res.success && res.data) {
+          cert = res.data;
+          BookClubStore.addCertificate(cert);
+        }
+      } catch (err) {
+        console.warn('API challenge certificate generation failed, using local store fallback:', err);
+      }
+    }
+
+    if (!cert) {
+      cert = BookClubStore.generateChallengeCertificate(challenge.id);
+    }
+
+    if (cert) {
+      BookClubUI.showToast('🎉 Certificate generated successfully!', 'success');
+      loadCertificateStatus();
+      BookClubUI.showCertificateModal(cert);
+    } else {
+      BookClubUI.showToast('Could not generate certificate. Please ensure challenge is completed.', 'error');
+    }
+  }
+
+  // Quick Progress buttons
+  const btnLogStep = document.getElementById('btnLogChallengeStep');
+  if (btnLogStep) {
+    btnLogStep.addEventListener('click', () => {
+      const stepInc = (challenge.unit === 'pages') ? 50 : 1;
+      const newProgress = Math.min(challenge.target, (challenge.progress || 0) + stepInc);
+      BookClubStore.updateChallengeProgress(challenge.id, newProgress);
+      challenge.progress = newProgress;
+      challenge.joined = true;
+      updateJoinBtn();
+      renderTimeline();
+      BookClubUI.showToast(`Logged +${stepInc} ${challenge.unit}! Current: ${newProgress}/${challenge.target}`, 'success');
+      loadCertificateStatus();
+    });
+  }
+
+  const btnComplete = document.getElementById('btnQuickCompleteChallenge');
+  if (btnComplete) {
+    btnComplete.addEventListener('click', () => {
+      BookClubStore.completeChallenge(challenge.id);
+      challenge.progress = challenge.target;
+      challenge.joined = true;
+      updateJoinBtn();
+      renderTimeline();
+      BookClubUI.showToast('🏆 Challenge marked as completed! Certificate unlocked!', 'success');
+      loadCertificateStatus();
+    });
+  }
+
+  loadCertificateStatus();
+});
+</script>
+</body>
+</html>
+

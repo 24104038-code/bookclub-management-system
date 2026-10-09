@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-page">
+<a href="#loginForm" class="skip-link">Skip to login form</a>
+
+<div class="auth-split-layout">
+  <!-- Left Visual Panel: Premium Literary Reading Showcase -->
+  <aside class="auth-visual-panel">
+    <!-- Atmospheric glows & architectural watermark -->
+    <div class="auth-ambient-glow auth-glow-top"></div>
+    <div class="auth-ambient-glow auth-glow-bottom"></div>
+    <svg class="auth-library-watermark" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M20 180 V80 Q20 20 80 20 Q140 20 140 80 V180" stroke="#FFFFFF" stroke-width="2"/>
+      <circle cx="80" cy="20" r="10" stroke="#D9A441" stroke-width="2"/>
+      <line x1="0" y1="160" x2="200" y2="160" stroke="#FFFFFF" stroke-width="1.5"/>
+      <path d="M40 180 V100 Q40 50 80 50 Q120 50 120 100 V180" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="4 4"/>
+    </svg>
+
+    <div class="auth-visual-inner">
+      <!-- Brand Lockup & Guild Badge -->
+      <div class="auth-visual-header">
+        <a href="index.html" class="auth-brand-lockup">
+          <span class="auth-brand-icon-box">📖</span>
+          <span class="auth-brand-text"><span class="brand-book">BOOK</span> <span class="brand-forge">FORGE</span></span>
+        </a>
+        <span class="auth-badge-pill">The Reader's Guild</span>
+      </div>
+
+      <!-- Hero Headline & Subtext -->
+      <div class="auth-headline-section">
+        <h2 class="auth-hero-headline">Where Readers Find <span class="highlight-phrase">Their Next Story.</span></h2>
+        <p class="auth-hero-subtext">Discover books, join meaningful conversations, track your reading journey, and connect with readers who love stories as much as you do.</p>
+      </div>
+
+      <!-- Bespoke Book Cards Showcase (3 real covers from images/books/) -->
+      <div class="auth-showcase-container" aria-label="Featured Club Books">
+        <div class="auth-showcase-card auth-card-left" title="The Silent Orchard by Elena Marsh">
+          <img src="images/books/silent-orchard.jpg" alt="The Silent Orchard cover">
+          <div class="book-genre-chip">Fiction</div>
+        </div>
+        <div class="auth-showcase-card auth-card-center" title="Winter's Ledger by Colin Reyes">
+          <img src="images/books/winters-ledger.jpg" alt="Winter's Ledger cover">
+          <div class="book-genre-chip">Mystery</div>
+        </div>
+        <div class="auth-showcase-card auth-card-right" title="The Cartographer's Daughter by Mina Sterling">
+          <img src="images/books/cartographers-daughter.jpg" alt="The Cartographer's Daughter cover">
+          <div class="book-genre-chip">Classic</div>
+        </div>
+      </div>
+
+      <!-- 3 Feature Highlights -->
+      <div class="auth-feature-highlights">
+        <div class="auth-highlight-item">
+          <div class="auth-highlight-icon">🔍</div>
+          <div class="auth-highlight-body">
+            <span class="auth-highlight-title">Discover</span>
+            <p class="auth-highlight-text">Explore books and find your next read across curated collections.</p>
+          </div>
+        </div>
+        <div class="auth-highlight-item">
+          <div class="auth-highlight-icon">💬</div>
+          <div class="auth-highlight-body">
+            <span class="auth-highlight-title">Connect</span>
+            <p class="auth-highlight-text">Join groups and discuss books with passionate readers worldwide.</p>
+          </div>
+        </div>
+        <div class="auth-highlight-item">
+          <div class="auth-highlight-icon">📊</div>
+          <div class="auth-highlight-body">
+            <span class="auth-highlight-title">Track</span>
+            <p class="auth-highlight-text">Track progress, goals, reviews and reading achievements in real-time.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Community Proof & Classic Literary Quote -->
+      <div class="auth-visual-footer">
+        <div class="auth-community-proof">
+          <div class="auth-avatar-stack">
+            <span class="auth-avatar-thumb" style="background:#B5652F;">ER</span>
+            <span class="auth-avatar-thumb" style="background:#4C6A50;">MK</span>
+            <span class="auth-avatar-thumb" style="background:#7A5FA6;">TL</span>
+            <span class="auth-avatar-thumb" style="background:#4A7FB5;">SP</span>
+          </div>
+          <div class="auth-proof-text">
+            <strong>1,250+ Active Readers</strong> · 48 Reading Circles
+          </div>
+        </div>
+        <p class="auth-literary-quote">
+          "A room without books is like a body without a soul."
+          <cite>— Cicero</cite>
+        </p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Form Panel: Authentication Cockpit -->
+  <main class="auth-form-panel">
+    <div class="auth-card-container">
+      <div class="auth-back-nav" style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="index.html" class="auth-back-link">← Back to Public Homepage</a>
+        <div class="theme-switch-dock">
+          <button type="button" class="theme-switch-btn active" data-set-theme="light" title="Light Theme">☀️</button>
+          <button type="button" class="theme-switch-btn" data-set-theme="dark" title="Dark Theme">🌙</button>
+          <button type="button" class="theme-switch-btn" data-set-theme="3d" title="3D Theme">🧊</button>
+        </div>
+      </div>
+
+      <div class="auth-modern-card">
+        <div class="auth-card-header">
+          <h1>Welcome Back</h1>
+          <p class="sub">Sign in to continue your reading journey.</p>
+        </div>
+
+        <!-- Error banner for login failures / role mismatch -->
+        <div class="auth-error-banner" id="loginErrorBanner">
+          <span>⚠️</span>
+          <span id="loginErrorText">Please check your credentials.</span>
+        </div>
+
+        <!-- Role Selection Toggle -->
+        <div class="role-select-box" style="margin-bottom: 20px;">
+          <label class="role-select-label">Select Account Role:</label>
+          <div class="role-toggle-group" id="roleToggleGroup" role="tablist">
+            <button type="button" class="role-toggle-btn active" id="roleBtnUser" data-role="user" role="tab" aria-selected="true">
+              <span>👤</span>
+              <span>User / Reader</span>
+            </button>
+            <button type="button" class="role-toggle-btn" id="roleBtnAdmin" data-role="admin" role="tab" aria-selected="false">
+              <span>🛡️</span>
+              <span>Admin</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Real Google Identity Services (GIS) Sign-In Container -->
+        <div class="google-gis-container" id="googleGisContainer" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+          <!-- Official Google iframe button injected by accounts.google.com -->
+          <div id="googleOfficialButton" style="width: 100%; display: flex; justify-content: center; min-height: 44px;"></div>
+          
+          <!-- Direct Google OAuth Sign-In Button (opens official accounts.google.com popup) -->
+          <button type="button" class="btn-google-auth" id="btnGoogleLogin" style="width: 100%;">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.67v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.16z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>Sign in with Google</span>
+          </button>
+
+          <div style="margin-top: 6px; font-size: 0.76rem; text-align: center;">
+            <a href="#" id="linkConfigGoogleId" style="color: var(--ink-soft); text-decoration: underline;">⚙️ Google OAuth Client ID Setup</a>
+          </div>
+        </div>
+
+        <!-- Social Auth Divider -->
+        <div class="social-auth-divider">
+          <span>or sign in directly</span>
+        </div>
+
+        <!-- Auth Method Tabs: Mobile Phone OTP vs Email -->
+        <div class="auth-method-tabs" role="tablist">
+          <button type="button" class="auth-method-tab active" id="tabPhoneAuth" role="tab" aria-selected="true">
+            <span>📱</span>
+            <span>Mobile Number (Real SMS)</span>
+          </button>
+          <button type="button" class="auth-method-tab" id="tabEmailAuth" role="tab" aria-selected="false">
+            <span>✉️</span>
+            <span>Email / Username</span>
+          </button>
+        </div>
+
+        <!-- Mobile Phone + Real SMS OTP Form -->
+        <form id="phoneLoginForm" novalidate>
+          <div id="phoneStep1">
+            <div class="field" id="fieldPhone">
+              <label for="phoneNumber">Enter Your Real Mobile Phone Number</label>
+              <div class="phone-input-row">
+                <select class="phone-country-code" id="phoneCountryCode" aria-label="Country Code">
+                  <option value="+91" selected>🇮🇳 +91 (IN)</option>
+                  <option value="+1">🇺🇸 +1 (US/CA)</option>
+                  <option value="+44">🇬🇧 +44 (UK)</option>
+                  <option value="+61">🇦🇺 +61 (AU)</option>
+                  <option value="+971">🇦🇪 +971 (AE)</option>
+                  <option value="+65">🇸🇬 +65 (SG)</option>
+                  <option value="+49">🇩🇪 +49 (DE)</option>
+                  <option value="+33">🇫🇷 +33 (FR)</option>
+                  <option value="+81">🇯🇵 +81 (JP)</option>
+                </select>
+                <input type="tel" id="phoneNumber" class="phone-number-field" placeholder="e.g. 9876543210" required autocomplete="tel">
+              </div>
+              <small class="text-soft" style="display:block; margin-top:4px; font-size:0.78rem;">
+                Real SMS verification code will be dispatched to this mobile device.
+              </small>
+            </div>
+
+            <button type="button" class="auth-btn-primary" id="btnSendOtp" style="margin-top:12px;">
+              <span class="btn-text">Send Verification Code 📲</span>
+              <span class="spinner" style="display:none;">⏳ Sending code...</span>
+            </button>
+          </div>
+
+          <div id="phoneStep2" style="display: none;">
+            <div class="otp-badge-notice">
+              <span>📨</span>
+              <span id="otpSentNoticeText">Code sent! Enter the 6-digit code.</span>
+            </div>
+
+            <div class="field" id="fieldOtp">
+              <label style="text-align:center; display:block; margin-bottom:8px;">Enter 6-Digit Verification Code</label>
+              <div class="otp-box-container">
+                <input type="text" maxlength="1" class="otp-digit-input" data-index="0" inputmode="numeric" autocomplete="one-time-code">
+                <input type="text" maxlength="1" class="otp-digit-input" data-index="1" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-input" data-index="2" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-input" data-index="3" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-input" data-index="4" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-input" data-index="5" inputmode="numeric">
+              </div>
+            </div>
+
+            <div class="otp-meta-row">
+              <span id="otpTimerText">Resend code in <strong>60s</strong></span>
+              <button type="button" class="otp-resend-btn" id="btnResendOtp" disabled>Resend Code</button>
+            </div>
+
+            <button type="submit" class="auth-btn-primary" id="btnVerifyOtp">
+              <span class="btn-text">Verify & Sign In ✓</span>
+              <span class="spinner" style="display:none;">⏳ Verifying...</span>
+            </button>
+
+            <div style="display: flex; justify-content: center; margin-top: 12px; margin-bottom: 6px;">
+              <button type="button" id="btnWhatsAppReceiveOtp" class="btn btn-xs btn-outline" style="display: inline-flex; align-items: center; gap: 6px; color: #16A34A; border-color: #86EFAC; background: #F0FDF4; font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+                <span>📲</span> Receive Code via WhatsApp
+              </button>
+            </div>
+
+            <div style="text-align: center; margin-top: 8px;">
+              <button type="button" class="btn btn-xs btn-ghost" id="btnChangePhone" style="font-size: 0.8rem; color: var(--ink-soft);">
+                ← Change Phone Number
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-switch-link">
+            Don't have an account? <a href="register.html">Create an account</a>
+          </div>
+        </form>
+
+        <!-- Email & Password Login Form -->
+        <form id="loginForm" style="display: none;" novalidate>
+          <div class="field" id="fieldIdentifier">
+            <label for="identifier">Email / Username</label>
+            <input type="text" id="identifier" name="identifier" placeholder="Enter your email or username" required autocomplete="username" autofocus>
+          </div>
+
+          <div class="field" id="fieldPassword">
+            <label for="password">Password</label>
+            <div class="password-field">
+              <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Show password" title="Toggle password visibility">👁️</button>
+            </div>
+          </div>
+
+          <div class="form-foot-row">
+            <label class="checkbox-row">
+              <input type="checkbox" id="rememberMe" checked>
+              <span>Remember me</span>
+            </label>
+            <a href="#" id="forgotPasswordLink">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="auth-btn-primary" id="loginSubmitBtn">
+            <span class="btn-text">Sign In with Email</span>
+            <span class="spinner" style="display:none;">⏳ Signing in...</span>
+          </button>
+
+          <div class="auth-switch-link">
+            Don't have an account? <a href="register.html">Create an account</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Google Cloud Client ID Setup Modal -->
+<div class="google-modal-overlay" id="googleConfigModal" role="dialog" aria-modal="true" aria-labelledby="googleConfigTitle">
+  <div class="google-modal-card" style="padding: 24px; max-width: 480px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.67v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.16z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        <strong id="googleConfigTitle" style="font-size: 1.05rem;">Google Live OAuth Setup</strong>
+      </div>
+      <button type="button" class="google-modal-close" id="closeGoogleConfigModal" aria-label="Close">✕</button>
+    </div>
+    <p style="font-size: 0.85rem; color: var(--ink-soft); line-height: 1.45; margin-bottom: 12px;">
+      To enable authentic Google account sign-in on this domain, enter your Web OAuth 2.0 Client ID from Google Cloud Console.
+    </p>
+    <div style="background: var(--surface-secondary, #f8f9fa); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 0.8rem; color: var(--ink);">
+      <strong>Quick Setup Steps:</strong>
+      <ol style="margin: 6px 0 0 18px; padding: 0; line-height: 1.5;">
+        <li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #1a73e8; text-decoration: underline;">Google Cloud Console → Credentials</a>.</li>
+        <li>Create OAuth Client ID (Application type: <strong>Web application</strong>).</li>
+        <li>Add Authorized JavaScript origin: <code style="background: rgba(0,0,0,0.06); padding: 1px 4px; border-radius: 4px;">http://localhost:5000</code>.</li>
+        <li>Copy your Client ID and paste below.</li>
+      </ol>
+    </div>
+    <div class="field" style="margin-bottom: 14px;">
+      <label for="inputGoogleClientId">Your Google Client ID</label>
+      <input type="text" id="inputGoogleClientId" placeholder="e.g. 123456789-abcdefg.apps.googleusercontent.com" style="width: 100%; padding: 10px; font-family: monospace; font-size: 0.82rem; border: 1px solid var(--line); border-radius: 6px;">
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+      <button type="button" class="btn btn-secondary btn-sm" id="btnCancelGoogleConfig">Cancel</button>
+      <button type="button" class="btn btn-primary btn-sm" id="btnSaveGoogleConfig">Save & Connect Google</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // If user is already authenticated, redirect them to the appropriate portal
+  if (BookClubAuth.isAuthenticated()) {
+    const existingUser = BookClubAuth.getCurrentUser();
+    if (existingUser) {
+      const target = existingUser.role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+      window.location.replace(target);
+      return;
+    }
+  }
+
+  const form = document.getElementById('loginForm');
+  const identifierInput = document.getElementById('identifier');
+  const passwordInput = document.getElementById('password');
+  const toggleBtn = document.getElementById('togglePasswordBtn');
+  const submitBtn = document.getElementById('loginSubmitBtn');
+  const btnText = submitBtn.querySelector('.btn-text');
+  const spinner = submitBtn.querySelector('.spinner');
+  const errorBanner = document.getElementById('loginErrorBanner');
+  const errorText = document.getElementById('loginErrorText');
+
+  // Active role state ('user' or 'admin')
+  let selectedRole = 'user';
+  const roleButtons = document.querySelectorAll('.role-toggle-btn');
+
+  function setRole(role) {
+    selectedRole = role;
+    roleButtons.forEach(btn => {
+      const isActive = btn.getAttribute('data-role') === role;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    hideError();
+  }
+
+  roleButtons.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const role = this.getAttribute('data-role');
+      setRole(role);
+    });
+  });
+
+  // Password visibility toggle
+  if (toggleBtn && passwordInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isPass = passwordInput.type === 'password';
+      passwordInput.type = isPass ? 'text' : 'password';
+      toggleBtn.textContent = isPass ? '🙈' : '👁️';
+    });
+  }
+
+  function showError(msg) {
+    errorText.textContent = msg;
+    errorBanner.style.display = 'flex';
+  }
+
+  function hideError() {
+    errorBanner.style.display = 'none';
+    document.querySelectorAll('.field-error').forEach(el => el.remove());
+    document.querySelectorAll('.field-invalid').forEach(el => el.classList.remove('field-invalid'));
+  }
+
+  function setFieldError(fieldId, msg) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    field.classList.add('field-invalid');
+    const err = document.createElement('small');
+    err.className = 'field-error';
+    err.textContent = msg;
+    field.appendChild(err);
+  }
+
+  // Forgot password modal
+  document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    BookClubUI.showModal(
+      'Reset Your Password',
+      `
+        <p class="text-soft" style="margin-bottom: 16px;">Enter your registered email address and we will send password recovery instructions.</p>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="resetEmail" placeholder="your.email@example.com" value="${BookClubUI.escapeHtml(identifierInput.value)}">
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleResetSubmit()">Send Reset Link</button>
+      `
+    );
+  });
+
+  window.handleResetSubmit = function () {
+    const email = (document.getElementById('resetEmail') || {}).value;
+    if (!email) {
+      alert('Please enter your email address.');
+      return;
+    }
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Password recovery link sent to ${email}`, 'success');
+  };
+
+  // Form submission
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    hideError();
+
+    const identifier = identifierInput.value.trim();
+    const password = passwordInput.value.trim();
+    const rememberMe = document.getElementById('rememberMe').checked;
+
+    let hasError = false;
+    if (!identifier) {
+      setFieldError('fieldIdentifier', 'Please enter your email or username.');
+      hasError = true;
+    }
+    if (!password) {
+      setFieldError('fieldPassword', 'Please enter your password.');
+      hasError = true;
+    }
+    if (hasError) return;
+
+    // Loading indicator
+    submitBtn.disabled = true;
+    btnText.style.display = 'none';
+    spinner.style.display = 'inline';
+
+    (async () => {
+      try {
+        let res;
+        if (typeof BookClubAuth.loginAsync === 'function') {
+          res = await BookClubAuth.loginAsync(identifier, password, rememberMe, selectedRole);
+        } else {
+          res = BookClubAuth.login(identifier, password, rememberMe, selectedRole);
+        }
+
+        if (!res.success) {
+          submitBtn.disabled = false;
+          btnText.style.display = 'inline';
+          spinner.style.display = 'none';
+
+          if (res.field === 'identifier') {
+            setFieldError('fieldIdentifier', res.error);
+          } else if (res.field === 'password') {
+            setFieldError('fieldPassword', res.error);
+          } else {
+            showError(res.error);
+          }
+        } else {
+          const user = res.user;
+          BookClubUI.showToast(`Welcome back, ${user.name}!`, 'success');
+
+          // Determine destination based on role & any pending redirect
+          let target = '';
+          if (user.role === 'admin') {
+            target = 'admin-dashboard.html';
+          } else {
+            const pendingRedirect = sessionStorage.getItem('bookclub_redirect');
+            sessionStorage.removeItem('bookclub_redirect');
+            target = (pendingRedirect && !pendingRedirect.includes('login') && !pendingRedirect.includes('admin')) 
+              ? pendingRedirect 
+              : 'dashboard.html';
+          }
+
+          setTimeout(() => {
+            window.location.replace(target);
+          }, 350);
+        }
+      } catch (err) {
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline';
+        spinner.style.display = 'none';
+        showError('Login request error. Please try again.');
+      }
+    })();
+  });
+
+  /* =========================================================
+     AUTH METHOD SWITCHER (Email vs Mobile Phone OTP)
+     ========================================================= */
+  const tabEmail = document.getElementById('tabEmailAuth');
+  const tabPhone = document.getElementById('tabPhoneAuth');
+  const emailForm = document.getElementById('loginForm');
+  const phoneForm = document.getElementById('phoneLoginForm');
+
+  if (tabEmail && tabPhone && emailForm && phoneForm) {
+    tabEmail.addEventListener('click', () => {
+      tabEmail.classList.add('active');
+      tabEmail.setAttribute('aria-selected', 'true');
+      tabPhone.classList.remove('active');
+      tabPhone.setAttribute('aria-selected', 'false');
+      emailForm.style.display = 'block';
+      phoneForm.style.display = 'none';
+      hideError();
+    });
+
+    tabPhone.addEventListener('click', () => {
+      tabPhone.classList.add('active');
+      tabPhone.setAttribute('aria-selected', 'true');
+      tabEmail.classList.remove('active');
+      tabEmail.setAttribute('aria-selected', 'false');
+      phoneForm.style.display = 'block';
+      emailForm.style.display = 'none';
+      hideError();
+    });
+  }
+
+  /* =========================================================
+     OFFICIAL GOOGLE IDENTITY SERVICES (GIS) INTEGRATION
+     Real Google Account Verification & OAuth 2.0 Flow
+     ========================================================= */
+  let activeGoogleClientId = localStorage.getItem('bookforge_google_client_id') || '';
+  const btnGoogle = document.getElementById('btnGoogleLogin');
+  const googleConfigModal = document.getElementById('googleConfigModal');
+  const closeGoogleConfigModal = document.getElementById('closeGoogleConfigModal');
+  const btnCancelGoogleConfig = document.getElementById('btnCancelGoogleConfig');
+  const btnSaveGoogleConfig = document.getElementById('btnSaveGoogleConfig');
+  const inputGoogleClientId = document.getElementById('inputGoogleClientId');
+  const linkConfigGoogleId = document.getElementById('linkConfigGoogleId');
+
+  async function resolveGoogleClientId() {
+    if (!activeGoogleClientId && typeof BookClubAPI !== 'undefined' && BookClubAPI.auth.getGoogleConfig) {
+      try {
+        const configRes = await BookClubAPI.auth.getGoogleConfig();
+        if (configRes && configRes.clientId) {
+          activeGoogleClientId = configRes.clientId;
+          localStorage.setItem('bookforge_google_client_id', activeGoogleClientId);
+        }
+      } catch (e) {}
+    }
+    return activeGoogleClientId;
+  }
+
+  // Handle cryptographic credential response returned directly from Google
+  window.handleGoogleCredentialResponse = async function (response) {
+    if (!response || !response.credential) {
+      showError('Google authentication response did not contain a valid credential token.');
+      return;
+    }
+
+    BookClubUI.showToast('Verifying Google credentials with authentication server...', 'info');
+
+    try {
+      const res = await BookClubAuth.loginWithGoogleAsync({
+        credential: response.credential
+      });
+
+      if (res.success) {
+        BookClubUI.showToast(`Verified! Welcome to BOOK FORGE, ${res.user.name}.`, 'success');
+        const target = res.user.role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+        setTimeout(() => window.location.replace(target), 400);
+      } else {
+        showError(res.error || 'Google token verification failed on server.');
+      }
+    } catch (err) {
+      showError('Google authentication error: ' + err.message);
+    }
+  };
+
+  function initOfficialGoogleGIS(clientId) {
+    if (!clientId) return false;
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+      setTimeout(() => initOfficialGoogleGIS(clientId), 250);
+      return false;
+    }
+
+    try {
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: window.handleGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      const officialBtnTarget = document.getElementById('googleOfficialButton');
+      if (officialBtnTarget) {
+        google.accounts.id.renderButton(officialBtnTarget, {
+          theme: 'outline',
+          size: 'large',
+          type: 'standard',
+          text: 'signin_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: officialBtnTarget.parentElement?.offsetWidth || 340
+        });
+
+        // Hide custom trigger if official Google button rendered its iframe successfully
+        setTimeout(() => {
+          if (officialBtnTarget.children.length > 0) {
+            btnGoogle.style.display = 'none';
+          }
+        }, 300);
+      }
+
+      // Trigger Google One Tap prompt
+      google.accounts.id.prompt();
+      return true;
+    } catch (err) {
+      console.warn('[GIS Init Notice]:', err);
+      return false;
+    }
+  }
+
+  // Launch official OAuth token popup via Google OAuth2 client
+  function launchGoogleOAuthPopup(clientId) {
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+      try {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'email profile openid',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              BookClubUI.showToast('Verifying Google access token...', 'info');
+              const res = await BookClubAuth.loginWithGoogleAsync({
+                accessToken: tokenResponse.access_token
+              });
+              if (res.success) {
+                BookClubUI.showToast(`Verified! Welcome to BOOK FORGE, ${res.user.name}.`, 'success');
+                const target = res.user.role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+                setTimeout(() => window.location.replace(target), 400);
+              } else {
+                showError(res.error || 'Google token verification failed.');
+              }
+            } else if (tokenResponse && tokenResponse.error) {
+              showError('Google Sign-In canceled or failed: ' + tokenResponse.error);
+            }
+          }
+        });
+        client.requestAccessToken();
+        return;
+      } catch (err) {
+        console.warn('[Google Token Client Error]:', err);
+      }
+    }
+
+    // Direct redirect / popup fallback to Google Accounts
+    const redirectUri = window.location.origin + window.location.pathname;
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile%20openid`;
+    const popup = window.open(authUrl, 'google_login_popup', 'width=520,height=640,menubar=no,status=no');
+    if (!popup) {
+      window.location.href = authUrl;
+    }
+  }
+
+  // Check URL fragment for token (if redirected from OAuth popup)
+  if (window.location.hash) {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = params.get('access_token');
+    const idToken = params.get('id_token');
+    if (accessToken || idToken) {
+      window.history.replaceState(null, null, window.location.pathname);
+      BookClubUI.showToast('Verifying Google sign-in...', 'info');
+      BookClubAuth.loginWithGoogleAsync({ accessToken, idToken }).then(res => {
+        if (res.success) {
+          BookClubUI.showToast(`Verified! Welcome, ${res.user.name}.`, 'success');
+          const target = res.user.role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+          setTimeout(() => window.location.replace(target), 400);
+        } else {
+          showError(res.error || 'Google verification failed.');
+        }
+      });
+    }
+  }
+
+  // Click on "Sign in with Google" button
+  if (btnGoogle) {
+    btnGoogle.addEventListener('click', async () => {
+      const clientId = await resolveGoogleClientId();
+      if (clientId) {
+        launchGoogleOAuthPopup(clientId);
+      } else {
+        if (inputGoogleClientId) inputGoogleClientId.value = '';
+        googleConfigModal.classList.add('open');
+      }
+    });
+  }
+
+  // Config modal event handlers
+  if (linkConfigGoogleId) {
+    linkConfigGoogleId.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (inputGoogleClientId) inputGoogleClientId.value = activeGoogleClientId;
+      googleConfigModal.classList.add('open');
+    });
+  }
+
+  function closeConfigModal() {
+    googleConfigModal.classList.remove('open');
+  }
+
+  if (closeGoogleConfigModal) closeGoogleConfigModal.addEventListener('click', closeConfigModal);
+  if (btnCancelGoogleConfig) btnCancelGoogleConfig.addEventListener('click', closeConfigModal);
+  if (googleConfigModal) {
+    googleConfigModal.addEventListener('click', (e) => {
+      if (e.target === googleConfigModal) closeConfigModal();
+    });
+  }
+
+  if (btnSaveGoogleConfig) {
+    btnSaveGoogleConfig.addEventListener('click', () => {
+      const enteredId = (inputGoogleClientId.value || '').trim();
+      if (!enteredId) {
+        alert('Please enter a valid Google Client ID.');
+        return;
+      }
+      activeGoogleClientId = enteredId;
+      localStorage.setItem('bookforge_google_client_id', enteredId);
+      closeConfigModal();
+      BookClubUI.showToast('Google Client ID saved! Connecting to Google...', 'success');
+      initOfficialGoogleGIS(enteredId);
+      launchGoogleOAuthPopup(enteredId);
+    });
+  }
+
+  // Initialize GIS on page load
+  resolveGoogleClientId().then(id => {
+    if (id) initOfficialGoogleGIS(id);
+  });
+
+  /* =========================================================
+     MOBILE NUMBER & OTP AUTHENTICATION FLOW
+     ========================================================= */
+  const phoneStep1 = document.getElementById('phoneStep1');
+  const phoneStep2 = document.getElementById('phoneStep2');
+  const phoneInput = document.getElementById('phoneNumber');
+  const countryCodeSelect = document.getElementById('phoneCountryCode');
+  const btnSendOtp = document.getElementById('btnSendOtp');
+  const btnVerifyOtp = document.getElementById('btnVerifyOtp');
+  const btnFillDemoPhone = document.getElementById('btnFillDemoPhone');
+  const btnFillDemoOtp = document.getElementById('btnFillDemoOtp');
+  const btnResendOtp = document.getElementById('btnResendOtp');
+  const btnChangePhone = document.getElementById('btnChangePhone');
+  const otpTimerText = document.getElementById('otpTimerText');
+  const otpSentNoticeText = document.getElementById('otpSentNoticeText');
+  const otpInputs = document.querySelectorAll('.otp-digit-input');
+
+  let activeFullPhone = '';
+  let otpCountdown = null;
+  let currentValidOtp = '123456';
+
+  if (btnFillDemoPhone && phoneInput) {
+    btnFillDemoPhone.addEventListener('click', () => {
+      phoneInput.value = '9876543210';
+      phoneInput.focus();
+    });
+  }
+
+  function startOtpTimer(duration = 60) {
+    if (otpCountdown) clearInterval(otpCountdown);
+    let secondsLeft = duration;
+    btnResendOtp.disabled = true;
+    otpTimerText.innerHTML = `Resend code in <strong>${secondsLeft}s</strong>`;
+
+    otpCountdown = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft <= 0) {
+        clearInterval(otpCountdown);
+        btnResendOtp.disabled = false;
+        otpTimerText.innerHTML = `Didn't receive code?`;
+      } else {
+        otpTimerText.innerHTML = `Resend code in <strong>${secondsLeft}s</strong>`;
+      }
+    }, 1000);
+  }
+
+  // Auto-focus behavior for 6-digit OTP boxes
+  otpInputs.forEach((input, idx) => {
+    input.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/[^0-9]/g, '');
+      e.target.value = val ? val[0] : '';
+      if (val && idx < otpInputs.length - 1) {
+        otpInputs[idx + 1].focus();
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && idx > 0) {
+        otpInputs[idx - 1].focus();
+      }
+    });
+
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+      if (pasteData) {
+        for (let i = 0; i < otpInputs.length; i++) {
+          otpInputs[i].value = pasteData[i] || '';
+        }
+        const lastFilled = Math.min(pasteData.length, otpInputs.length) - 1;
+        if (lastFilled >= 0 && lastFilled < otpInputs.length) {
+          otpInputs[lastFilled].focus();
+        }
+      }
+    });
+  });
+
+  // Send OTP
+  if (btnSendOtp) {
+    btnSendOtp.addEventListener('click', async () => {
+      hideError();
+      const rawNumber = (phoneInput.value || '').trim().replace(/[^0-9]/g, '');
+      if (!rawNumber || rawNumber.length < 7) {
+        showError('Please enter a valid mobile number (at least 7 digits).');
+        return;
+      }
+
+      const country = countryCodeSelect.value || '+91';
+      activeFullPhone = `${country}${rawNumber}`;
+
+      btnSendOtp.disabled = true;
+      btnSendOtp.querySelector('.btn-text').style.display = 'none';
+      btnSendOtp.querySelector('.spinner').style.display = 'inline';
+
+      try {
+        const res = await BookClubAuth.sendOtpAsync(activeFullPhone);
+        btnSendOtp.disabled = false;
+        btnSendOtp.querySelector('.btn-text').style.display = 'inline';
+        btnSendOtp.querySelector('.spinner').style.display = 'none';
+
+        if (res.success) {
+          currentValidOtp = res.otp || '123456';
+          otpSentNoticeText.innerHTML = `Verification code dispatched to <strong>${activeFullPhone}</strong> via SMS. Please enter the 6-digit code.`;
+          phoneStep1.style.display = 'none';
+          phoneStep2.style.display = 'block';
+          startOtpTimer(60);
+          otpInputs[0].focus();
+          BookClubUI.showToast(`Verification code sent to ${activeFullPhone}! Check your phone messages.`, 'success');
+        } else {
+          showError(res.error || 'Failed to send OTP. Please try again.');
+        }
+      } catch (err) {
+        btnSendOtp.disabled = false;
+        btnSendOtp.querySelector('.btn-text').style.display = 'inline';
+        btnSendOtp.querySelector('.spinner').style.display = 'none';
+        showError('Error sending OTP code.');
+      }
+    });
+  }
+
+  // Receive via WhatsApp
+  const btnWhatsAppReceiveOtp = document.getElementById('btnWhatsAppReceiveOtp');
+  if (btnWhatsAppReceiveOtp) {
+    btnWhatsAppReceiveOtp.addEventListener('click', () => {
+      const cleanDigits = activeFullPhone.replace(/[^0-9]/g, '');
+      const msg = encodeURIComponent(`Your BOOK FORGE login verification code is: ${currentValidOtp}. Valid for 5 minutes.`);
+      window.open(`https://api.whatsapp.com/send?phone=${cleanDigits}&text=${msg}`, '_blank');
+      BookClubUI.showToast(`Opening WhatsApp to receive verification code...`, 'info');
+    });
+  }
+
+  // Resend OTP
+  if (btnResendOtp) {
+    btnResendOtp.addEventListener('click', async () => {
+      if (btnResendOtp.disabled) return;
+      try {
+        const res = await BookClubAuth.sendOtpAsync(activeFullPhone);
+        if (res.success) {
+          currentValidOtp = res.otp || '123456';
+          otpSentNoticeText.innerHTML = `New verification code dispatched to <strong>${activeFullPhone}</strong> via SMS.`;
+          startOtpTimer(60);
+          BookClubUI.showToast(`New verification code sent to ${activeFullPhone}!`, 'info');
+        }
+      } catch (e) {}
+    });
+  }
+
+  // Change phone number
+  if (btnChangePhone) {
+    btnChangePhone.addEventListener('click', () => {
+      phoneStep2.style.display = 'none';
+      phoneStep1.style.display = 'block';
+      if (otpCountdown) clearInterval(otpCountdown);
+      phoneInput.focus();
+    });
+  }
+
+  // Verify OTP submission
+  if (phoneForm) {
+    phoneForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+
+      let enteredOtp = '';
+      otpInputs.forEach(i => enteredOtp += (i.value || ''));
+
+      if (enteredOtp.length !== 6) {
+        showError('Please enter the complete 6-digit verification code.');
+        return;
+      }
+
+      btnVerifyOtp.disabled = true;
+      btnVerifyOtp.querySelector('.btn-text').style.display = 'none';
+      btnVerifyOtp.querySelector('.spinner').style.display = 'inline';
+
+      try {
+        const res = await BookClubAuth.loginWithOtpAsync(activeFullPhone, enteredOtp);
+
+        btnVerifyOtp.disabled = false;
+        btnVerifyOtp.querySelector('.btn-text').style.display = 'inline';
+        btnVerifyOtp.querySelector('.spinner').style.display = 'none';
+
+        if (res.success) {
+          BookClubUI.showToast(`Verified! Welcome to BOOK FORGE, ${res.user.name}.`, 'success');
+          const target = res.user.role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+          setTimeout(() => window.location.replace(target), 400);
+        } else {
+          showError(res.error || 'Invalid OTP code. Please check and try again.');
+        }
+      } catch (err) {
+        btnVerifyOtp.disabled = false;
+        btnVerifyOtp.querySelector('.btn-text').style.display = 'inline';
+        btnVerifyOtp.querySelector('.spinner').style.display = 'none';
+        showError('OTP verification error. Please try again.');
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>

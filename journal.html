@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Journal — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="journalTabs">
+      <span class="tab active" data-tab="timeline">Chronological Timeline</span>
+      <span class="tab" data-tab="calendar">Monthly Calendar View</span>
+    </div>
+
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Reading Reflections</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">Capture your mood, daily pages, and stream of consciousness after every reading session.</p>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" id="btnNewJournalEntry">+ New Journal Entry</button>
+    </div>
+
+    <!-- TIMELINE VIEW -->
+    <div id="viewTimeline">
+      <div class="journal-timeline" id="journalTimelineList" style="margin-bottom: 40px;">
+        <!-- Entries rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div id="viewCalendar" style="display:none; margin-bottom: 40px;">
+      <div class="card panel">
+        <div class="flex-between mb-30">
+          <h3 style="margin:0;">September 2026</h3>
+          <span class="badge badge-active">5 Entries Logged</span>
+        </div>
+        <div class="grid grid-4" id="calJournalGrid" style="gap:16px;">
+          <!-- Calendar entries cards -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('journal');
+  BookClubUI.renderTopbar(
+    'Personal Reading Journal',
+    'Document moods, thoughts, and chapter breakthroughs day by day.',
+    `<a href="reading-progress.html" class="btn btn-outline btn-sm">Reading Tracker 📈</a>`
+  );
+
+  function renderTimeline() {
+    const list = BookClubStore.getJournal();
+    const container = document.getElementById('journalTimelineList');
+
+    if (list.length === 0) {
+      container.innerHTML = BookClubUI.renderEmptyState('📓', 'Your journal is empty', 'Log your first daily reflection after reading a chapter.', 'Write Entry', '#');
+      return;
+    }
+
+    container.innerHTML = list.map(j => `
+      <div class="journal-entry">
+        <div class="journal-dot"></div>
+        <div class="flex-between mb-0">
+          <div>
+            <span style="font-size:1.6rem; vertical-align:middle; margin-right:8px;">${j.mood}</span>
+            <strong style="font-size:1.1rem; color:var(--brown-deep);">${j.bookTitle}</strong>
+            <span class="text-soft" style="font-size:0.85rem; margin-left:8px;">— Mood: ${j.moodLabel}</span>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge badge-want">📄 +${j.pagesRead} pages</span>
+            <div class="text-soft" style="font-size:0.75rem; margin-top:4px;">${j.date}</div>
+          </div>
+        </div>
+
+        <p style="margin: 14px 0 6px 0; font-size:0.95rem; line-height:1.55;">${j.thoughts}</p>
+
+        <div class="flex-between" style="border-top:1px dashed var(--line); padding-top:8px; margin-top:12px; font-size:0.8rem; color:var(--ink-soft);">
+          <span>Session Rating: ${'★'.repeat(j.rating || 4)}</span>
+          <a href="reading-progress.html" style="color:var(--clay); font-weight:600;">Update Tracker Progress →</a>
+        </div>
+      </div>
+    `).join('');
+
+    // Also populate calendar grid
+    const calGrid = document.getElementById('calJournalGrid');
+    if (calGrid) {
+      calGrid.innerHTML = list.map(j => `
+        <div class="card" style="padding:14px; background:var(--cream);">
+          <div class="flex-between mb-0" style="margin-bottom:6px;">
+            <strong style="font-size:0.85rem;">${j.date}</strong>
+            <span style="font-size:1.3rem;">${j.mood}</span>
+          </div>
+          <div style="font-weight:700; color:var(--brown-deep); font-size:0.9rem; margin-bottom:4px;">${j.bookTitle}</div>
+          <p class="text-soft" style="font-size:0.8rem; margin:0 0 8px 0;">${j.thoughts.slice(0, 60)}...</p>
+          <span class="badge badge-reading">+${j.pagesRead} pgs</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Add new journal modal
+  document.getElementById('btnNewJournalEntry').addEventListener('click', () => {
+    const books = BookClubStore.getBooks();
+    BookClubUI.showModal(
+      'New Reading Journal Entry',
+      `
+        <div class="field">
+          <label>Book You Read</label>
+          <select id="jmBook">
+            ${books.map(b => `<option value="${b.id}">${b.title}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>How Did This Session Make You Feel? (Mood)</label>
+          <div class="mood-picker" id="jmMoodPicker">
+            <button type="button" class="mood-btn selected" data-mood="😊" data-label="Satisfied">😊</button>
+            <button type="button" class="mood-btn" data-mood="😍" data-label="Enchanted">😍</button>
+            <button type="button" class="mood-btn" data-mood="😐" data-label="Contemplative">😐</button>
+            <button type="button" class="mood-btn" data-mood="😢" data-label="Emotional">😢</button>
+            <button type="button" class="mood-btn" data-mood="🤯" data-label="Mind Blown">🤯</button>
+            <button type="button" class="mood-btn" data-mood="❤️" data-label="Heartwarming">❤️</button>
+          </div>
+          <input type="hidden" id="jmSelectedMood" value="😊">
+          <input type="hidden" id="jmSelectedLabel" value="Satisfied">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Pages Read</label><input type="number" id="jmPages" min="1" value="30"></div>
+          <div class="field"><label>Session Rating (1-5)</label><input type="number" id="jmRating" min="1" max="5" value="5"></div>
+        </div>
+        <div class="field">
+          <label>Thoughts & Impressions</label>
+          <textarea id="jmThoughts" rows="4" placeholder="What stood out? Character arcs, a sentence you loved, or plot developments..."></textarea>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSaveJournalEntry()">Save to Journal</button>
+      `
+    );
+
+    setTimeout(() => {
+      document.querySelectorAll('#jmMoodPicker .mood-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('#jmMoodPicker .mood-btn').forEach(b => b.classList.remove('selected'));
+          this.classList.add('selected');
+          document.getElementById('jmSelectedMood').value = this.getAttribute('data-mood');
+          document.getElementById('jmSelectedLabel').value = this.getAttribute('data-label');
+        });
+      });
+    }, 50);
+  });
+
+  window.handleSaveJournalEntry = function () {
+    const thoughts = document.getElementById('jmThoughts').value.trim();
+    if (!thoughts) { alert('Please write down a few thoughts.'); return; }
+    BookClubStore.addJournalEntry({
+      bookId: document.getElementById('jmBook').value,
+      mood: document.getElementById('jmSelectedMood').value,
+      moodLabel: document.getElementById('jmSelectedLabel').value,
+      pagesRead: Number(document.getElementById('jmPages').value) || 25,
+      rating: Number(document.getElementById('jmRating').value) || 5,
+      thoughts: thoughts
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Journal entry saved and pages synced! 📓', 'success');
+    renderTimeline();
+  };
+
+  // Tabs
+  document.querySelectorAll('#journalTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#journalTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      const tab = this.getAttribute('data-tab');
+      document.getElementById('viewTimeline').style.display = tab === 'timeline' ? 'block' : 'none';
+      document.getElementById('viewCalendar').style.display = tab === 'calendar' ? 'block' : 'none';
+    });
+  });
+
+  renderTimeline();
+});
+</script>
+</body>
+</html>

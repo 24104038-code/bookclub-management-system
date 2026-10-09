@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizer Console — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.organizer-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 24px;
+  padding-bottom: 4px;
+}
+.organizer-tab {
+  padding: 8px 18px;
+  border-radius: 6px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.organizer-tab:hover {
+  border-color: var(--primary, var(--brown-deep));
+  color: var(--brown-deep);
+}
+.organizer-tab.active {
+  background: var(--primary, var(--brown-deep));
+  color: #ffffff !important;
+  border-color: var(--primary, var(--brown-deep));
+  box-shadow: var(--shadow-sm);
+}
+.action-banner {
+  background: linear-gradient(135deg, var(--forest-deep, #1E3A2E), #2A4230);
+  color: #fff;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.action-banner h3 {
+  color: #fff;
+  margin: 0 0 6px 0;
+  font-family: var(--font-display);
+}
+.action-banner p {
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+  font-size: 0.9rem;
+}
+.btn-gold {
+  background: var(--gold);
+  color: #1A1A1A;
+  font-weight: 600;
+  border: none;
+}
+.btn-gold:hover {
+  background: #C49842;
+  color: #000;
+}
+.roster-header {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- QUICK ACTION BANNER -->
+    <div class="action-banner">
+      <div>
+        <h3>Organizer Workspace & Operations</h3>
+        <p>Coordinate reading groups, host salons, curate book selections, and oversee member attendance.</p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-gold btn-sm" id="btnQuickCreateEvent">+ Host New Event</button>
+        <button class="btn btn-outline btn-sm" style="color:#fff; border-color:rgba(255,255,255,0.4);" id="btnQuickCreateComp">+ New Competition</button>
+        <button class="btn btn-outline btn-sm" style="color:#fff; border-color:rgba(255,255,255,0.4);" id="btnQuickCreateChallenge">+ Launch Challenge</button>
+      </div>
+    </div>
+
+    <!-- METRIC STAT CARDS -->
+    <div class="grid grid-4" style="margin-bottom: 24px;">
+      <div class="card stat-card">
+        <div class="stat-title">Hosted Events</div>
+        <div class="stat-value tone-green" id="metricEventsCount">6</div>
+        <div class="stat-delta up">↑ 3 scheduled this month</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Total RSVPs Received</div>
+        <div class="stat-value tone-gold" id="metricRsvpsCount">142</div>
+        <div class="stat-delta">88% average turnout rate</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Active Competitions</div>
+        <div class="stat-value tone-blue" id="metricCompsCount">2</div>
+        <div class="stat-delta">279 total competitors</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Community Challenges</div>
+        <div class="stat-value tone-clay" id="metricChallengesCount">3</div>
+        <div class="stat-delta">372 active readers enrolled</div>
+      </div>
+    </div>
+
+    <!-- ORGANIZER TABS -->
+    <div class="organizer-tabs" id="organizerTabs">
+      <button class="organizer-tab active" data-sec="events">Events & Gatherings</button>
+      <button class="organizer-tab" data-sec="competitions">Reading Competitions</button>
+      <button class="organizer-tab" data-sec="challenges">Reading Challenges</button>
+      <button class="organizer-tab" data-sec="attendance">Attendee Rosters & Check-In</button>
+    </div>
+
+    <!-- SECTION 1: EVENTS -->
+    <div id="secEvents" class="organizer-panel-section">
+      <div class="flex-between mb-30">
+        <div>
+          <h3>Scheduled Gatherings & Salons</h3>
+          <p class="text-soft" style="font-size:0.88rem; margin-top:2px;">Track capacity, manage RSVP lists, and launch virtual rooms.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btnCreateEventSection">+ Create Event</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Event Title</th>
+              <th>Category</th>
+              <th>Date & Time</th>
+              <th>Seats / RSVPs</th>
+              <th>Location / Room</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orgEventsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 2: COMPETITIONS -->
+    <div id="secCompetitions" class="organizer-panel-section" style="display: none;">
+      <div class="flex-between mb-30">
+        <div>
+          <h3>Tournaments & Reading Cups</h3>
+          <p class="text-soft" style="font-size:0.88rem; margin-top:2px;">Manage competitive sprints, assign prizes, and track leaderboards.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btnCreateCompSection">+ Create Competition</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tournament Name</th>
+              <th>Format</th>
+              <th>Timeline</th>
+              <th>Enrolled</th>
+              <th>Reward & Prize</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orgCompetitionsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 3: CHALLENGES -->
+    <div id="secChallenges" class="organizer-panel-section" style="display: none;">
+      <div class="flex-between mb-30">
+        <div>
+          <h3>Community Reading Quests</h3>
+          <p class="text-soft" style="font-size:0.88rem; margin-top:2px;">Set reading targets to motivate members across books and pages.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btnCreateChallengeSection">+ Create Challenge</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Challenge Title</th>
+              <th>Target Goal</th>
+              <th>Duration</th>
+              <th>Participants</th>
+              <th>XP & Badge</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orgChallengesTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 4: ATTENDANCE & ROSTERS -->
+    <div id="secAttendance" class="organizer-panel-section" style="display: none;">
+      <div class="roster-header">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <label for="rosterEventSelect" style="font-weight:600; font-size:0.9rem;">Select Gathering:</label>
+          <select id="rosterEventSelect" style="padding:6px 12px; border-radius:6px; border:1px solid var(--line); font-size:0.9rem; background:var(--bg);">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline btn-sm" id="btnExportRoster">📥 Export Roster (CSV)</button>
+          <button class="btn btn-primary btn-sm" id="btnMarkAllPresent">✓ Mark All Present</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Reader</th>
+              <th>Email</th>
+              <th>RSVP Status</th>
+              <th>Book Club Role</th>
+              <th>Attendance Check-In</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="orgRosterTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Enforce Organizer or Admin privileges
+  const hasAccess = BookClubAuth.requireRole(['organizer', 'admin'], 'dashboard.html?access_denied=1');
+  if (!hasAccess) return;
+  const user = BookClubAuth.getCurrentUser();
+
+  BookClubUI.renderSidebar('organizer-dashboard');
+  BookClubUI.renderTopbar(
+    'Organizer Console',
+    `Welcome back, ${user.name}. Manage community sessions, tournaments, and reader engagement.`,
+    `<a href="calendar.html" class="btn btn-outline btn-sm">📆 View Calendar</a>`
+  );
+
+  // Tab switching
+  const tabs = document.querySelectorAll('#organizerTabs .organizer-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      const sec = this.getAttribute('data-sec');
+      document.getElementById('secEvents').style.display = sec === 'events' ? 'block' : 'none';
+      document.getElementById('secCompetitions').style.display = sec === 'competitions' ? 'block' : 'none';
+      document.getElementById('secChallenges').style.display = sec === 'challenges' ? 'block' : 'none';
+      document.getElementById('secAttendance').style.display = sec === 'attendance' ? 'block' : 'none';
+      if (sec === 'attendance') renderRosterTable();
+    });
+  });
+
+  // Render Metric counts
+  function updateMetrics() {
+    const events = BookClubStore.getEvents();
+    const comps = BookClubStore.getCompetitions();
+    const challenges = BookClubStore.getChallenges();
+
+    const totalRsvps = events.reduce((sum, e) => sum + (e.participants || 0), 0);
+    document.getElementById('metricEventsCount').textContent = events.length;
+    document.getElementById('metricRsvpsCount').textContent = totalRsvps;
+    document.getElementById('metricCompsCount').textContent = comps.length;
+    document.getElementById('metricChallengesCount').textContent = challenges.length;
+  }
+  updateMetrics();
+
+  // 1. Render Events Table
+  function renderEventsTable() {
+    const events = BookClubStore.getEvents();
+    const tbody = document.getElementById('orgEventsTbody');
+    if (!events.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-soft" style="padding:24px;">No events scheduled yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = events.map(e => `
+      <tr>
+        <td>
+          <strong>${e.title}</strong>
+          <div class="text-soft" style="font-size:0.75rem;">Hosted by: ${e.organizer || 'Community'}</div>
+        </td>
+        <td><span class="badge badge-reading">${e.type}</span></td>
+        <td>
+          <div>${e.date}</div>
+          <div class="text-soft" style="font-size:0.75rem;">${e.time}</div>
+        </td>
+        <td>
+          <strong>${e.participants || 0}</strong> / ${e.maxSeats || 50}
+          <div style="width:70px; height:4px; background:var(--line); border-radius:2px; margin-top:4px; overflow:hidden;">
+            <div style="width:${Math.min(100, Math.round(((e.participants||0)/(e.maxSeats||50))*100))}%; height:100%; background:var(--forest);"></div>
+          </div>
+        </td>
+        <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${e.location}">
+          ${e.location || 'Virtual Hall'}
+        </td>
+        <td><span class="badge badge-active">Active</span></td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <a href="event-details.html?id=${e.id}" class="btn btn-outline btn-sm">Details</a>
+            <button class="btn btn-ghost btn-sm" onclick="showEditEventModal(${e.id})">Edit</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderEventsTable();
+
+  // 2. Render Competitions Table
+  function renderCompetitionsTable() {
+    const comps = BookClubStore.getCompetitions();
+    const tbody = document.getElementById('orgCompetitionsTbody');
+    if (!comps.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-soft" style="padding:24px;">No competitions organized yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = comps.map(c => `
+      <tr>
+        <td><strong>${c.title}</strong></td>
+        <td><span class="badge badge-gold">${c.type}</span></td>
+        <td>${c.startDate} to ${c.endDate}</td>
+        <td><strong>${c.participants || 0}</strong> readers</td>
+        <td>${c.prize || 'Badge Award'}</td>
+        <td><span class="badge ${c.status === 'Active' ? 'badge-active' : 'badge-member'}">${c.status || 'Active'}</span></td>
+        <td>
+          <a href="competition-details.html?id=${c.id}" class="btn btn-outline btn-sm">Arena</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderCompetitionsTable();
+
+  // 3. Render Challenges Table
+  function renderChallengesTable() {
+    const challenges = BookClubStore.getChallenges();
+    const tbody = document.getElementById('orgChallengesTbody');
+    if (!challenges.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-soft" style="padding:24px;">No challenges active yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = challenges.map(ch => `
+      <tr>
+        <td><strong>${ch.title}</strong></td>
+        <td>${ch.target} ${ch.unit}</td>
+        <td>${ch.daysRemaining ? ch.daysRemaining + ' days left' : 'Ongoing'}</td>
+        <td><strong>${ch.participantsCount || 0}</strong> readers</td>
+        <td>+${ch.rewardXp || 500} XP</td>
+        <td><span class="badge badge-active">Live</span></td>
+        <td>
+          <a href="challenge-details.html?id=${ch.id}" class="btn btn-outline btn-sm">Leaderboard</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderChallengesTable();
+
+  // 4. Populate Roster Events Dropdown & Table
+  function populateRosterDropdown() {
+    const events = BookClubStore.getEvents();
+    const select = document.getElementById('rosterEventSelect');
+    select.innerHTML = events.map(e => `
+      <option value="${e.id}">${e.title} (${e.date})</option>
+    `).join('');
+
+    select.addEventListener('change', renderRosterTable);
+  }
+  populateRosterDropdown();
+
+  // Mock attendance rosters data
+  const mockRosters = [
+    { name: 'Jordan Rivera', email: 'jordan@bookclub.org', role: 'Avid Reader', rsvp: 'Confirmed', attended: true },
+    { name: 'Marcus Brody', email: 'marcus@bookclub.org', role: 'Book Critic', rsvp: 'Confirmed', attended: true },
+    { name: 'Aditi Krishnan', email: 'aditi@bookclub.org', role: 'Discussion Lead', rsvp: 'Confirmed', attended: false },
+    { name: 'Sam Park', email: 'sam@bookclub.org', role: 'Fiction Member', rsvp: 'Waitlisted', attended: false },
+    { name: 'Meera Joseph', email: 'meera@bookclub.org', role: 'Club Member', rsvp: 'Confirmed', attended: true },
+    { name: 'Rahul Thomas', email: 'rahul@bookclub.org', role: 'Sci-Fi Circle', rsvp: 'Confirmed', attended: false }
+  ];
+
+  function renderRosterTable() {
+    const tbody = document.getElementById('orgRosterTbody');
+    tbody.innerHTML = mockRosters.map((m, idx) => `
+      <tr>
+        <td>
+          <strong>${m.name}</strong>
+        </td>
+        <td>${m.email}</td>
+        <td><span class="badge ${m.rsvp === 'Confirmed' ? 'badge-active' : 'badge-clay'}">${m.rsvp}</span></td>
+        <td>${m.role}</td>
+        <td>
+          <span class="badge ${m.attended ? 'badge-active' : 'badge-member'}" id="badgeAttended_${idx}">
+            ${m.attended ? '✓ Checked In' : 'Pending Check-In'}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="toggleRosterAttendance(${idx})">
+            ${m.attended ? 'Undo' : 'Check In'}
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  window.toggleRosterAttendance = function(idx) {
+    mockRosters[idx].attended = !mockRosters[idx].attended;
+    const isAttended = mockRosters[idx].attended;
+    BookClubUI.showToast(`${mockRosters[idx].name} marked as ${isAttended ? 'Checked In' : 'Pending'}!`, 'info');
+    renderRosterTable();
+  };
+
+  document.getElementById('btnMarkAllPresent').addEventListener('click', () => {
+    mockRosters.forEach(m => m.attended = true);
+    renderRosterTable();
+    BookClubUI.showToast('All registered attendees checked in successfully.', 'success');
+  });
+
+  document.getElementById('btnExportRoster').addEventListener('click', () => {
+    const eventSelect = document.getElementById('rosterEventSelect');
+    const eventName = eventSelect.options[eventSelect.selectedIndex]?.text || 'Event';
+    BookClubUI.showToast(`Exported roster for "${eventName}" (CSV simulation).`, 'success');
+  });
+
+  // Modal: Host Event
+  function openCreateEventModal() {
+    BookClubUI.showModal(
+      'Host New Community Gathering / Salon',
+      `
+        <div class="field">
+          <label>Event Title</label>
+          <input type="text" id="orgEvTitle" placeholder="e.g., Sunday Sci-Fi Roundtable & Book Salon">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Category / Type</label>
+            <select id="orgEvType">
+              <option>Book Club Meeting</option>
+              <option>Author Talk</option>
+              <option>Reading Session</option>
+              <option>Writing Workshop</option>
+              <option>Social Event</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Capacity / Max Seats</label>
+            <input type="number" id="orgEvSeats" value="40" min="5" max="500">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="orgEvDate" value="2026-10-25">
+          </div>
+          <div class="field">
+            <label>Time</label>
+            <input type="text" id="orgEvTime" value="6:00 PM - 7:30 PM">
+          </div>
+        </div>
+        <div class="field">
+          <label>Location or Meeting Link</label>
+          <input type="text" id="orgEvLocation" value="Community Library Hall & Online Stream">
+        </div>
+        <div class="field">
+          <label>Agenda & Description</label>
+          <textarea id="orgEvDesc" rows="3" placeholder="Describe the discussion agenda, required chapters, or author spotlight..."></textarea>
+        </div>
+      `,
+      `
+        <button class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitCreateEvent()">Schedule Event</button>
+      `
+    );
+  }
+
+  window.submitCreateEvent = function() {
+    const title = document.getElementById('orgEvTitle').value.trim();
+    if (!title) {
+      BookClubUI.showToast('Please provide an event title.', 'error');
+      return;
+    }
+    const type = document.getElementById('orgEvType').value;
+    const seats = Number(document.getElementById('orgEvSeats').value) || 40;
+    const date = document.getElementById('orgEvDate').value || '2026-10-25';
+    const time = document.getElementById('orgEvTime').value || '6:00 PM - 7:30 PM';
+    const location = document.getElementById('orgEvLocation').value || 'Main Library Hall';
+    const desc = document.getElementById('orgEvDesc').value.trim() || 'A structured literary gathering for readers.';
+
+    const newEv = BookClubStore.createEvent({
+      title,
+      type,
+      maxSeats: seats,
+      date,
+      time,
+      location,
+      description: desc,
+      organizer: user.name,
+      organizerRole: 'Host Organizer',
+      organizerAvatar: user.avatar || 'OR'
+    });
+
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Event "${title}" scheduled successfully!`, 'success');
+    updateMetrics();
+    renderEventsTable();
+    populateRosterDropdown();
+  };
+
+  // Modal: Create Competition
+  function openCreateCompModal() {
+    BookClubUI.showModal(
+      'Launch Reading Tournament or Sprint',
+      `
+        <div class="field">
+          <label>Tournament Name</label>
+          <input type="text" id="orgCompTitle" placeholder="e.g., November 500-Page Sprint Cup">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Format / Type</label>
+            <select id="orgCompType">
+              <option>30-Day Reading Race</option>
+              <option>Fastest Reader</option>
+              <option>Genre Sprint</option>
+              <option>Pages Marathon</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Prize / Trophy</label>
+            <input type="text" id="orgCompPrize" value="Golden Laurel & $50 Book Card">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Start Date</label>
+            <input type="date" id="orgCompStart" value="2026-11-01">
+          </div>
+          <div class="field">
+            <label>End Date</label>
+            <input type="date" id="orgCompEnd" value="2026-11-30">
+          </div>
+        </div>
+        <div class="field">
+          <label>XP Reward</label>
+          <input type="number" id="orgCompXp" value="1200">
+        </div>
+      `,
+      `
+        <button class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitCreateComp()">Launch Tournament</button>
+      `
+    );
+  }
+
+  window.submitCreateComp = function() {
+    const title = document.getElementById('orgCompTitle').value.trim();
+    if (!title) {
+      BookClubUI.showToast('Please specify a tournament title.', 'error');
+      return;
+    }
+    const comps = BookClubStore.getCompetitions();
+    comps.unshift({
+      id: comps.length + 1,
+      title,
+      type: document.getElementById('orgCompType').value,
+      prize: document.getElementById('orgCompPrize').value,
+      startDate: document.getElementById('orgCompStart').value,
+      endDate: document.getElementById('orgCompEnd').value,
+      xpReward: Number(document.getElementById('orgCompXp').value) || 1000,
+      participants: 1,
+      status: 'Upcoming',
+      joined: true,
+      description: 'Community reading tournament created by organizer.'
+    });
+    localStorage.setItem('bookclub_competitions_data', JSON.stringify(comps));
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Tournament "${title}" announced!`, 'success');
+    updateMetrics();
+    renderCompetitionsTable();
+  };
+
+  // Modal: Create Challenge
+  function openCreateChallengeModal() {
+    BookClubUI.showModal(
+      'Launch Community Reading Challenge',
+      `
+        <div class="field">
+          <label>Challenge Title</label>
+          <input type="text" id="orgChTitle" placeholder="e.g., Read 10 Classic Novels in 60 Days">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Target Goal</label>
+            <input type="number" id="orgChTarget" value="10">
+          </div>
+          <div class="field">
+            <label>Unit</label>
+            <select id="orgChUnit">
+              <option value="books">Books</option>
+              <option value="pages">Pages</option>
+              <option value="reviews">Reviews</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>XP Reward</label>
+            <input type="number" id="orgChXp" value="750">
+          </div>
+          <div class="field">
+            <label>Days Duration</label>
+            <input type="number" id="orgChDays" value="30">
+          </div>
+        </div>
+      `,
+      `
+        <button class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitCreateChallenge()">Publish Challenge</button>
+      `
+    );
+  }
+
+  window.submitCreateChallenge = function() {
+    const title = document.getElementById('orgChTitle').value.trim();
+    if (!title) {
+      BookClubUI.showToast('Please enter a challenge title.', 'error');
+      return;
+    }
+    const challenges = BookClubStore.getChallenges();
+    challenges.unshift({
+      id: challenges.length + 1,
+      title,
+      target: Number(document.getElementById('orgChTarget').value) || 5,
+      unit: document.getElementById('orgChUnit').value,
+      rewardXp: Number(document.getElementById('orgChXp').value) || 500,
+      daysRemaining: Number(document.getElementById('orgChDays').value) || 30,
+      participantsCount: 1,
+      joined: true,
+      description: 'Community reading quest designed to foster shared habits.'
+    });
+    localStorage.setItem('bookclub_challenges_data', JSON.stringify(challenges));
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Challenge "${title}" published!`, 'success');
+    updateMetrics();
+    renderChallengesTable();
+  };
+
+  window.showEditEventModal = function(id) {
+    const event = BookClubStore.getEventById(id);
+    if (!event) return;
+    BookClubUI.showToast(`Editing event #${id} "${event.title}"`, 'info');
+  };
+
+  // Button Listeners
+  document.getElementById('btnQuickCreateEvent').addEventListener('click', openCreateEventModal);
+  document.getElementById('btnCreateEventSection').addEventListener('click', openCreateEventModal);
+  document.getElementById('btnQuickCreateComp').addEventListener('click', openCreateCompModal);
+  document.getElementById('btnCreateCompSection').addEventListener('click', openCreateCompModal);
+  document.getElementById('btnQuickCreateChallenge').addEventListener('click', openCreateChallengeModal);
+  document.getElementById('btnCreateChallengeSection').addEventListener('click', openCreateChallengeModal);
+});
+</script>
+</body>
+</html>

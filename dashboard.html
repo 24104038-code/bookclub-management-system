@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reader Dashboard — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR (Rendered dynamically by components.js) -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- TOP SUMMARY CARDS -->
+    <div class="grid grid-4" style="margin-bottom: 20px;" id="dashboardStatsRow1">
+      <div class="card stat-card">
+        <div class="stat-title">Books Read</div>
+        <div class="stat-value tone-green" id="statBooksRead">12</div>
+        <div class="stat-delta up">↑ 3 this month</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Currently Reading</div>
+        <div class="stat-value tone-gold" id="statCurrentlyReading">3</div>
+        <div class="stat-delta">On track for weekly goal</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Want to Read</div>
+        <div class="stat-value tone-blue" id="statWantToRead">8</div>
+        <div class="stat-delta">In your queue</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Pages Read</div>
+        <div class="stat-value tone-purple" id="statPagesRead">3,950</div>
+        <div class="stat-delta up">↑ 35 avg pages/day</div>
+      </div>
+    </div>
+
+    <!-- STREAK & LEVEL CARDS -->
+    <div class="grid grid-3" style="margin-bottom: 30px;" id="dashboardStatsRow2">
+      <div class="card stat-card">
+        <div class="stat-title">Daily Reading Streak</div>
+        <div class="stat-value" style="color:var(--clay); font-size: 1.8rem;" id="statStreak">🔥 14 Days</div>
+        <div class="stat-delta">Personal record: 21 days</div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-title">Current Reader Level</div>
+        <div class="stat-value tone-gold" style="font-size: 1.8rem;" id="statLevel">Level 8 · Sage</div>
+        <div class="stat-delta" id="statXpLabel">2,340 / 3,000 XP</div>
+        <div class="progress-track" style="margin-top: 6px;">
+          <div class="progress-fill" id="statXpBar" style="width: 78%; background: var(--shell-gold);"></div>
+        </div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-title">2026 Annual Goal</div>
+        <div class="flex-between">
+          <div class="stat-value tone-green" style="font-size: 1.8rem;" id="statAnnualGoalVal">28 / 50</div>
+          <span class="badge badge-completed" id="statAnnualGoalPct">56%</span>
+        </div>
+        <div class="progress-track" style="margin-top: 6px;">
+          <div class="progress-fill" id="statAnnualGoalBar" style="width: 56%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEGINNER REWARDS & QUEST VAULT -->
+    <div class="beginner-rewards-vault" id="dashboardQuestVault">
+      <!-- Populated dynamically by renderDashboardQuests() -->
+    </div>
+
+    <!-- CURRENTLY READING SECTION -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin: 0;">Currently Reading</h2>
+        <p class="text-soft" style="margin: 4px 0 0 0;">Pick up right where you left off or log your pages for today.</p>
+      </div>
+      <div class="flex gap-8">
+        <a href="library.html" class="btn btn-outline btn-sm">View My Library Shelves</a>
+        <a href="reading-progress.html" class="btn btn-primary btn-sm">Reading Tracker →</a>
+      </div>
+    </div>
+
+    <div class="grid grid-3" id="currentlyReadingGrid" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- MAIN TWO COLUMN SECTION -->
+    <div class="grid grid-2" style="gap: 30px; align-items: start; margin-bottom: 40px;">
+      <!-- LEFT COLUMN: Upcoming Events & Challenges -->
+      <div>
+        <div class="card panel mb-30">
+          <div class="panel-head">
+            <h3>Active Challenges & Competitions</h3>
+            <a href="challenges.html">View All →</a>
+          </div>
+          <div id="dashChallengesList"></div>
+        </div>
+
+        <div class="card panel">
+          <div class="panel-head">
+            <h3>Upcoming Book Club Events</h3>
+            <a href="events.html">Events Hub →</a>
+          </div>
+          <div id="dashEventsList"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Activity Feed & Badges -->
+      <div>
+        <div class="card panel mb-30">
+          <div class="panel-head">
+            <h3>Recent Community Activity</h3>
+            <a href="activity.html">Full Stream →</a>
+          </div>
+          <div id="dashActivityList" class="feed-list"></div>
+        </div>
+
+        <div class="card panel">
+          <div class="panel-head">
+            <h3>Recently Earned Badges</h3>
+            <a href="achievements.html">All Badges →</a>
+          </div>
+          <div class="grid grid-3" id="dashBadgesList" style="gap: 12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECOMMENDED BOOKS -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin: 0;">Recommended For You</h2>
+        <p class="text-soft" style="margin: 4px 0 0 0;">Based on your interest in Fantasy, Mystery, and historical memoirs.</p>
+      </div>
+      <a href="recommendations.html" class="btn btn-outline btn-sm">See Why You'll Love These →</a>
+    </div>
+
+    <div class="grid grid-4" id="dashRecommendationsGrid">
+      <!-- Populated from store -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = BookClubAuth.requireAuth();
+  if (!user) return;
+
+  // Handle access denied alert from admin routes
+  if (window.location.search.includes('access_denied=1')) {
+    setTimeout(() => {
+      BookClubUI.showToast('Access Denied: Administrator privileges required to access that page.', 'error');
+    }, 250);
+    try {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch(e) {}
+  }
+
+  // Render Shell Navigation
+  BookClubUI.renderSidebar('dashboard');
+  BookClubUI.renderTopbar(
+    `Welcome, ${user.name.split(' ')[0]} 📖`,
+    `Here's your reading habit snapshot for today.`,
+    `<a href="books.html" class="btn btn-primary btn-sm">+ Find Books</a>`
+  );
+
+  // Load User Stats
+  const stats = BookClubStore.getUserStats();
+  document.getElementById('statBooksRead').textContent = stats.booksRead;
+  document.getElementById('statCurrentlyReading').textContent = stats.currentlyReading;
+  document.getElementById('statWantToRead').textContent = stats.wantToRead;
+  document.getElementById('statPagesRead').textContent = stats.pagesRead.toLocaleString();
+  document.getElementById('statStreak').textContent = `🔥 ${stats.streak} Days`;
+  document.getElementById('statLevel').textContent = `Level ${user.level || 8} · Sage`;
+
+  function renderDashboardBooks() {
+    const currentlyReading = BookClubStore.getLibraryShelves().reading;
+    const crGrid = document.getElementById('currentlyReadingGrid');
+    if (crGrid) {
+      if (currentlyReading.length === 0) {
+        crGrid.innerHTML = `
+          <div style="grid-column: 1 / -1;">
+            ${BookClubUI.renderEmptyState('📖', 'No books currently being read', 'Add a book from your library to start tracking your daily reading pace.', 'Explore Books', 'books.html')}
+          </div>
+        `;
+      } else {
+        crGrid.innerHTML = currentlyReading.slice(0, 3).map(b => `
+          <div class="card reading-card" style="align-items: flex-start; padding: 20px;">
+            <div class="mini-cover" style="width: 72px; height: 104px;">
+              ${BookClubUI.renderBookCover(b)}
+            </div>
+            <div class="info" style="flex: 1; min-width: 0;">
+              <h4 style="margin: 0 0 2px 0; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <a href="book-details.html?id=${b.id}">${(typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(b, 'title') : (b.title_ta || b.title)}</a>
+              </h4>
+              <p class="author">${(typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(b, 'author') : (b.author_ta || b.author)} · <span class="badge badge-want" style="font-size: 0.68rem;">${(typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(b, 'genre') : (b.genre_ta || b.genre)}</span></p>
+
+              <div class="progress-track" style="margin: 10px 0 6px;">
+                <div class="progress-fill" style="width: ${b.percentage}%;"></div>
+              </div>
+
+              <div class="progress-label-row" style="margin-bottom: 12px;">
+                <span>${b.currentPage} / ${b.totalPages} pgs</span>
+                <strong style="color: var(--brown-deep);">${b.percentage}%</strong>
+              </div>
+
+              <a href="reading-progress.html" class="btn btn-outline btn-sm btn-block">Continue Reading →</a>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    const recommendations = BookClubStore.getBooks().slice(4, 8);
+    const recGrid = document.getElementById('dashRecommendationsGrid');
+    if (recGrid) {
+      recGrid.innerHTML = recommendations.map(b => BookClubUI.renderBookCard(b)).join('');
+    }
+  }
+
+  function renderDashboardQuests() {
+    const vaultEl = document.getElementById('dashboardQuestVault');
+    if (!vaultEl || !BookClubStore.getUserQuests) return;
+
+    const quests = BookClubStore.getUserQuests();
+    const stats = BookClubStore.getUserStats();
+    const unlockedCount = quests.filter(q => q.isUnlocked).length;
+
+    vaultEl.innerHTML = `
+      <div class="vault-header">
+        <div class="vault-title-wrap">
+          <h3>🎁 Beginner Rewards &amp; Quest Vault (Progressive Tiers)</h3>
+          <p>Complete reading goals to unlock exclusive books, earn badges, and gain escalating rewards: <strong>100 → 150 → 250 → 350 → 500 → 750 XP</strong>!</p>
+        </div>
+        <div class="vault-level-pill">
+          <span>🔓 ${unlockedCount} / ${quests.length} Unlocked</span>
+          <span>⚡ ${stats.xp} Total XP</span>
+        </div>
+      </div>
+
+      <div class="vault-cards-grid">
+        ${quests.map(q => {
+          const isComplete = q.isCompleted;
+          const isUnlocked = q.isUnlocked;
+
+          return `
+            <div class="vault-quest-card ${isUnlocked ? 'unlocked-card' : ''}">
+              <div>
+                <div class="vault-book-preview">
+                  <div class="vault-book-thumb">
+                    <img src="${q.book.coverImage}" alt="${q.book.title}" onerror="this.src='images/default-cover.jpg';">
+                  </div>
+                  <div class="vault-book-details">
+                    <h4>${BookClubUI.escapeHtml(q.book.title)}</h4>
+                    <p class="vault-author">by ${BookClubUI.escapeHtml(q.book.author)} · <span style="color:#F8E7BE;">${q.book.genre}</span></p>
+                    <span class="vault-reward-pill">⚡ +${q.rewardXP} XP · 🏆 ${BookClubUI.escapeHtml(q.rewardBadge)}</span>
+                  </div>
+                </div>
+
+                <div class="quest-task-label" style="color:#FFFFFF; margin-bottom: 6px;">
+                  🎯 ${BookClubUI.escapeHtml(q.title)}
+                </div>
+                <p class="vault-quest-desc">
+                  ${BookClubUI.escapeHtml(q.description)}
+                </p>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#CAD7CE; font-weight:700; margin-bottom:4px;">
+                  <span>Progress: ${q.current} / ${q.target}</span>
+                  <span>${q.percentage}%</span>
+                </div>
+                <div class="quest-mini-bar-bg" style="background: rgba(255,255,255,0.15);">
+                  <div class="quest-mini-bar-fill" style="width: ${q.percentage}%;"></div>
+                </div>
+
+                <div class="vault-quest-foot">
+                  ${isUnlocked ? `
+                    <span style="font-size:0.8rem; color:#6EE7B7; font-weight:700;">✓ Unlocked</span>
+                    <a href="book-details.html?id=${q.book.id}" class="btn btn-outline btn-sm" style="color:#FFFFFF; border-color:rgba(255,255,255,0.4);">Read Book</a>
+                  ` : isComplete ? `
+                    <button type="button" class="btn btn-warning btn-sm btn-claim-quest" data-unlock-quest="${q.book.id}" style="width:100%; font-weight:700;">
+                      🎁 Claim &amp; Unlock (+${q.rewardXP} XP)
+                    </button>
+                  ` : `
+                    <span style="font-size:0.78rem; color:#FCD34D;">🔒 In Progress</span>
+                    <a href="book-details.html?id=${q.book.id}" class="btn btn-ghost btn-sm" style="color:#CAD7CE; font-size:0.8rem;">View Quest →</a>
+                  `}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  renderDashboardBooks();
+  renderDashboardQuests();
+  window.addEventListener('bookforge_lang_change', () => {
+    renderDashboardBooks();
+    renderDashboardQuests();
+  });
+
+  // Active Challenges
+  const challenges = BookClubStore.getChallenges().slice(0, 2);
+  const chList = document.getElementById('dashChallengesList');
+  if (chList) {
+    chList.innerHTML = challenges.map(c => `
+      <div class="list-row" style="padding: 12px 0;">
+        <div style="flex:1;">
+          <div class="flex-between" style="margin-bottom: 4px;">
+            <strong style="font-size: 0.92rem;">${c.badgeIcon} ${c.title}</strong>
+            <span class="badge badge-active">${c.daysRemaining}d left</span>
+          </div>
+          <div class="progress-track" style="height: 6px; margin-bottom: 4px;">
+            <div class="progress-fill" style="width: ${Math.round((c.progress / c.target) * 100)}%;"></div>
+          </div>
+          <span class="meta">${c.progress} / ${c.target} ${c.unit} (${Math.round((c.progress / c.target) * 100)}%)</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Upcoming Events
+  const events = BookClubStore.getEvents().slice(0, 2);
+  const evList = document.getElementById('dashEventsList');
+  if (evList) {
+    evList.innerHTML = events.map(e => `
+      <div class="event-row">
+        <div class="event-date-badge">
+          <span class="mon">${e.month}</span>
+          <span class="day">${e.day}</span>
+        </div>
+        <div class="event-body">
+          <div class="event-title"><a href="event-details.html?id=${e.id}"><strong>${e.title}</strong></a></div>
+          <div class="event-sub">🕒 ${e.time} · 👥 ${e.participants} attending</div>
+        </div>
+        <a href="event-details.html?id=${e.id}" class="btn btn-outline btn-sm">RSVP</a>
+      </div>
+    `).join('');
+  }
+
+  // Activity Feed
+  const activities = BookClubStore.getActivities().slice(0, 4);
+  const actList = document.getElementById('dashActivityList');
+  if (actList) {
+    actList.innerHTML = activities.map(a => `
+      <div class="feed-row">
+        <div class="feed-ico" style="background: ${a.avatarBg || 'var(--clay)'};">${a.avatar || 'JR'}</div>
+        <div class="feed-body">
+          <div class="feed-title"><strong>${a.user}</strong> ${a.action.replace('_', ' ')} <a href="${a.targetLink || '#'}" style="color:var(--clay); font-weight:600;">${a.targetTitle}</a></div>
+          <div class="feed-time">${a.time} · ${a.details || ''}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Recently Earned Badges
+  const badges = [
+    { icon: '🌱', name: 'First Book', date: 'May 2' },
+    { icon: '🐛', name: 'Bookworm', date: 'Jul 18' },
+    { icon: '🔥', name: '14-Day Streak', date: 'Sep 20' }
+  ];
+  const bList = document.getElementById('dashBadgesList');
+  if (bList) {
+    bList.innerHTML = badges.map(b => `
+      <div class="card" style="text-align:center; padding:12px 8px;">
+        <div style="font-size:1.8rem; margin-bottom:4px;">${b.icon}</div>
+        <div style="font-size:0.78rem; font-weight:700;">${b.name}</div>
+        <div style="font-size:0.7rem; color:var(--ink-soft);">${b.date}</div>
+      </div>
+    `).join('');
+  }
+
+
+});
+</script>
+</body>
+</html>

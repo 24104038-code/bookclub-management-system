@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reader Reviews — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-box" style="flex:2;">
+        <span>🔎</span>
+        <input type="text" id="reviewSearchInput" placeholder="Filter reviews by book title, author, or keyword...">
+      </div>
+
+      <select id="reviewSortSelect">
+        <option value="newest">Sort: Newest First</option>
+        <option value="highest">Sort: Highest Rated</option>
+        <option value="likes">Sort: Most Helpful / Liked</option>
+      </select>
+
+      <button type="button" class="btn btn-primary btn-sm" id="btnOpenWriteReview">+ Write a Review</button>
+    </div>
+
+    <!-- REVIEWS GRID -->
+    <div class="grid grid-2" id="reviewsFeedGrid" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('reviews');
+  BookClubUI.renderTopbar(
+    'Community Literary Reviews',
+    'Explore detailed, multi-category reader ratings across storytelling, pacing, and worldbuilding.',
+    `<button class="btn btn-primary btn-sm" id="topbarReviewBtn">+ Review a Book</button>`
+  );
+
+  const searchInput = document.getElementById('reviewSearchInput');
+  const sortSelect = document.getElementById('reviewSortSelect');
+
+  function renderReviews() {
+    const list = BookClubStore.getReviews();
+    const container = document.getElementById('reviewsFeedGrid');
+    const q = searchInput.value.trim().toLowerCase();
+    const sortBy = sortSelect.value;
+
+    let filtered = list;
+    if (q) {
+      filtered = filtered.filter(r => r.bookTitle.toLowerCase().includes(q) || r.reviewText.toLowerCase().includes(q) || r.user.toLowerCase().includes(q));
+    }
+
+    if (sortBy === 'highest') {
+      filtered.sort((a, b) => b.overallRating - a.overallRating);
+    } else if (sortBy === 'likes') {
+      filtered.sort((a, b) => b.likes - a.likes);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('⭐', 'No reviews found', 'Try adjusting your search terms or write a review.', 'Write Review', '#')}</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(r => `
+      <div class="card review-card" style="flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="flex-between mb-0" style="align-items:flex-start;">
+            <div class="author-line">
+              <div class="avatar-chip" style="background:var(--clay); margin-left:0;">${r.avatar || 'R'}</div>
+              <div>
+                <strong>${r.user}</strong>
+                <div class="text-soft" style="font-size:0.78rem;">${r.date}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span class="stars" style="font-size:1.15rem;">${'★'.repeat(r.overallRating)}${'☆'.repeat(5 - r.overallRating)}</span>
+              <div class="text-soft" style="font-size:0.75rem;">Overall: ${r.overallRating}/5</div>
+            </div>
+          </div>
+
+          <div style="margin: 12px 0 6px 0;">
+            <a href="book-details.html?id=${r.bookId}" style="font-size:1.05rem; font-family:var(--font-display); font-weight:700; color:var(--brown-deep);">
+              📖 ${r.bookTitle}
+            </a>
+            <span class="text-soft" style="font-size:0.85rem;">by ${r.bookAuthor || 'Author'}</span>
+          </div>
+
+          <p style="margin: 8px 0 14px 0; font-size:0.92rem; line-height:1.5;">${r.reviewText}</p>
+
+          ${r.hasSpoiler ? `
+            <div class="spoiler-box">
+              <div class="flex-between">
+                <small style="color:var(--clay); font-weight:700;">⚠️ Spoilers enclosed</small>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('sp-rev-${r.id}').classList.toggle('revealed')">Reveal</button>
+              </div>
+              <div class="spoiler-blur" id="sp-rev-${r.id}" style="margin-top:6px;">${r.spoilerText || 'Spoiler text concealed.'}</div>
+            </div>
+          ` : ''}
+
+          <!-- Aspect Ratings Strip -->
+          <div class="card" style="background:var(--cream-deep); padding:10px 14px; margin: 10px 0 14px; border-color:var(--line); font-size:0.78rem; display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; text-align:center;">
+            <div>Story<br><strong>${(r.categoryRatings || {}).story || 5}★</strong></div>
+            <div>Chars<br><strong>${(r.categoryRatings || {}).characters || 5}★</strong></div>
+            <div>Writing<br><strong>${(r.categoryRatings || {}).writing || 5}★</strong></div>
+            <div>Pacing<br><strong>${(r.categoryRatings || {}).pacing || 4}★</strong></div>
+            <div>World<br><strong>${(r.categoryRatings || {}).worldBuilding || 4}★</strong></div>
+          </div>
+        </div>
+
+        <div class="flex-between" style="border-top:1px dashed var(--line); padding-top:10px;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="handleLikeReviewFeed(${r.id})">
+            ${r.isLiked ? '❤️ Helpful' : '🤍 Helpful'} (${r.likes})
+          </button>
+          <a href="book-details.html?id=${r.bookId}" class="btn btn-outline btn-sm">Book Page →</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.handleLikeReviewFeed = function (id) {
+    BookClubStore.toggleLikeReview(id);
+    renderReviews();
+  };
+
+  function openWriteReviewModal() {
+    const books = BookClubStore.getBooks();
+    BookClubUI.showModal(
+      'Write a Detailed Book Review',
+      `
+        <div class="field">
+          <label>Select Book</label>
+          <select id="revModalBookSelect">
+            ${books.map(b => `<option value="${b.id}">${b.title} (${b.author})</option>`).join('')}
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Overall Stars (1-5)</label><input type="number" id="rmOverall" min="1" max="5" value="5"></div>
+          <div class="field"><label>Story Arc (1-5)</label><input type="number" id="rmStory" min="1" max="5" value="5"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Characters (1-5)</label><input type="number" id="rmChar" min="1" max="5" value="5"></div>
+          <div class="field"><label>Writing / Prose (1-5)</label><input type="number" id="rmWrit" min="1" max="5" value="5"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Pacing (1-5)</label><input type="number" id="rmPace" min="1" max="5" value="4"></div>
+          <div class="field"><label>World Building (1-5)</label><input type="number" id="rmWorld" min="1" max="5" value="4"></div>
+        </div>
+        <div class="field">
+          <label>Review Essay</label>
+          <textarea id="rmText" rows="4" placeholder="What resonated with you? Character dynamics, themes, or surprises..."></textarea>
+        </div>
+        <div class="checkbox-row" style="margin-bottom:12px;">
+          <input type="checkbox" id="rmSpoiler">
+          <label for="rmSpoiler">Contains major plot spoilers</label>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSaveReviewModal()">Publish Review</button>
+      `
+    );
+  }
+
+  window.handleSaveReviewModal = function () {
+    const bookId = Number(document.getElementById('revModalBookSelect').value);
+    const text = document.getElementById('rmText').value.trim();
+    if (!text) { alert('Please enter your review.'); return; }
+
+    BookClubStore.addReview({
+      bookId: bookId,
+      overallRating: Number(document.getElementById('rmOverall').value) || 5,
+      storyRating: Number(document.getElementById('rmStory').value) || 5,
+      characterRating: Number(document.getElementById('rmChar').value) || 5,
+      writingRating: Number(document.getElementById('rmWrit').value) || 5,
+      pacingRating: Number(document.getElementById('rmPace').value) || 4,
+      worldBuildingRating: Number(document.getElementById('rmWorld').value) || 4,
+      reviewText: text,
+      hasSpoiler: document.getElementById('rmSpoiler').checked
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Your review was published to the feed! ⭐', 'success');
+    renderReviews();
+  };
+
+  searchInput.addEventListener('input', renderReviews);
+  sortSelect.addEventListener('change', renderReviews);
+  document.getElementById('btnOpenWriteReview').addEventListener('click', openWriteReviewModal);
+  document.getElementById('topbarReviewBtn').addEventListener('click', openWriteReviewModal);
+
+  renderReviews();
+});
+</script>
+</body>
+</html>

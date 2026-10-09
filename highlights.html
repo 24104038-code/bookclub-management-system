@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Highlights & Quotes — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-box" style="flex:2;">
+        <span>🔎</span>
+        <input type="text" id="quoteSearchInput" placeholder="Search memorable quotes by phrase, author, or book...">
+      </div>
+
+      <select id="quoteFilterSelect">
+        <option value="all">All Quotes</option>
+        <option value="favorites">Favorites Only (❤️)</option>
+      </select>
+
+      <button type="button" class="btn btn-primary btn-sm" id="btnAddNewQuote">+ Save Quote</button>
+    </div>
+
+    <!-- QUOTE WALL (MASONRY STYLE COLUMNS) -->
+    <div class="quote-wall" id="quoteWallGrid" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('highlights');
+  BookClubUI.renderTopbar(
+    'Memorable Highlights & Quotes',
+    'A personal quote wall of poetic sentences, philosophy, and unforgettable dialogue.',
+    `<a href="notes.html" class="btn btn-outline btn-sm">Private Notes 📝</a>`
+  );
+
+  const searchInput = document.getElementById('quoteSearchInput');
+  const filterSelect = document.getElementById('quoteFilterSelect');
+
+  function renderQuoteWall() {
+    const list = BookClubStore.getHighlights();
+    const container = document.getElementById('quoteWallGrid');
+    const q = searchInput.value.trim().toLowerCase();
+    const isFavOnly = filterSelect.value === 'favorites';
+
+    let filtered = list;
+    if (isFavOnly) filtered = filtered.filter(h => h.isFavorite);
+    if (q) {
+      filtered = filtered.filter(h => h.quote.toLowerCase().includes(q) || h.bookTitle.toLowerCase().includes(q) || (h.bookAuthor || '').toLowerCase().includes(q));
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="column-span:all;">${BookClubUI.renderEmptyState('💡', 'No quotes saved yet', 'Save the most inspiring sentences from your reading sessions.', 'Add Quote', '#')}</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(h => `
+      <div class="quote-card" style="background:${h.color || '#FAF7F2'};">
+        <div class="flex-between mb-0" style="margin-bottom:12px;">
+          <a href="book-details.html?id=${h.bookId}" style="font-weight:700; color:var(--brown-deep); font-size:0.92rem;">
+            📖 ${h.bookTitle}
+          </a>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="handleFavQuote(${h.id})" title="Toggle favorite">
+            ${h.isFavorite ? '❤️' : '🤍'}
+          </button>
+        </div>
+
+        <div class="quote-text">"${h.quote}"</div>
+
+        ${h.userNote ? `<p class="text-soft" style="font-size:0.85rem; font-style:normal; margin-bottom:10px;">💬 <em>${h.userNote}</em></p>` : ''}
+
+        <div class="quote-meta">
+          <div>
+            <span>Page ${h.page}</span>
+            ${h.sharedToGroup ? `<span style="margin-left:6px; color:var(--green-shelf);">· Shared to ${h.sharedToGroup}</span>` : ''}
+          </div>
+          <div class="quote-actions">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${h.quote.replace(/'/g, "\\'")}'); BookClubUI.showToast('Quote copied to clipboard!', 'success');" title="Copy text">📋</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openShareQuoteModal('${h.quote.replace(/'/g, "\\'")}', '${h.bookTitle.replace(/'/g, "\\'")}')" title="Share to circle">👥</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="handleDeleteHighlight(${h.id})" title="Delete">🗑️</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.handleFavQuote = function (id) {
+    BookClubStore.toggleHighlightFavorite(id);
+    renderQuoteWall();
+  };
+
+  window.handleDeleteHighlight = function (id) {
+    if (confirm('Delete this saved quote?')) {
+      BookClubStore.deleteHighlight(id);
+      BookClubUI.showToast('Quote removed.', 'info');
+      renderQuoteWall();
+    }
+  };
+
+  window.openShareQuoteModal = function (quote, bookTitle) {
+    const groups = BookClubStore.getGroups();
+    BookClubUI.showModal(
+      'Share Quote to Reading Group',
+      `
+        <p class="text-soft">Post this quote from <em>${bookTitle}</em> to your circle's discussion board:</p>
+        <blockquote style="border-left: 3px solid var(--clay); padding-left: 12px; margin: 12px 0; font-style: italic;">"${quote}"</blockquote>
+        <div class="field">
+          <label>Select Circle</label>
+          <select id="shareGroupSelect">
+            ${groups.map(g => `<option value="${g.name}">${g.name}</option>`).join('')}
+          </select>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="confirmShareQuote()">Share Now</button>
+      `
+    );
+  };
+
+  window.confirmShareQuote = function () {
+    const grp = document.getElementById('shareGroupSelect').value;
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Quote shared to ${grp}! 💬`, 'success');
+  };
+
+  // Add new quote modal
+  document.getElementById('btnAddNewQuote').addEventListener('click', () => {
+    const books = BookClubStore.getBooks();
+    BookClubUI.showModal(
+      'Save a Book Highlight',
+      `
+        <div class="field">
+          <label>Book Title</label>
+          <select id="qmBook">
+            ${books.map(b => `<option value="${b.id}">${b.title}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Quote Content</label>
+          <textarea id="qmQuote" rows="3" placeholder="Paste or type the sentence here..."></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Page</label><input type="number" id="qmPage" value="1"></div>
+          <div class="field">
+            <label>Color Tint</label>
+            <select id="qmColor">
+              <option value="#FAF7F2">Parchment (Default)</option>
+              <option value="#E9C6A5">Terracotta Warm</option>
+              <option value="#E3EEE3">Sage Green</option>
+              <option value="#FDF4E3">Antique Gold</option>
+              <option value="#EDE7F6">Soft Lavender</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Personal Reflection (Optional)</label>
+          <input type="text" id="qmNote" placeholder="Why this sentence caught your eye...">
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSaveHighlight()">Pin to Wall</button>
+      `
+    );
+  });
+
+  window.handleSaveHighlight = function () {
+    const quote = document.getElementById('qmQuote').value.trim();
+    if (!quote) { alert('Please enter quote text.'); return; }
+    BookClubStore.addHighlight({
+      bookId: document.getElementById('qmBook').value,
+      quote: quote,
+      page: document.getElementById('qmPage').value,
+      color: document.getElementById('qmColor').value,
+      userNote: document.getElementById('qmNote').value
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Pinned to your quote wall! ✨', 'success');
+    renderQuoteWall();
+  };
+
+  searchInput.addEventListener('input', renderQuoteWall);
+  filterSelect.addEventListener('change', renderQuoteWall);
+
+  renderQuoteWall();
+});
+</script>
+</body>
+</html>

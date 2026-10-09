@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+server/node_modules/
+
+# Environment variables (keep your credentials safe)
+.env
+server/.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+frontend/dist/
+build/
+
+# Logs & temp files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+scratch/
+
+# IDE files
+.vscode/
+.idea/

@@ -1,0 +1,14 @@
+{
+  "name": "bookclub-management-system",
+  "version": "1.0.0",
+  "description": "BookClub Management System - Frontend & Express Backend",
+  "scripts": {
+    "start": "node server/server.js",
+    "serve": "node server/server.js",
+    "server": "node server/server.js",
+    "dev": "node --watch server/server.js",
+    "test": "node scratch/test_backend_api.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

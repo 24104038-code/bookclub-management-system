@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.notif-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  transition: all .2s ease;
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+}
+.notif-card.unread {
+  border-left: 4px solid var(--clay);
+  background: rgba(181, 101, 47, 0.07);
+  border-color: var(--clay-light, var(--line));
+}
+.notif-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--cream-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+}
+
+/* Dark Theme Overrides */
+html[data-theme="dark"] .notif-card,
+body[data-theme="dark"] .notif-card {
+  background: #16241D !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  color: #F5F3EC !important;
+}
+html[data-theme="dark"] .notif-card.unread,
+body[data-theme="dark"] .notif-card.unread {
+  background: linear-gradient(90deg, rgba(245, 166, 35, 0.16) 0%, #16241D 100%) !important;
+  border: 1px solid rgba(245, 166, 35, 0.35) !important;
+  border-left: 4px solid #F5A623 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+}
+html[data-theme="dark"] .notif-card.unread strong,
+body[data-theme="dark"] .notif-card.unread strong {
+  color: #F8E7A2 !important;
+}
+html[data-theme="dark"] .notif-card.unread p,
+body[data-theme="dark"] .notif-card.unread p {
+  color: #F5F3EC !important;
+}
+html[data-theme="dark"] .notif-card .notif-icon,
+body[data-theme="dark"] .notif-card .notif-icon {
+  background: #0E1813 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="dark"] .notif-card .btn-ghost,
+body[data-theme="dark"] .notif-card .btn-ghost {
+  color: #F5A623 !important;
+}
+
+/* 3D Theme Overrides */
+html[data-theme="3d"] .notif-card,
+body[data-theme="3d"] .notif-card {
+  background: linear-gradient(145deg, #1D2B22 0%, #141E18 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 215, 120, 0.18) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.22) !important;
+}
+html[data-theme="3d"] .notif-card.unread,
+body[data-theme="3d"] .notif-card.unread {
+  background: linear-gradient(145deg, #2A3E31 0%, #17241D 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  border-left: 4px solid #F59E0B !important;
+  box-shadow: 0 18px 40px -8px rgba(0, 0, 0, 0.75), 0 0 20px rgba(245, 158, 11, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+html[data-theme="3d"] .notif-card.unread strong,
+body[data-theme="3d"] .notif-card.unread strong {
+  color: #FDE047 !important;
+}
+html[data-theme="3d"] .notif-card.unread p,
+body[data-theme="3d"] .notif-card.unread p {
+  color: #FFFFFF !important;
+}
+html[data-theme="3d"] .notif-card .notif-icon,
+body[data-theme="3d"] .notif-card .notif-icon {
+  background: radial-gradient(circle, #24352B 0%, #131E17 100%) !important;
+  border: 1px solid rgba(255, 215, 120, 0.25) !important;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+}
+html[data-theme="3d"] .notif-card .btn-ghost,
+body[data-theme="3d"] .notif-card .btn-ghost {
+  color: #FDE047 !important;
+}
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="notifTabs">
+      <span class="tab active" data-filter="all">All Notifications</span>
+      <span class="tab" data-filter="unread">Unread Only</span>
+    </div>
+
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Notification Center</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">Stay up to date on circle discussions, challenge milestones, and event reminders.</p>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" id="btnMarkAllRead">✓ Mark All as Read</button>
+    </div>
+
+    <!-- NOTIFICATIONS LIST -->
+    <div class="grid" style="gap: 14px; margin-bottom: 40px;" id="notificationsListContainer">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('notifications');
+  BookClubUI.renderTopbar(
+    'Notifications',
+    'Stay current with your reading circle updates.',
+    `<a href="activity.html" class="btn btn-outline btn-sm">Community Activity ⚡</a>`
+  );
+
+  let currentFilter = 'all';
+
+  function renderNotifs() {
+    const list = BookClubStore.getNotifications();
+    const container = document.getElementById('notificationsListContainer');
+
+    let filtered = list;
+    if (currentFilter === 'unread') {
+      filtered = list.filter(n => !n.isRead);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = BookClubUI.renderEmptyState('🔔', 'You are all caught up!', 'No new notifications right now.', 'Explore Discussions', 'discussions.html');
+      return;
+    }
+
+    container.innerHTML = filtered.map(n => `
+      <div class="notif-card ${n.isRead ? '' : 'unread'}" id="notif-${n.id}">
+        <div class="notif-icon">${n.icon || '🔔'}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="flex-between" style="margin-bottom:2px;">
+            <strong style="font-size:0.95rem; color:var(--brown-deep);">${n.title}</strong>
+            <span class="text-soft" style="font-size:0.75rem;">${n.time}</span>
+          </div>
+          <p style="margin:0; font-size:0.9rem; color:var(--ink);">${n.message}</p>
+        </div>
+        <div class="flex gap-8">
+          ${n.link ? `<a href="${n.link}" class="btn btn-outline btn-sm" onclick="BookClubStore.markNotificationRead(${n.id})">View</a>` : ''}
+          ${!n.isRead ? `<button class="btn btn-ghost btn-sm" onclick="handleReadSingle(${n.id})">Mark Read</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.handleReadSingle = function (id) {
+    BookClubStore.markNotificationRead(id);
+    renderNotifs();
+    BookClubUI.renderSidebar('notifications');
+  };
+
+  document.getElementById('btnMarkAllRead').addEventListener('click', () => {
+    BookClubStore.markAllNotificationsRead();
+    BookClubUI.showToast('All notifications marked as read! ✓', 'success');
+    renderNotifs();
+    BookClubUI.renderSidebar('notifications');
+  });
+
+  document.querySelectorAll('#notifTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#notifTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.getAttribute('data-filter');
+      renderNotifs();
+    });
+  });
+
+  renderNotifs();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* Settings Bespoke Grid & Card Layout */
+.settings-container {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.settings-nav-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  border-bottom: 2px solid var(--line, #E7DCC8);
+  margin-bottom: 24px;
+  padding-bottom: 4px;
+}
+
+.settings-tab-btn {
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-display, inherit);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-radius: 10px 10px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.settings-tab-btn:hover {
+  color: var(--brown-deep, #5C3A1E);
+}
+
+.settings-tab-btn.active {
+  color: var(--brown-deep, #5C3A1E);
+  background: rgba(217, 164, 65, 0.12);
+  border-bottom: 3px solid var(--shell-gold, #D9A441);
+}
+
+body[data-theme="dark"] .settings-tab-btn.active,
+body[data-theme="3d"] .settings-tab-btn.active {
+  color: #FDE047 !important;
+  background: rgba(253, 224, 71, 0.1) !important;
+}
+
+/* Theme Selection Visual Cards */
+.theme-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 14px;
+}
+
+@media (max-width: 768px) {
+  .theme-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.theme-card-option {
+  border: 2px solid var(--line, #E7DCC8);
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--card-bg, #FFFFFF);
+  cursor: pointer;
+  transition: all 0.22s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-card-option:hover {
+  border-color: var(--shell-gold, #D9A441);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.theme-card-option.active {
+  border-color: var(--shell-gold, #D9A441);
+  box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.3), 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.theme-mini-preview {
+  height: 90px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.preview-light {
+  background: #FBF7EF;
+  color: #2E251C;
+}
+
+.preview-dark {
+  background: #0D1410;
+  color: #F5F3EC;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.preview-3d {
+  background: radial-gradient(circle at 50% 20%, #1A2820 0%, #0F1712 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.preview-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-dot-row {
+  display: flex;
+  gap: 4px;
+}
+
+.preview-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.preview-dark .preview-dot {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.preview-3d .preview-dot {
+  background: #F5A623;
+  box-shadow: 0 0 4px #F5A623;
+}
+
+.preview-fake-card {
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preview-light .preview-fake-card {
+  background: #FFFFFF;
+  border: 1px solid #E7DCC8;
+}
+
+.preview-dark .preview-fake-card {
+  background: #16241D;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.preview-3d .preview-fake-card {
+  background: linear-gradient(145deg, #24352B, #16221A);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.theme-card-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.theme-card-desc {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+  margin-bottom: 12px;
+  flex: 1;
+}
+
+/* Language Selection Grid */
+.lang-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+@media (max-width: 768px) {
+  .lang-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.lang-card-option {
+  border: 2px solid var(--line, #E7DCC8);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: var(--card-bg, #FFFFFF);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lang-card-option:hover {
+  border-color: var(--shell-gold, #D9A441);
+  transform: translateY(-2px);
+}
+
+.lang-card-option.active {
+  border-color: var(--shell-gold, #D9A441);
+  background: rgba(217, 164, 65, 0.1);
+  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.25);
+}
+
+.lang-card-flag {
+  font-size: 1.8rem;
+}
+
+/* Toggle Switch Styles */
+.setting-switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line, #E7DCC8);
+}
+
+.setting-switch-row:last-child {
+  border-bottom: none;
+}
+
+.setting-text-col {
+  flex: 1;
+  padding-right: 20px;
+}
+
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #CBD5E1;
+  transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 26px;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .switch-slider {
+  background-color: #22C55E;
+}
+
+input:checked + .switch-slider:before {
+  transform: translateX(24px);
+}
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar"></div>
+
+    <div class="settings-container">
+      <!-- Settings Header -->
+      <div class="flex-between mb-30" style="align-items: flex-start;">
+        <div>
+          <h1 style="margin: 0 0 6px 0;" data-i18n="settings.title">System &amp; Reading Settings</h1>
+          <p class="text-soft" style="margin: 0;" data-i18n="settings.subtitle">Customize themes, language, communication preferences, and display modes.</p>
+        </div>
+        <button type="button" class="btn btn-primary" id="btnSaveAllSettings">
+          <span>💾</span> <span data-i18n="settings.save">Save Preferences</span>
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="settings-nav-tabs">
+        <button type="button" class="settings-tab-btn active" data-tab="tab-appearance">
+          <span>🎨</span> <span data-i18n="settings.tabAppearance">Theme &amp; Visuals</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tab-language">
+          <span>🌐</span> <span data-i18n="settings.tabLanguage">Language &amp; Region</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tab-comm">
+          <span>💬</span> <span data-i18n="settings.tabComm">Communication &amp; Alerts</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tab-reading">
+          <span>📖</span> <span data-i18n="settings.tabReading">Reading Preferences</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tab-account">
+          <span>🛡️</span> <span data-i18n="settings.tabAccount">Privacy &amp; Storage</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: THEME & VISUAL EXPERIENCE -->
+      <div class="card panel settings-panel" id="tab-appearance">
+        <h3 style="margin-top: 0;" data-i18n="settings.themeHeading">Interface Theme</h3>
+        <p class="text-soft" data-i18n="settings.themeDesc">Choose your preferred aesthetic style across all BOOK FORGE pages.</p>
+
+        <div class="theme-cards-grid">
+          <!-- Light Theme -->
+          <div class="theme-card-option" data-choose-theme="light">
+            <div class="theme-mini-preview preview-light">
+              <div class="preview-header-bar">
+                <span style="font-weight: 700; font-size: 0.72rem;">📖 BOOK FORGE</span>
+                <div class="preview-dot-row"><div class="preview-dot"></div><div class="preview-dot"></div></div>
+              </div>
+              <div class="preview-fake-card">
+                <span>The Silent Orchard</span>
+                <span style="color:#B5652F;">100%</span>
+              </div>
+            </div>
+            <div class="theme-card-title">☀️ Light (Parchment)</div>
+            <div class="theme-card-desc">Warm library cream aesthetic with ivory paper and terracotta accents. Gentle on eyes during the day.</div>
+            <button type="button" class="btn btn-outline btn-sm btn-block" style="pointer-events: none;">Activate Light</button>
+          </div>
+
+          <!-- Dark Theme -->
+          <div class="theme-card-option" data-choose-theme="dark">
+            <div class="theme-mini-preview preview-dark">
+              <div class="preview-header-bar">
+                <span style="font-weight: 700; font-size: 0.72rem; color:#F5A623;">🔥 BOOK FORGE</span>
+                <div class="preview-dot-row"><div class="preview-dot"></div><div class="preview-dot"></div></div>
+              </div>
+              <div class="preview-fake-card">
+                <span>Winter's Ledger</span>
+                <span style="color:#F5A623;">75%</span>
+              </div>
+            </div>
+            <div class="theme-card-title">🌙 Dark (Obsidian Forge)</div>
+            <div class="theme-card-desc">Rich midnight obsidian palette with deep forest emerald undertones and molten gold accents.</div>
+            <button type="button" class="btn btn-outline btn-sm btn-block" style="pointer-events: none;">Activate Dark</button>
+          </div>
+
+          <!-- 3D Theme -->
+          <div class="theme-card-option" data-choose-theme="3d">
+            <div class="theme-mini-preview preview-3d">
+              <div class="preview-header-bar">
+                <span style="font-weight: 800; font-size: 0.72rem; color:#FCD34D;">🧊 BOOK FORGE 3D</span>
+                <div class="preview-dot-row"><div class="preview-dot"></div><div class="preview-dot"></div></div>
+              </div>
+              <div class="preview-fake-card">
+                <span>Salt &amp; Story</span>
+                <span style="color:#FCD34D; font-weight:800;">3D Depth</span>
+              </div>
+            </div>
+            <div class="theme-card-title">🧊 3D (Spatial Tactile)</div>
+            <div class="theme-card-desc">Show-stopping tangible 3D feel: extruded tactile buttons, multi-layer depth shadows, and interactive card elevation!</div>
+            <button type="button" class="btn btn-primary btn-sm btn-block" style="pointer-events: none;">Activate 3D</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MULTILINGUAL & REGION -->
+      <div class="card panel settings-panel" id="tab-language" style="display: none;">
+        <h3 style="margin-top: 0;" data-i18n="settings.langHeading">Platform Language</h3>
+        <p class="text-soft" data-i18n="settings.langDesc">Select your preferred reading guild language.</p>
+
+        <div class="lang-cards-grid">
+          <div class="lang-card-option" data-choose-lang="en">
+            <span class="lang-card-flag">🇬🇧</span>
+            <div>
+              <strong style="display: block;">English</strong>
+              <span class="text-soft" style="font-size: 0.78rem;">Default / International</span>
+            </div>
+          </div>
+
+          <div class="lang-card-option" data-choose-lang="es">
+            <span class="lang-card-flag">🇪🇸</span>
+            <div>
+              <strong style="display: block;">Español</strong>
+              <span class="text-soft" style="font-size: 0.78rem;">Spanish</span>
+            </div>
+          </div>
+
+          <div class="lang-card-option" data-choose-lang="fr">
+            <span class="lang-card-flag">🇫🇷</span>
+            <div>
+              <strong style="display: block;">Français</strong>
+              <span class="text-soft" style="font-size: 0.78rem;">French</span>
+            </div>
+          </div>
+
+          <div class="lang-card-option" data-choose-lang="de">
+            <span class="lang-card-flag">🇩🇪</span>
+            <div>
+              <strong style="display: block;">Deutsch</strong>
+              <span class="text-soft" style="font-size: 0.78rem;">German</span>
+            </div>
+          </div>
+
+          <div class="lang-card-option" data-choose-lang="ta">
+            <span class="lang-card-flag">🇮🇳</span>
+            <div>
+              <strong style="display: block;">தமிழ் (Tamil)</strong>
+              <span class="text-soft" style="font-size: 0.78rem;">தமிழ் இலக்கியம்</span>
+            </div>
+          </div>
+
+          <div class="lang-card-option" data-choose-lang="hi">
+            <span class="lang-card-flag">🇮🇳</span>
+            <div>
+              <strong style="display: block;">हिन्दी (Hindi)</strong>
+              <span class="text-soft" style="font-size: 0.78rem;">हिन्दी साहित्य</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: COMMUNICATION & WHATSAPP SETTINGS -->
+      <div class="card panel settings-panel" id="tab-comm" style="display: none;">
+        <h3 style="margin-top: 0;" data-i18n="settings.commHeading">Messaging &amp; WhatsApp Integration</h3>
+        <p class="text-soft">Configure WhatsApp notifications, in-app direct messaging, and SMS alerts.</p>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;" data-i18n="settings.enableWhatsApp">Enable One-Click WhatsApp Actions</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Directly launch WhatsApp chats with club members and share reading progress to WhatsApp status.</span>
+          </div>
+          <label class="switch-toggle">
+            <input type="checkbox" id="prefWhatsApp" checked>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;" data-i18n="settings.enableSMS">Enable Normal SMS / Mobile Triggers</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Allow triggering SMS texts for offline discussion reminders and mobile reading updates.</span>
+          </div>
+          <label class="switch-toggle">
+            <input type="checkbox" id="prefSMS" checked>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;" data-i18n="settings.readReceipts">Show Message Read Receipts (✓✓)</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Show double checkmarks when messages have been viewed by the recipient.</span>
+          </div>
+          <label class="switch-toggle">
+            <input type="checkbox" id="prefReadReceipts" checked>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;" data-i18n="settings.soundEffects">Chat Sound Effects &amp; Chimes</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Play an audible notification chime when receiving messages in discussions or DMs.</span>
+          </div>
+          <label class="switch-toggle">
+            <input type="checkbox" id="prefSounds" checked>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line, #E7DCC8);">
+          <label style="display:block; font-weight:700; margin-bottom: 6px;">Your WhatsApp / Mobile Phone Number:</label>
+          <input type="tel" id="prefPhoneNumber" value="+1 (555) 987-6543" style="max-width: 340px; padding: 10px; border-radius: 8px;">
+          <p class="text-soft" style="font-size: 0.78rem; margin-top: 4px;">Used for WhatsApp reading circle invitations and SMS verification alerts.</p>
+        </div>
+      </div>
+
+      <!-- TAB 4: READING PREFERENCES -->
+      <div class="card panel settings-panel" id="tab-reading" style="display: none;">
+        <h3 style="margin-top: 0;">Reading &amp; Typography Preferences</h3>
+        <p class="text-soft">Fine-tune the typography and layout for book descriptions and reading sessions.</p>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;">Preferred Reading Typography</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Choose between classical Fraunces serif or clean Source Sans for titles.</span>
+          </div>
+          <select id="prefFont" style="max-width: 220px; padding: 8px 12px; border-radius: 8px;">
+            <option value="serif">Classical Literary Serif</option>
+            <option value="sans">Modern Clean Sans</option>
+          </select>
+        </div>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;">Text Display Scale</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Adjust the sizing of reading cards and catalog summaries.</span>
+          </div>
+          <select id="prefTextScale" style="max-width: 220px; padding: 8px 12px; border-radius: 8px;">
+            <option value="100">Standard (100%)</option>
+            <option value="90">Compact (90%)</option>
+            <option value="115">Large &amp; Relaxed (115%)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TAB 5: PRIVACY & DATA -->
+      <div class="card panel settings-panel" id="tab-account" style="display: none;">
+        <h3 style="margin-top: 0;">Privacy &amp; Local Storage</h3>
+        <p class="text-soft">Manage local data, clear cache, and export your personal reading records.</p>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;">Clear Communications Cache</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Reset local message history and temporary chat attachments.</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" id="btnClearChatCache">Clear Chat Data</button>
+        </div>
+
+        <div class="setting-switch-row">
+          <div class="setting-text-col">
+            <strong style="display: block;">Reset All Settings to Factory Default</strong>
+            <span class="text-soft" style="font-size: 0.8rem;">Restores Light theme, English language, and default alert preferences.</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" id="btnResetAll" style="color: #EA580C; border-color: #EA580C;">Reset Defaults</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = BookClubAuth.requireAuth('login.html');
+  if (!user) return;
+
+  // Render Shell Navigation
+  BookClubUI.renderSidebar('settings');
+  BookClubUI.renderTopbar(
+    'Settings & Preferences ⚙️',
+    'Theme selection, multilingual engine, WhatsApp integration, and display modes.'
+  );
+
+  // Tab Switching
+  const tabs = document.querySelectorAll('.settings-tab-btn');
+  const panels = document.querySelectorAll('.settings-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.style.display = 'none');
+
+      tab.classList.add('active');
+      const targetId = tab.getAttribute('data-tab');
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) targetPanel.style.display = 'block';
+    });
+  });
+
+  // Theme Selection Sync
+  function syncThemeCards() {
+    const current = (typeof BookForgeTheme !== 'undefined') ? BookForgeTheme.getTheme() : 'light';
+    document.querySelectorAll('[data-choose-theme]').forEach(card => {
+      const themeVal = card.getAttribute('data-choose-theme');
+      if (themeVal === current) {
+        card.classList.add('active');
+        const btn = card.querySelector('button');
+        if (btn) btn.textContent = '✓ Active Theme';
+      } else {
+        card.classList.remove('active');
+        const btn = card.querySelector('button');
+        if (btn) btn.textContent = `Activate ${themeVal.toUpperCase()}`;
+      }
+    });
+  }
+
+  document.querySelectorAll('[data-choose-theme]').forEach(card => {
+    card.addEventListener('click', () => {
+      const selected = card.getAttribute('data-choose-theme');
+      if (typeof BookForgeTheme !== 'undefined') {
+        BookForgeTheme.setTheme(selected);
+        syncThemeCards();
+        BookClubUI.showToast(`Theme updated to: ${selected.toUpperCase()}`, 'success');
+      }
+    });
+  });
+
+  // Language Selection Sync
+  function syncLangCards() {
+    const current = (typeof BookForgeI18n !== 'undefined') ? BookForgeI18n.getLanguage() : 'en';
+    document.querySelectorAll('[data-choose-lang]').forEach(card => {
+      const langVal = card.getAttribute('data-choose-lang');
+      if (langVal === current) {
+        card.classList.add('active');
+      } else {
+        card.classList.remove('active');
+      }
+    });
+  }
+
+  document.querySelectorAll('[data-choose-lang]').forEach(card => {
+    card.addEventListener('click', () => {
+      const selected = card.getAttribute('data-choose-lang');
+      if (typeof BookForgeI18n !== 'undefined') {
+        BookForgeI18n.setLanguage(selected);
+        syncLangCards();
+        BookClubUI.showToast(`Language updated!`, 'success');
+      }
+    });
+  });
+
+  // Load and Save Preferences
+  function loadPreferences() {
+    try {
+      const prefs = JSON.parse(localStorage.getItem('bookforge_user_prefs') || '{}');
+      if (prefs.whatsapp !== undefined) document.getElementById('prefWhatsApp').checked = prefs.whatsapp;
+      if (prefs.sms !== undefined) document.getElementById('prefSMS').checked = prefs.sms;
+      if (prefs.readReceipts !== undefined) document.getElementById('prefReadReceipts').checked = prefs.readReceipts;
+      if (prefs.sounds !== undefined) document.getElementById('prefSounds').checked = prefs.sounds;
+      if (prefs.phone) document.getElementById('prefPhoneNumber').value = prefs.phone;
+      if (prefs.font) document.getElementById('prefFont').value = prefs.font;
+      if (prefs.scale) document.getElementById('prefTextScale').value = prefs.scale;
+    } catch(e) {}
+  }
+
+  function savePreferences() {
+    const prefs = {
+      whatsapp: document.getElementById('prefWhatsApp').checked,
+      sms: document.getElementById('prefSMS').checked,
+      readReceipts: document.getElementById('prefReadReceipts').checked,
+      sounds: document.getElementById('prefSounds').checked,
+      phone: document.getElementById('prefPhoneNumber').value.trim(),
+      font: document.getElementById('prefFont').value,
+      scale: document.getElementById('prefTextScale').value
+    };
+
+    localStorage.setItem('bookforge_user_prefs', JSON.stringify(prefs));
+    BookClubUI.showToast('All preferences successfully saved and applied!', 'success');
+  }
+
+  document.getElementById('btnSaveAllSettings').addEventListener('click', savePreferences);
+
+  // Clear chat cache
+  document.getElementById('btnClearChatCache').addEventListener('click', () => {
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('bookforge_chat_')) localStorage.removeItem(k);
+    });
+    BookClubUI.showToast('Chat history cache has been cleared.', 'info');
+  });
+
+  // Reset defaults
+  document.getElementById('btnResetAll').addEventListener('click', () => {
+    if (confirm('Are you sure you want to reset all themes, language, and preferences to defaults?')) {
+      if (typeof BookForgeTheme !== 'undefined') BookForgeTheme.setTheme('light');
+      if (typeof BookForgeI18n !== 'undefined') BookForgeI18n.setLanguage('en');
+      localStorage.removeItem('bookforge_user_prefs');
+      syncThemeCards();
+      syncLangCards();
+      loadPreferences();
+      BookClubUI.showToast('Settings have been reset to factory defaults.', 'warning');
+    }
+  });
+
+  // Initial Sync
+  syncThemeCards();
+  syncLangCards();
+  loadPreferences();
+});
+</script>
+</body>
+</html>

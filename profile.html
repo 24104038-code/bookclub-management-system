@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reader Profile — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- PROFILE HERO HEADER -->
+    <div class="card panel mb-30" style="padding: 30px; background: var(--paper); position: relative; overflow: hidden;">
+      <div style="display: flex; gap: 26px; align-items: center; flex-wrap: wrap;">
+        <div class="avatar-chip" style="width: 100px; height: 100px; font-size: 2.2rem; background: var(--clay); border: 4px solid var(--cream-deep); overflow: hidden; display: flex; align-items: center; justify-content: center;" id="profAvatar">
+          U
+        </div>
+
+        <div style="flex: 1; min-width: 250px;">
+          <div class="flex-between">
+            <div>
+              <h1 style="margin: 0 0 2px 0; font-size: 1.8rem;" id="profName">Reader Profile</h1>
+              <span class="text-soft" style="font-size: 0.92rem;" id="profUsername">@reader</span>
+              <span class="badge badge-want" style="margin-left: 8px;" id="profGenre">Member</span>
+            </div>
+
+            <div class="flex gap-8">
+              <button type="button" class="btn btn-outline btn-sm" id="btnEditProfileModal">✏️ Edit Profile</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnMessageModal">💬 Message</button>
+            </div>
+          </div>
+
+          <p style="margin: 12px 0; color: var(--ink); max-width: 620px; font-size: 0.95rem;" id="profBio">
+            Lifelong fantasy reader, slow when it comes to mysteries, always down for a good book recommendation. Currently tackling 50 books in 2026.
+          </p>
+
+          <div class="flex gap-16" style="font-size: 0.88rem; color: var(--ink-soft); flex-wrap: wrap;">
+            <span>Level: <strong style="color:var(--shell-gold-deep);" id="profLevel">8 (Sage)</strong></span>
+            <span>Streak: <strong style="color:var(--clay);" id="profStreak">🔥 14 Days</strong></span>
+            <span>XP: <strong id="profXp">2,340</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- METRIC STRIP -->
+      <div class="grid grid-4" style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line); text-align: center;">
+        <div>
+          <div class="stat-value tone-green" style="font-size: 1.5rem;" id="profStatBooks">12</div>
+          <div class="stat-title">Books Read</div>
+        </div>
+        <div>
+          <div class="stat-value tone-purple" style="font-size: 1.5rem;" id="profStatPages">3,950</div>
+          <div class="stat-title">Pages Read</div>
+        </div>
+        <div>
+          <div class="stat-value tone-gold" style="font-size: 1.5rem;" id="profStatReviews">9</div>
+          <div class="stat-title">Reviews Written</div>
+        </div>
+        <div>
+          <div class="stat-value tone-blue" style="font-size: 1.5rem;">84</div>
+          <div class="stat-title">Fellow Readers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE TABS -->
+    <div class="tabs" id="profTabs">
+      <span class="tab active" data-tab="overview">Overview</span>
+      <span class="tab" data-tab="books">Completed Books</span>
+      <span class="tab" data-tab="reviews">Reviews Written</span>
+      <span class="tab" data-tab="achievements">Badges & Trophies</span>
+      <span class="tab" data-tab="certificates">My Certificates</span>
+      <span class="tab" data-tab="activity">Recent Activity</span>
+    </div>
+
+    <!-- TAB 1: Overview -->
+    <div id="profTabOverview" class="tab-pane">
+      <div class="grid grid-2" style="gap: 30px; align-items: start; margin-bottom: 40px;">
+        <div class="card panel">
+          <h3>Currently Reading</h3>
+          <div class="feed-list" id="profCurrentBooksList"></div>
+        </div>
+
+        <div class="card panel">
+          <h3>Annual Goal Pace</h3>
+          <div class="progress-track" style="height: 12px; margin: 16px 0 8px;">
+            <div class="progress-fill" style="width: 56%;"></div>
+          </div>
+          <div class="flex-between" style="font-size: 0.88rem; color: var(--ink-soft);">
+            <span>28 of 50 books finished</span>
+            <strong>56% Completed</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Books -->
+    <div id="profTabBooks" class="tab-pane" style="display:none; margin-bottom: 40px;">
+      <h3 style="margin-bottom: 20px;">Finished Reading Shelf</h3>
+      <div class="grid grid-4" id="profFinishedBooksGrid"></div>
+    </div>
+
+    <!-- TAB 3: Reviews -->
+    <div id="profTabReviews" class="tab-pane" style="display:none; margin-bottom: 40px;">
+      <h3 style="margin-bottom: 20px;">Reviews Written by Reader</h3>
+      <div class="grid grid-2" id="profReviewsGrid"></div>
+    </div>
+
+    <!-- TAB 4: Achievements -->
+    <div id="profTabAchievements" class="tab-pane" style="display:none; margin-bottom: 40px;">
+      <h3 style="margin-bottom: 20px;">Earned Community Badges</h3>
+      <div class="badges-grid" id="profBadgesGrid"></div>
+    </div>
+
+    <!-- TAB: Certificates -->
+    <div id="profTabCertificates" class="tab-pane" style="display:none; margin-bottom: 40px;">
+      <div class="card panel">
+        <div class="panel-head">
+          <h3 style="margin: 0;">My Event Participation Certificates</h3>
+          <span class="badge badge-completed" id="profCertsCountBadge">0 Earned</span>
+        </div>
+        <p class="text-soft" style="margin: 6px 0 20px; font-size: 0.9rem;">
+          Official certificates awarded for attending and completing BookClub community events and salons.
+        </p>
+
+        <div id="profCertificatesList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: Activity -->
+    <div id="profTabActivity" class="tab-pane" style="display:none; margin-bottom: 40px;">
+      <div class="card panel" style="max-width: 750px;">
+        <h3>Personal Reading Timeline</h3>
+        <div class="feed-list" id="profActivityList"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = BookClubAuth.requireAuth();
+  if (!user) return;
+
+  BookClubUI.renderSidebar('profile');
+  BookClubUI.renderTopbar(
+    'Reader Profile',
+    'Your public reading portfolio and bookshelf highlights.',
+    `<button class="btn btn-primary btn-sm" id="topbarEditProf">Edit Profile</button>`
+  );
+
+  document.getElementById('profName').textContent = user.name;
+  document.getElementById('profUsername').textContent = `@${user.username}`;
+  const profAvatarEl = document.getElementById('profAvatar');
+  if (user.profileImage && user.profileImage.trim()) {
+    profAvatarEl.innerHTML = `<img src="${BookClubUI.escapeHtml(user.profileImage)}" alt="${BookClubUI.escapeHtml(user.name)}" style="width:100%; height:100%; object-fit:cover; display:block;">`;
+  } else {
+    profAvatarEl.textContent = user.avatar || 'JR';
+  }
+  document.getElementById('profGenre').textContent = `${user.favoriteGenre || 'Fiction'} Reader`;
+  document.getElementById('profBio').textContent = user.bio || 'Book lover exploring stories.';
+  document.getElementById('profLevel').textContent = `${user.level || 8} (Sage)`;
+  document.getElementById('profStreak').textContent = `🔥 ${user.streak || 14} Days`;
+  document.getElementById('profXp').textContent = (user.xp || 2340).toLocaleString();
+
+  // Load user currently reading
+  const shelves = BookClubStore.getLibraryShelves();
+  const curList = document.getElementById('profCurrentBooksList');
+  curList.innerHTML = (shelves.reading || []).slice(0, 3).map(b => `
+    <div class="feed-row">
+      <div class="mini-cover" style="width:40px; height:58px; flex-shrink:0;">${BookClubUI.renderBookCover(b)}</div>
+      <div class="feed-body">
+        <strong>${b.title}</strong>
+        <div class="feed-time">${b.currentPage} / ${b.totalPages} pages (${b.percentage}%)</div>
+      </div>
+      <a href="book-details.html?id=${b.id}" class="btn btn-outline btn-sm">Read</a>
+    </div>
+  `).join('');
+
+  // Finished books
+  const finGrid = document.getElementById('profFinishedBooksGrid');
+  finGrid.innerHTML = (shelves.read || []).map(b => BookClubUI.renderBookCard(b)).join('');
+
+  // Reviews
+  const reviews = BookClubStore.getReviews().filter(r => r.username === user.username || r.user === user.name);
+  const revGrid = document.getElementById('profReviewsGrid');
+  revGrid.innerHTML = (reviews.length ? reviews : BookClubStore.getReviews().slice(0, 2)).map(r => `
+    <div class="card review-card">
+      <div class="review-body">
+        <div class="flex-between">
+          <strong>📖 ${r.bookTitle}</strong>
+          <span class="stars">${'★'.repeat(r.overallRating)}</span>
+        </div>
+        <p class="text-soft" style="font-size:0.78rem; margin:2px 0 6px;">${r.date}</p>
+        <p style="margin:0 0 8px 0; font-size:0.9rem;">${r.reviewText}</p>
+        <span class="badge badge-want">Helpful votes: ${r.likes}</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Achievements
+  const badges = (typeof MOCK_ACHIEVEMENTS !== 'undefined') ? MOCK_ACHIEVEMENTS.filter(b => b.status === 'unlocked') : [];
+  const bGrid = document.getElementById('profBadgesGrid');
+  bGrid.innerHTML = badges.map(b => `
+    <div class="badge-card">
+      <div class="badge-icon-lg">${b.icon}</div>
+      <h4>${b.title}</h4>
+      <p>${b.description}</p>
+      <span class="badge-xp-tag">+${b.xp} XP</span>
+    </div>
+  `).join('');
+
+  // Activity
+  const acts = BookClubStore.getActivities().filter(a => a.user === user.name || a.username === user.username);
+  const actList = document.getElementById('profActivityList');
+  actList.innerHTML = (acts.length ? acts : BookClubStore.getActivities().slice(0, 3)).map(a => `
+    <div class="feed-row">
+      <div class="feed-ico" style="background:var(--clay);">${a.avatar || 'JR'}</div>
+      <div class="feed-body">
+        <strong>${a.action.replace('_', ' ')}</strong> ${a.targetTitle}
+        <div class="feed-time">${a.time} · ${a.details || ''}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Tabs switching
+  document.querySelectorAll('#profTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#profTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      const tab = this.getAttribute('data-tab');
+      document.getElementById('profTabOverview').style.display = tab === 'overview' ? 'block' : 'none';
+      document.getElementById('profTabBooks').style.display = tab === 'books' ? 'block' : 'none';
+      document.getElementById('profTabReviews').style.display = tab === 'reviews' ? 'block' : 'none';
+      document.getElementById('profTabAchievements').style.display = tab === 'achievements' ? 'block' : 'none';
+      document.getElementById('profTabCertificates').style.display = tab === 'certificates' ? 'block' : 'none';
+      document.getElementById('profTabActivity').style.display = tab === 'activity' ? 'block' : 'none';
+    });
+  });
+
+  // Edit Profile Modal
+  let selectedProfileImage = user.profileImage || null;
+
+  function openEditModal() {
+    selectedProfileImage = user.profileImage || null;
+    const previewInitial = user.avatar || (user.name ? user.name.split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase() : 'U');
+
+    BookClubUI.showModal(
+      'Edit Profile Information',
+      `
+        <!-- PROFILE PHOTO SECTION -->
+        <div style="margin-bottom: 20px; padding: 16px; background: var(--cream-deep, #faf7f2); border: 1px solid var(--line); border-radius: 12px; text-align: center;">
+          <label style="display:block; font-weight:700; font-size:0.9rem; margin-bottom:10px; color:var(--ink);">Profile Photo</label>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <div id="epPhotoPreview" style="width: 84px; height: 84px; border-radius: 50%; overflow: hidden; background: var(--clay); color: #fff; font-size: 2rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 3px solid var(--paper); box-shadow: 0 4px 10px rgba(0,0,0,0.12);">
+              ${selectedProfileImage ? `<img src="${selectedProfileImage}" alt="Profile Photo" style="width:100%; height:100%; object-fit:cover; display:block;">` : previewInitial}
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;">
+              <input type="file" id="epPhotoFileInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+              <button type="button" class="btn btn-primary btn-sm" id="btnUploadPhoto">📷 Choose Photo</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnRemovePhoto" style="color:var(--crimson); ${selectedProfileImage ? '' : 'display:none;'}">🗑️ Remove Photo</button>
+            </div>
+
+            <div style="width: 100%; max-width: 320px; margin-top: 4px;">
+              <input type="url" id="epPhotoUrl" class="input-sm" style="font-size:0.8rem; text-align:center;" placeholder="Or paste image URL (https://...)" value="${(selectedProfileImage && selectedProfileImage.startsWith('http')) ? selectedProfileImage : ''}">
+            </div>
+            <div class="text-soft" style="font-size: 0.74rem;">JPG, PNG, or WebP. Automatically optimized & saved to MongoDB.</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="epName" value="${BookClubUI.escapeHtml(user.name)}">
+        </div>
+        <div class="field">
+          <label>Favorite Genre</label>
+          <select id="epGenre">
+            <option value="Fantasy" ${user.favoriteGenre === 'Fantasy' ? 'selected' : ''}>Fantasy</option>
+            <option value="Mystery" ${user.favoriteGenre === 'Mystery' ? 'selected' : ''}>Mystery</option>
+            <option value="Fiction" ${user.favoriteGenre === 'Fiction' ? 'selected' : ''}>Fiction</option>
+            <option value="Non-Fiction" ${user.favoriteGenre === 'Non-Fiction' ? 'selected' : ''}>Non-Fiction</option>
+            <option value="Classic" ${user.favoriteGenre === 'Classic' ? 'selected' : ''}>Classic Literature</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Bio</label>
+          <textarea id="epBio" rows="3">${BookClubUI.escapeHtml(user.bio || '')}</textarea>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" id="btnSaveProfile" class="btn btn-primary" onclick="handleSaveProfileUpdates()">Save Changes</button>
+      `
+    );
+
+    // Wire up Photo upload & preview handlers
+    const fileInput = document.getElementById('epPhotoFileInput');
+    const uploadBtn = document.getElementById('btnUploadPhoto');
+    const removeBtn = document.getElementById('btnRemovePhoto');
+    const urlInput = document.getElementById('epPhotoUrl');
+    const previewEl = document.getElementById('epPhotoPreview');
+    const nameInput = document.getElementById('epName');
+
+    function updatePreviewUI() {
+      if (selectedProfileImage) {
+        previewEl.innerHTML = `<img src="${selectedProfileImage}" alt="Profile Preview" style="width:100%; height:100%; object-fit:cover; display:block;">`;
+        if (removeBtn) removeBtn.style.display = 'inline-block';
+      } else {
+        const curName = (nameInput ? nameInput.value.trim() : user.name) || 'U';
+        const inits = curName.split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase() || 'U';
+        previewEl.innerHTML = inits;
+        if (removeBtn) removeBtn.style.display = 'none';
+      }
+    }
+
+    if (uploadBtn && fileInput) {
+      uploadBtn.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+          BookClubUI.showToast('Please select a valid image file (PNG, JPG, WebP).', 'error');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          const img = new Image();
+          img.onload = function () {
+            // Compress to max 320x320 canvas to keep database document fast & lightweight
+            const canvas = document.createElement('canvas');
+            const maxDim = 320;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            selectedProfileImage = canvas.toDataURL('image/jpeg', 0.86);
+            if (urlInput) urlInput.value = '';
+            updatePreviewUI();
+            BookClubUI.showToast('Photo selected! Click "Save Changes" to save it.', 'info');
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (urlInput) {
+      urlInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (val) {
+          selectedProfileImage = val;
+          updatePreviewUI();
+        } else if (!fileInput.value) {
+          selectedProfileImage = null;
+          updatePreviewUI();
+        }
+      });
+    }
+
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => {
+        selectedProfileImage = null;
+        if (fileInput) fileInput.value = '';
+        if (urlInput) urlInput.value = '';
+        updatePreviewUI();
+        BookClubUI.showToast('Photo removed. Default initials avatar will be used.', 'info');
+      });
+    }
+
+    if (nameInput) {
+      nameInput.addEventListener('input', () => {
+        if (!selectedProfileImage) {
+          updatePreviewUI();
+        }
+      });
+    }
+  }
+
+  window.handleSaveProfileUpdates = async function () {
+    const saveBtn = document.getElementById('btnSaveProfile');
+    const newName = document.getElementById('epName').value.trim();
+    const newGenre = document.getElementById('epGenre').value;
+    const newBio = document.getElementById('epBio').value.trim();
+
+    if (!newName) {
+      BookClubUI.showToast('Name cannot be empty.', 'error');
+      return;
+    }
+
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+    }
+
+    try {
+      const updatePayload = {
+        name: newName,
+        favoriteGenre: newGenre,
+        bio: newBio,
+        profileImage: selectedProfileImage // base64 string, URL, or null
+      };
+
+      if (typeof BookClubAuth.updateCurrentUserAsync === 'function') {
+        await BookClubAuth.updateCurrentUserAsync(updatePayload);
+      } else {
+        BookClubAuth.updateCurrentUser(updatePayload);
+      }
+
+      BookClubUI.closeModal();
+      BookClubUI.showToast('Profile updated successfully in database!', 'success');
+      setTimeout(() => window.location.reload(), 300);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      BookClubUI.showToast('Could not save changes to database.', 'error');
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+      }
+    }
+  };
+
+  document.getElementById('btnEditProfileModal').addEventListener('click', openEditModal);
+  document.getElementById('topbarEditProf').addEventListener('click', openEditModal);
+  window.openEditProfileModal = openEditModal;
+
+  // Auto-launch modal if requested via URL param (e.g. from AI assistant)
+  if (window.location.search.includes('openEdit=true') || window.location.hash === '#edit-profile') {
+    setTimeout(openEditModal, 250);
+  }
+
+  document.getElementById('btnMessageModal').addEventListener('click', () => {
+    BookClubUI.showToast('Direct message channel opened.', 'info');
+  });
+
+  // Load and render user certificates
+  async function loadUserCertificates() {
+    let certs = [];
+    if (typeof BookClubAPI !== 'undefined' && BookClubAPI.getToken()) {
+      try {
+        const res = await BookClubAPI.certificates.getAll();
+        if (res && res.success && res.data) {
+          certs = res.data;
+        }
+      } catch (e) {}
+    }
+    if (!certs.length && typeof BookClubStore !== 'undefined') {
+      certs = BookClubStore.getCertificates();
+    }
+
+    const countBadge = document.getElementById('profCertsCountBadge');
+    if (countBadge) countBadge.textContent = `${certs.length} Earned`;
+
+    const certsContainer = document.getElementById('profCertificatesList');
+    if (!certsContainer) return;
+
+    if (!certs.length) {
+      certsContainer.innerHTML = BookClubUI.renderEmptyState(
+        '🏆',
+        'No Certificates Earned Yet',
+        'Complete reading challenges or participate in community events to receive your official verified credentials.',
+        'Explore Reading Challenges',
+        'challenges.html'
+      );
+      return;
+    }
+
+    certsContainer.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        ${certs.map(c => {
+          const isChallenge = c.type === 'challenge' || (!c.eventId && !!c.challengeId);
+          const issueStr = new Date(c.issueDate || Date.now()).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+          const pdfUrl = (typeof BookClubAPI !== 'undefined' && BookClubAPI.certificates)
+            ? BookClubAPI.certificates.getPdfUrl(c.certificateId)
+            : `/api/certificates/${c.certificateId}/pdf`;
+
+          const displayTitle = isChallenge ? (c.challengeTitle || c.eventName) : c.eventName;
+          const displayIcon = isChallenge ? (c.badgeIcon || '⚡') : '🎓';
+
+          return `
+            <div class="card" style="padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; background: var(--paper); border: 1px solid var(--line);">
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 50px; height: 50px; border-radius: 8px; background: ${isChallenge ? 'rgba(197, 160, 89, 0.15)' : 'rgba(45, 106, 79, 0.1)'}; border: 1px solid ${isChallenge ? '#C5A059' : '#2D6A4F'}; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;">
+                  ${displayIcon}
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <h4 style="margin: 0; font-size: 1.1rem; color: var(--ink);">${BookClubUI.escapeHtml(displayTitle)}</h4>
+                    <span class="badge" style="font-size: 0.72rem; padding: 2px 8px; ${isChallenge ? 'background:#D8F3DC; color:#1B4332;' : 'background:#E2EAFC; color:#1D3557;'}">
+                      ${isChallenge ? 'Reading Challenge' : 'Event Participation'}
+                    </span>
+                  </div>
+                  <div class="text-soft" style="font-size: 0.82rem; display: flex; gap: 14px; flex-wrap: wrap;">
+                    ${isChallenge 
+                      ? `<span>🎯 Target: <strong>${BookClubUI.escapeHtml(c.targetRequirement || 'Completed')}</strong></span>
+                         <span>🏅 Badge: <strong>${BookClubUI.escapeHtml(c.badgeName || 'Finisher')}</strong></span>`
+                      : `<span>📅 Event Date: <strong>${BookClubUI.escapeHtml(c.eventDate)}</strong></span>`
+                    }
+                    <span>🎖️ Certificate ID: <code style="font-weight: 700;">${BookClubUI.escapeHtml(c.certificateId)}</code></span>
+                    <span>🕒 Issued: <strong>${issueStr}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-8">
+                <button type="button" class="btn btn-primary btn-sm" onclick="handleViewProfileCert('${BookClubUI.escapeHtml(c.certificateId)}')">
+                  👁️ View
+                </button>
+                <a href="${pdfUrl}" target="_blank" download="Certificate-${c.certificateId}.pdf" class="btn btn-outline btn-sm">
+                  📥 Download
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  window.handleViewProfileCert = async function (certId) {
+    if (typeof BookClubAPI !== 'undefined' && BookClubAPI.getToken()) {
+      try {
+        const res = await BookClubAPI.certificates.getById(certId);
+        if (res && res.success && res.data) {
+          BookClubUI.showCertificateModal(res.data);
+          return;
+        }
+      } catch (e) {}
+    }
+    const cert = BookClubStore.getCertificateById(certId);
+    if (cert) {
+      BookClubUI.showCertificateModal(cert);
+    }
+  };
+
+  loadUserCertificates();
+});
+</script>
+</body>
+</html>

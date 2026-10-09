@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+  <defs>
+    <linearGradient id="bg_thirukkural_svg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F241E"/>
+      <stop offset="60%" stop-color="#204738"/>
+      <stop offset="100%" stop-color="#0F241E"/>
+    </linearGradient>
+    <pattern id="ornament_bg_thirukkural_svg" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M20 0 L40 20 L20 40 L0 20 Z" fill="none" stroke="#C9A84E" stroke-width="0.5" opacity="0.15"/>
+    </pattern>
+  </defs>
+
+  <rect width="400" height="600" fill="url(#bg_thirukkural_svg)"/>
+  <rect width="400" height="600" fill="url(#ornament_bg_thirukkural_svg)"/>
+
+  <rect x="16" y="16" width="368" height="568" fill="none" stroke="#C9A84E" stroke-width="2" rx="6" opacity="0.85"/>
+  <rect x="22" y="22" width="356" height="556" fill="none" stroke="#C9A84E" stroke-width="0.75" rx="4" opacity="0.5"/>
+
+  <text x="200" y="65" fill="#E8CA65" font-family="sans-serif" font-size="12" font-weight="bold" letter-spacing="4" text-anchor="middle" opacity="0.9">TAMIL CLASSIC HERITAGE</text>
+  <line x1="70" y1="76" x2="330" y2="76" stroke="#C9A84E" stroke-width="1" opacity="0.6"/>
+
+  <circle cx="200" cy="180" r="62" fill="none" stroke="#C9A84E" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="200" cy="180" r="54" fill="#0F241E" stroke="#E8CA65" stroke-width="0.8" opacity="0.9"/>
+  <text x="200" y="195" font-size="42" text-anchor="middle">📖</text>
+
+  <text x="200" y="285" fill="#FFFFFF" font-family="sans-serif" font-size="26" font-weight="bold" text-anchor="middle">திருக்குறள்</text>
+  <text x="200" y="318" fill="#E8CA65" font-family="sans-serif" font-size="15" font-weight="600" letter-spacing="2" text-anchor="middle">THIRUKKURAL</text>
+  
+  <line x1="120" y1="338" x2="280" y2="338" stroke="#C9A84E" stroke-width="1" opacity="0.5"/>
+
+  <text x="200" y="370" fill="#E5E5E5" font-family="sans-serif" font-size="13" text-anchor="middle" opacity="0.85">அறம் · பொருள் · இன்பம்</text>
+
+  <rect x="60" y="445" width="280" height="85" rx="8" fill="#0F241E" stroke="#C9A84E" stroke-width="1" opacity="0.75"/>
+  <text x="200" y="472" fill="#E8CA65" font-family="sans-serif" font-size="11" font-weight="bold" letter-spacing="2" text-anchor="middle">ஆசிரியர் / AUTHOR</text>
+  <text x="200" y="498" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">திருவள்ளுவர்</text>
+  <text x="200" y="518" fill="#D1D5DB" font-family="sans-serif" font-size="11" text-anchor="middle">Thiruvalluvar</text>
+
+  <text x="200" y="565" fill="#C9A84E" font-family="sans-serif" font-size="10" letter-spacing="2" text-anchor="middle" opacity="0.7">BOOK FORGE ARCHIVE</text>
+</svg>

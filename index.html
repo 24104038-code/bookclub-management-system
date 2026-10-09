@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOOK FORGE — Read Together. Connect Better.</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="home-page">
+<a href="#main" class="skip-link">Skip to content</a>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="brand">
+      <span class="mark">📖</span>
+      <span class="brand-text"><span class="brand-book">BOOK</span> <span class="brand-forge">FORGE</span></span>
+    </a>
+    <button class="nav-toggle" id="publicNavToggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    <ul class="nav-links" id="publicNavLinks">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="/books">Browse Books</a></li>
+      <li><a href="/groups">Reading Groups</a></li>
+      <li><a href="/challenges">Challenges</a></li>
+      <li><a href="/events">Events</a></li>
+      <li><a href="/discussions">Discussions</a></li>
+      <li><a href="/dashboard">Reader Portal</a></li>
+    </ul>
+    <div class="nav-auth" id="navAuthArea">
+      <!-- Quick Theme Switcher -->
+      <div class="theme-switch-dock" style="margin-right: 6px;">
+        <button type="button" class="theme-switch-btn active" data-set-theme="light" title="Light Theme">☀️</button>
+        <button type="button" class="theme-switch-btn" data-set-theme="dark" title="Dark Theme">🌙</button>
+        <button type="button" class="theme-switch-btn" data-set-theme="3d" title="3D Theme">🧊</button>
+      </div>
+      <a href="/login" class="btn btn-ghost btn-sm">Login</a>
+      <a href="/register" class="btn btn-primary btn-sm">Join Club</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <!-- HERO -->
+  <section class="hero">
+    <!-- Ambient blurred lighting effects -->
+    <div class="hero-glow-blob hero-glow-blob-1" aria-hidden="true"></div>
+    <div class="hero-glow-blob hero-glow-blob-2" aria-hidden="true"></div>
+    <div class="hero-glow-blob hero-glow-blob-3" aria-hidden="true"></div>
+
+    <!-- Extremely faint book/library-inspired architectural watermark -->
+    <div class="hero-library-watermark" aria-hidden="true">
+      <svg width="100%" height="100%" viewBox="0 0 1200 560" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <!-- Faint classical reading hall ceiling arches -->
+        <path d="M40 560 V220 Q40 50 220 50 Q400 50 400 220 V560" stroke="#7A4E2D" stroke-width="1.2" stroke-dasharray="5 5" opacity="0.045"/>
+        <path d="M420 560 V180 Q420 30 600 30 Q780 30 780 180 V560" stroke="#7A4E2D" stroke-width="1.2" stroke-dasharray="5 5" opacity="0.055"/>
+        <path d="M800 560 V220 Q800 50 980 50 Q1160 50 1160 220 V560" stroke="#7A4E2D" stroke-width="1.2" stroke-dasharray="5 5" opacity="0.045"/>
+        <!-- Delicate central architectural rosette -->
+        <circle cx="600" cy="30" r="16" stroke="#B08A3E" stroke-width="1" opacity="0.07"/>
+        <circle cx="600" cy="30" r="8" stroke="#B08A3E" stroke-width="1" opacity="0.06"/>
+        <line x1="592" y1="30" x2="608" y2="30" stroke="#B08A3E" stroke-width="1" opacity="0.07"/>
+        <line x1="600" y1="22" x2="600" y2="38" stroke="#B08A3E" stroke-width="1" opacity="0.07"/>
+        <!-- Soft horizontal gallery line -->
+        <line x1="0" y1="480" x2="1200" y2="480" stroke="#7A4E2D" stroke-width="1" opacity="0.035"/>
+      </svg>
+    </div>
+
+    <div class="container hero-inner">
+      <div class="hero-content">
+        <div class="hero-eyebrow-badge">
+          <span class="eyebrow-star">✦</span>
+          <span class="eyebrow-text">The Modern Reading Community</span>
+        </div>
+        <h1 class="hero-title">Read Together. <span class="accent">Connect Better.</span></h1>
+        <p class="lead">Discover curated books, join scheduled reading groups, track your annual reading goals, and enter exciting community reading competitions.</p>
+        <div class="hero-actions" id="heroActionButtons">
+          <a href="/books" class="btn btn-primary">Explore Books</a>
+          <a href="/register" class="btn btn-outline">Join BOOK FORGE</a>
+          <a href="/dashboard" class="btn btn-ghost">Go to Reader Dashboard →</a>
+        </div>
+        <div class="hero-social-proof">
+          <div class="hero-avatar-stack">
+            <span class="hero-mini-avatar" style="background:#4C6A50;">EM</span>
+            <span class="hero-mini-avatar" style="background:#B5652F;">CR</span>
+            <span class="hero-mini-avatar" style="background:#B08A3E;">PN</span>
+            <span class="hero-mini-avatar" style="background:#5C3A54;">WA</span>
+          </div>
+          <span class="hero-proof-text">Joined by <strong>1,250+</strong> passionate readers discussing literature this week</span>
+        </div>
+      </div>
+
+      <!-- Hero Featured Books Grid (2x2 with realistic covers matching /books) -->
+      <div class="hero-art" id="heroFeaturedArt">
+        <!-- 1. The Silent Orchard -->
+        <a href="/books/1" class="hero-book-card" data-book-id="1" title="View details for The Silent Orchard">
+          <div class="hero-book-cover-wrap">
+            <img src="images/books/silent-orchard.jpg" alt="The Silent Orchard by Elena Marsh" class="hero-book-cover-img" loading="lazy" onerror="this.onerror=null;this.src='images/books/default-cover.jpg';">
+            <div class="hero-book-spine-line"></div>
+          </div>
+          <div class="hero-book-info">
+            <div class="hero-book-meta-top">
+              <span class="hero-book-genre genre-fiction">Fiction</span>
+              <span class="hero-book-rating">★ 4.2</span>
+            </div>
+            <h3 class="hero-book-title">The Silent Orchard</h3>
+            <p class="hero-book-author">by Elena Marsh</p>
+          </div>
+        </a>
+
+        <!-- 2. Winter's Ledger -->
+        <a href="/books/2" class="hero-book-card" data-book-id="2" title="View details for Winter's Ledger">
+          <div class="hero-book-cover-wrap">
+            <img src="images/books/winters-ledger.jpg" alt="Winter's Ledger by Colin Reyes" class="hero-book-cover-img" loading="lazy" onerror="this.onerror=null;this.src='images/books/default-cover.jpg';">
+            <div class="hero-book-spine-line"></div>
+          </div>
+          <div class="hero-book-info">
+            <div class="hero-book-meta-top">
+              <span class="hero-book-genre genre-mystery">Mystery</span>
+              <span class="hero-book-rating">★ 4.8</span>
+            </div>
+            <h3 class="hero-book-title">Winter's Ledger</h3>
+            <p class="hero-book-author">by Colin Reyes</p>
+          </div>
+        </a>
+
+        <!-- 3. Salt & Story -->
+        <a href="/books/3" class="hero-book-card" data-book-id="3" title="View details for Salt & Story">
+          <div class="hero-book-cover-wrap">
+            <img src="images/books/salt-and-story.jpg" alt="Salt & Story by Priya Nandan" class="hero-book-cover-img" loading="lazy" onerror="this.onerror=null;this.src='images/books/default-cover.jpg';">
+            <div class="hero-book-spine-line"></div>
+          </div>
+          <div class="hero-book-info">
+            <div class="hero-book-meta-top">
+              <span class="hero-book-genre genre-nonfiction">Non-Fiction</span>
+              <span class="hero-book-rating">★ 4.0</span>
+            </div>
+            <h3 class="hero-book-title">Salt & Story</h3>
+            <p class="hero-book-author">by Priya Nandan</p>
+          </div>
+        </a>
+
+        <!-- 4. Paper Lanterns -->
+        <a href="/books/4" class="hero-book-card" data-book-id="4" title="View details for Paper Lanterns">
+          <div class="hero-book-cover-wrap">
+            <img src="images/books/paper-lanterns.jpg" alt="Paper Lanterns by Wren Achebe" class="hero-book-cover-img" loading="lazy" onerror="this.onerror=null;this.src='images/books/default-cover.jpg';">
+            <div class="hero-book-spine-line"></div>
+          </div>
+          <div class="hero-book-info">
+            <div class="hero-book-meta-top">
+              <span class="hero-book-genre genre-fantasy">Fantasy</span>
+              <span class="hero-book-rating">★ 4.7</span>
+            </div>
+            <h3 class="hero-book-title">Paper Lanterns</h3>
+            <p class="hero-book-author">by Wren Achebe</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS STRIP -->
+  <section class="stats-strip">
+    <div class="container stats-grid">
+      <div><div class="stat-num">1,250+</div><div class="stat-label">Active Readers</div></div>
+      <div><div class="stat-num">320+</div><div class="stat-label">Curated Books</div></div>
+      <div><div class="stat-num">48</div><div class="stat-label">Reading Circles</div></div>
+      <div><div class="stat-num">18,500+</div><div class="stat-label">Pages Logged This Week</div></div>
+    </div>
+  </section>
+
+  <!-- FEATURED BOOKS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">On The Shelves</span>
+        <h2>Featured Books</h2>
+        <p>Hand-picked literary works our community is actively reading and reviewing right now.</p>
+      </div>
+      <div class="grid grid-4" id="homeFeaturedBooks">
+        <!-- Rendered dynamically from store -->
+      </div>
+      <div class="text-center" style="margin-top: 36px;">
+        <a href="/books" class="btn btn-outline">Browse All 320+ Books →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTIVE READING CHALLENGES -->
+  <section class="section" style="background: var(--cream-deep);">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Community Milestones</span>
+        <h2>Active Reading Challenges</h2>
+        <p>Build daily reading habits, earn XP, and unlock badges with fellow book lovers.</p>
+      </div>
+      <div class="grid grid-3" id="homeChallenges">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="text-center" style="margin-top: 30px;">
+        <a href="/challenges" class="btn btn-primary btn-sm">Explore All Challenges</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPCOMING EVENTS & TRENDING DISCUSSIONS -->
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-2" style="gap: 40px; align-items: start;">
+        <div>
+          <div class="flex-between mb-30">
+            <div>
+              <span class="eyebrow">Gatherings</span>
+              <h2 style="margin: 4px 0 0 0;">Upcoming Events</h2>
+            </div>
+            <a href="/events" class="btn btn-ghost btn-sm">View Calendar →</a>
+          </div>
+          <div class="grid" style="gap: 16px;" id="homeEvents">
+            <!-- Event cards -->
+          </div>
+        </div>
+
+        <div>
+          <div class="flex-between mb-30">
+            <div>
+              <span class="eyebrow">Conversations</span>
+              <h2 style="margin: 4px 0 0 0;">Trending Discussions</h2>
+            </div>
+            <a href="/discussions" class="btn btn-ghost btn-sm">All Forums →</a>
+          </div>
+          <div class="grid" style="gap: 16px;" id="homeDiscussions">
+            <!-- Discussion cards -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOP READERS / LEADERBOARD SPOTLIGHT -->
+  <section class="section" style="background: var(--cream-deep);">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Reader Spotlight</span>
+        <h2>This Month's Top Readers</h2>
+        <p>Celebrating the readers who turned the most pages and led inspiring discussions.</p>
+      </div>
+
+      <div class="podium-wrap">
+        <div class="podium-step podium-rank-2">
+          <div class="podium-avatar" style="background: var(--green-shelf);">AK</div>
+          <div class="podium-name">Aditi Krishnan</div>
+          <div class="podium-score">1,200 pgs</div>
+          <div class="podium-pillar"><span>#2</span></div>
+        </div>
+        <div class="podium-step podium-rank-1">
+          <div class="podium-avatar" style="background: var(--shell-gold-deep);">MB</div>
+          <div class="podium-name">Marcus Brody</div>
+          <div class="podium-score">2,150 pgs</div>
+          <div class="podium-pillar"><span>#1 👑</span></div>
+        </div>
+        <div class="podium-step podium-rank-3">
+          <div class="podium-avatar" style="background: var(--clay);">JR</div>
+          <div class="podium-name">Jordan Rivera</div>
+          <div class="podium-score">1,450 pgs</div>
+          <div class="podium-pillar"><span>#3</span></div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <a href="/leaderboards" class="btn btn-outline btn-sm">View Full Leaderboards</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Voices of BOOK FORGE</span>
+        <h2>Why Our Community Loves Reading Here</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card feature-card">
+          <p style="font-style: italic; font-size: 1rem; margin-bottom: 16px;">"The reading streaks and monthly challenges pushed me to read 28 books this year — my highest ever since college!"</p>
+          <div class="author-line">
+            <div class="avatar-chip" style="background: var(--clay);">WA</div>
+            <div>
+              <strong>Wren Achebe</strong>
+              <div class="text-soft" style="font-size: 0.8rem;">Fantasy Enthusiast · 3 yrs member</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card feature-card">
+          <p style="font-style: italic; font-size: 1rem; margin-bottom: 16px;">"I love our weekly Zoom sessions for Mystery Readers. The poll for 'What should we read next' has turned into a beloved monthly ritual."</p>
+          <div class="author-line">
+            <div class="avatar-chip" style="background: var(--green-shelf);">AK</div>
+            <div>
+              <strong>Aditi Krishnan</strong>
+              <div class="text-soft" style="font-size: 0.8rem;">Reading Group Organizer</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card feature-card">
+          <p style="font-style: italic; font-size: 1rem; margin-bottom: 16px;">"The private reading journal and quote wall changed the way I remember books. It feels like having my personal antique library in my pocket."</p>
+          <div class="author-line">
+            <div class="avatar-chip" style="background: var(--gold);">MJ</div>
+            <div>
+              <strong>Meera Joseph</strong>
+              <div class="text-soft" style="font-size: 0.8rem;">Literature Student</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="section" style="background: linear-gradient(135deg, var(--brown-deep), #2A170A); color: #fff; text-align: center;">
+    <div class="container" style="max-width: 680px;">
+      <h2 style="color: #fff; font-size: 2.4rem; margin-bottom: 16px;">Ready for your next great read?</h2>
+      <p style="color: #DCC9AE; font-size: 1.15rem; margin-bottom: 30px;">Join hundreds of passionate readers. Track your books, join lively discussions, and discover books you'll never forget.</p>
+      <div class="hero-actions" style="justify-content: center;">
+        <a href="/register" class="btn btn-primary btn-lg">Create Free Account</a>
+        <a href="/dashboard" class="btn btn-outline" style="border-color: #DCC9AE; color: #fff;">Open Reader Dashboard</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <span class="mark">📖</span>
+          <span class="brand-text"><span class="brand-book">BOOK</span> <span class="brand-forge">FORGE</span></span>
+        </div>
+        <p>A warm, thoughtful platform for reading guilds, book circles, and literary discovery.</p>
+        <div class="social-row">
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Instagram">📸</a>
+          <a href="#" aria-label="Discord">💬</a>
+          <a href="#" aria-label="Goodreads">📖</a>
+        </div>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="/books">Book Discovery</a></li>
+          <li><a href="/groups">Reading Groups</a></li>
+          <li><a href="/challenges">Challenges & Badges</a></li>
+          <li><a href="/competitions">Competitions</a></li>
+          <li><a href="/events">Upcoming Events</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Reader Tools</h4>
+        <ul>
+          <li><a href="/dashboard">Reader Dashboard</a></li>
+          <li><a href="/library">My Library Shelves</a></li>
+          <li><a href="/reading-progress">Reading Tracker</a></li>
+          <li><a href="/reading-goals">Annual Reading Goals</a></li>
+          <li><a href="/journal">Reading Journal</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Community</h4>
+        <ul>
+          <li><a href="/discussions">Forums & Discussions</a></li>
+          <li><a href="/reviews">Community Reviews</a></li>
+          <li><a href="/leaderboards">Leaderboards</a></li>
+          <li><a href="/calendar">Events Calendar</a></li>
+          <li><a href="/reports">Community Guidelines</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 BOOK FORGE Platform. Designed for book lovers and reading guilds everywhere.
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile Nav toggle
+  const navToggle = document.getElementById('publicNavToggle');
+  const navLinks = document.getElementById('publicNavLinks');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+  }
+
+  // Read authenticated user state if available (does not force-redirect on index.html)
+  const user = (typeof BookClubAuth !== 'undefined' && BookClubAuth.getCurrentUser) ? BookClubAuth.getCurrentUser() : null;
+
+  // Auth user state in public nav
+  const navAuthArea = document.getElementById('navAuthArea');
+  if (user && navAuthArea) {
+    const isAdm = user.role === 'admin';
+    navAuthArea.innerHTML = `
+      <a href="${isAdm ? '/admin' : '/profile'}" class="btn btn-ghost btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
+        <span style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; text-align:center; background:var(--clay); color:#fff; border-radius:50%; font-size:0.7rem; font-weight:700; overflow:hidden;">${(user.profileImage && user.profileImage.trim()) ? `<img src="${BookClubUI.escapeHtml(user.profileImage)}" alt="${BookClubUI.escapeHtml(user.name)}" style="width:100%; height:100%; object-fit:cover; display:block;">` : (user.avatar || 'U')}</span>
+        <span style="font-weight:700;">${BookClubUI.escapeHtml(user.name)}</span>
+        <span class="badge ${isAdm ? 'badge-admin' : 'badge-reading'}" style="font-size:0.65rem; padding:2px 6px;">${user.role.toUpperCase()}</span>
+      </a>
+      <a href="${isAdm ? '/admin' : '/dashboard'}" class="btn btn-primary btn-sm">${isAdm ? 'Admin Console' : 'Dashboard'}</a>
+      <button type="button" class="btn btn-outline btn-sm" id="publicNavLogoutBtn" title="Sign out">Logout ↩</button>
+    `;
+
+    document.getElementById('publicNavLogoutBtn')?.addEventListener('click', () => {
+      BookClubAuth.logout();
+      window.location.replace('/login');
+    });
+  }
+
+  // Adjust hero action buttons if user is Admin
+  if (user && user.role === 'admin') {
+    const heroBtns = document.getElementById('heroActionButtons');
+    if (heroBtns) {
+      heroBtns.innerHTML = `
+        <a href="/books" class="btn btn-primary">Explore Books</a>
+        <a href="/admin" class="btn btn-outline">Admin Command Console</a>
+        <a href="/admin" class="btn btn-ghost">Open Admin Dashboard →</a>
+      `;
+    }
+  }
+
+  // Populate / Synchronize Hero Featured Books with BookClubStore
+  try {
+    const heroBooks = [1, 2, 3, 4].map(id => BookClubStore.getBookById(id)).filter(Boolean);
+    const heroArt = document.getElementById('heroFeaturedArt');
+    if (heroArt && heroBooks.length === 4) {
+      heroArt.innerHTML = heroBooks.map(b => {
+        let genreClass = '';
+        const g = (b.genre || '').toLowerCase();
+        if (g.includes('mystery')) genreClass = 'genre-mystery';
+        else if (g.includes('non')) genreClass = 'genre-nonfiction';
+        else if (g.includes('fantasy')) genreClass = 'genre-fantasy';
+        else genreClass = 'genre-fiction';
+
+        const coverSrc = b.coverImage || 'images/books/default-cover.jpg';
+        return `
+          <a href="/books/${b.id}" class="hero-book-card" data-book-id="${b.id}" title="View details for ${BookClubUI.escapeHtml(b.title)}">
+            <div class="hero-book-cover-wrap">
+              <img src="${coverSrc}" alt="${BookClubUI.escapeHtml(b.title)} by ${BookClubUI.escapeHtml(b.author)}" class="hero-book-cover-img" loading="lazy" onerror="this.onerror=null;this.src='images/books/default-cover.jpg';">
+              <div class="hero-book-spine-line"></div>
+            </div>
+            <div class="hero-book-info">
+              <div class="hero-book-meta-top">
+                <span class="hero-book-genre ${genreClass}">${BookClubUI.escapeHtml(b.genre)}</span>
+                <span class="hero-book-rating">★ ${b.rating}</span>
+              </div>
+              <h3 class="hero-book-title">${BookClubUI.escapeHtml(b.title)}</h3>
+              <p class="hero-book-author">by ${BookClubUI.escapeHtml(b.author)}</p>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    // Attach click listeners to hero cards to set selectedBookId
+    const heroCards = (heroArt || document).querySelectorAll('.hero-book-card');
+    heroCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-book-id');
+        if (id) {
+          try {
+            sessionStorage.setItem('selectedBookId', id);
+            localStorage.setItem('selectedBookId', id);
+          } catch (e) {}
+        }
+      });
+    });
+  } catch (e) {
+    console.error('Error hydrating hero books:', e);
+  }
+
+  // Populate Featured Books
+  const books = BookClubStore.getBooks().slice(0, 4);
+  const featuredContainer = document.getElementById('homeFeaturedBooks');
+  if (featuredContainer) {
+    featuredContainer.innerHTML = books.map(b => BookClubUI.renderBookCard(b)).join('');
+  }
+
+  // Populate Challenges
+  const challenges = BookClubStore.getChallenges().slice(0, 3);
+  const chContainer = document.getElementById('homeChallenges');
+  if (chContainer) {
+    chContainer.innerHTML = challenges.map(c => `
+      <div class="card panel">
+        <div class="flex-between mb-0">
+          <span class="badge badge-reading">${c.badgeIcon} ${c.badgeName}</span>
+          <span class="text-soft" style="font-size: 0.8rem;">${c.daysRemaining} days left</span>
+        </div>
+        <h3 style="margin: 12px 0 6px 0; font-size: 1.18rem;">${c.title}</h3>
+        <p class="text-soft" style="font-size: 0.88rem; margin-bottom: 16px;">${c.description}</p>
+        <div class="progress-track" style="margin-bottom: 6px;">
+          <div class="progress-fill" style="width: ${Math.min(100, Math.round((c.progress / c.target) * 100))}%;"></div>
+        </div>
+        <div class="flex-between" style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 16px;">
+          <span>Progress: ${c.progress} / ${c.target} ${c.unit}</span>
+          <span>👥 ${c.participantsCount} readers</span>
+        </div>
+        <a href="/challenges/${c.id}" class="btn btn-outline btn-sm btn-block">View Challenge</a>
+      </div>
+    `).join('');
+  }
+
+  // Populate Upcoming Events
+  const events = BookClubStore.getEvents().slice(0, 2);
+  const evContainer = document.getElementById('homeEvents');
+  if (evContainer) {
+    evContainer.innerHTML = events.map(e => `
+      <div class="card event-card">
+        <div class="event-date-badge"><span class="d">${e.day}</span><span class="m">${e.month}</span></div>
+        <div class="event-info" style="flex:1;">
+          <h3 style="margin-bottom: 4px;"><a href="/events/${e.id}">${e.title}</a></h3>
+          <p class="event-meta">🕒 ${e.time} · 📍 ${e.location}</p>
+          <div class="flex-between" style="margin-top: 10px;">
+            <span class="badge badge-active">${e.type}</span>
+            <a href="/events/${e.id}" class="btn btn-outline btn-sm">Details & RSVP</a>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Populate Trending Discussions
+  const discussions = BookClubStore.getDiscussions().slice(0, 2);
+  const discContainer = document.getElementById('homeDiscussions');
+  if (discContainer) {
+    discContainer.innerHTML = discussions.map(d => `
+      <div class="card discussion-card">
+        <div class="discussion-top">
+          <span class="discussion-book-tag">${d.bookTag || d.category}</span>
+          <span class="text-soft" style="font-size:0.8rem;">${d.timeAgo}</span>
+        </div>
+        <h3 class="discussion-title"><a href="/discussions/${d.id}">${d.title}</a></h3>
+        <p class="discussion-content">${d.content.slice(0, 95)}...</p>
+        <div class="discussion-footer">
+          <div class="author-line">
+            <div class="avatar-chip" style="background:var(--clay); margin-left:0;">${d.avatar}</div>
+            <span>${d.author}</span>
+          </div>
+          <div class="flex gap-12">
+            <span>💬 ${(d.replies || []).length} replies</span>
+            <span>❤️ ${d.likes}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+});
+</script>
+</body>
+</html>

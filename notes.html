@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Notes — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-box" style="flex:2;">
+        <span>🔎</span>
+        <input type="text" id="notesSearchInput" placeholder="Search notes by keyword, tags, or book title...">
+      </div>
+
+      <select id="notesBookFilter">
+        <option value="all">All Books</option>
+      </select>
+
+      <button type="button" class="btn btn-primary btn-sm" id="btnCreateNote">+ New Note</button>
+    </div>
+
+    <!-- NOTES GRID -->
+    <div class="grid grid-2" id="notesGrid" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('notes');
+  BookClubUI.renderTopbar(
+    'Private Book Notes',
+    'Personal reflections, character theories, and margin notes for your eyes only.',
+    `<a href="highlights.html" class="btn btn-outline btn-sm">Highlights & Quotes 💡</a>`
+  );
+
+  const searchInput = document.getElementById('notesSearchInput');
+  const bookFilter = document.getElementById('notesBookFilter');
+
+  // Populate book dropdown
+  const allBooks = BookClubStore.getBooks();
+  bookFilter.innerHTML = `<option value="all">All Books</option>` + allBooks.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
+
+  function renderNotes() {
+    const list = BookClubStore.getNotes();
+    const container = document.getElementById('notesGrid');
+    const q = searchInput.value.trim().toLowerCase();
+    const selBook = bookFilter.value;
+
+    let filtered = list;
+    if (q) {
+      filtered = filtered.filter(n => n.note.toLowerCase().includes(q) || n.bookTitle.toLowerCase().includes(q) || (n.tags || []).some(t => t.toLowerCase().includes(q)));
+    }
+    if (selBook !== 'all') {
+      filtered = filtered.filter(n => n.bookId === Number(selBook));
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('📝', 'No notes found', 'Capture your first margin reflection while reading.', 'Take Note', '#')}</div>`;
+      const btn = container.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openNewNoteModal(); });
+      return;
+    }
+
+    container.innerHTML = filtered.map(n => `
+      <div class="card panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="flex-between mb-0">
+            <a href="book-details.html?id=${n.bookId}" style="font-weight:700; color:var(--brown-deep);">📖 ${n.bookTitle}</a>
+            <span class="badge badge-want">Page ${n.page}</span>
+          </div>
+
+          <p style="margin: 14px 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink);">${n.note}</p>
+
+          <div class="flex gap-8" style="flex-wrap:wrap; margin-bottom: 12px;">
+            ${(n.tags || []).map(t => `<span class="badge badge-member">${t}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="flex-between" style="border-top: 1px dashed var(--line); padding-top: 10px; font-size:0.78rem; color:var(--ink-soft);">
+          <span>Saved on ${n.createdAt}</span>
+          <div class="flex gap-8">
+            <button class="btn btn-danger btn-sm" onclick="handleDeleteNote(${n.id})">Delete</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.handleDeleteNote = function (id) {
+    if (confirm('Delete this private note?')) {
+      BookClubStore.deleteNote(id);
+      BookClubUI.showToast('Note deleted.', 'info');
+      renderNotes();
+    }
+  };
+
+  function openNewNoteModal() {
+    BookClubUI.showModal(
+      'Take a Private Book Note',
+      `
+        <div class="field">
+          <label>Book</label>
+          <select id="nModalBook">
+            ${allBooks.map(b => `<option value="${b.id}">${b.title}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Page Number</label><input type="number" id="nModalPage" value="1"></div>
+          <div class="field"><label>Tags (comma separated)</label><input type="text" id="nModalTags" placeholder="Clues, Symbolism, Character"></div>
+        </div>
+        <div class="field">
+          <label>Your Note</label>
+          <textarea id="nModalNote" rows="4" placeholder="Write your thoughts or observations..."></textarea>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSaveNote()">Save Note</button>
+      `
+    );
+  }
+
+  window.handleSaveNote = function () {
+    const text = document.getElementById('nModalNote').value.trim();
+    if (!text) { alert('Please enter note text.'); return; }
+    BookClubStore.addNote({
+      bookId: document.getElementById('nModalBook').value,
+      page: document.getElementById('nModalPage').value,
+      tags: document.getElementById('nModalTags').value,
+      note: text
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Note saved!', 'success');
+    renderNotes();
+  };
+
+  searchInput.addEventListener('input', renderNotes);
+  bookFilter.addEventListener('change', renderNotes);
+  document.getElementById('btnCreateNote').addEventListener('click', openNewNoteModal);
+
+  renderNotes();
+});
+</script>
+</body>
+</html>

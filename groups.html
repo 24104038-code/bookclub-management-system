@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Groups — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="groupTabs">
+      <span class="tab active" data-filter="discover">Discover Groups</span>
+      <span class="tab" data-filter="my-groups">My Groups</span>
+      <span class="tab" data-filter="popular">Popular Groups</span>
+      <span class="tab" data-filter="recommended">Recommended For You</span>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-box" style="flex: 2;">
+        <span>🔎</span>
+        <input type="text" id="groupSearchInput" placeholder="Search groups by name, genre, or organizer...">
+      </div>
+
+      <select id="groupGenreFilter">
+        <option value="all">All Genres</option>
+        <option value="Mystery">Mystery</option>
+        <option value="Fantasy">Fantasy</option>
+        <option value="Classic">Classic Literature</option>
+        <option value="Non-Fiction">Non-Fiction</option>
+      </select>
+
+      <button type="button" class="btn btn-primary btn-sm" id="btnOpenCreateGroup">+ Create Reading Group</button>
+    </div>
+
+    <!-- GROUPS GRID -->
+    <div class="grid grid-3" id="groupsGrid" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('groups');
+  BookClubUI.renderTopbar(
+    'Reading Circles & Groups',
+    'Find your literary tribe — read chapters on schedule, share theories, and meet weekly.',
+    `<button class="btn btn-primary btn-sm" id="topbarCreateGroupBtn">+ Start Group</button>`
+  );
+
+  let currentTab = 'discover';
+  const searchInput = document.getElementById('groupSearchInput');
+  const genreFilter = document.getElementById('groupGenreFilter');
+
+  function renderGroups() {
+    const list = BookClubStore.getGroups();
+    const container = document.getElementById('groupsGrid');
+    const query = searchInput.value.trim().toLowerCase();
+    const genre = genreFilter.value;
+
+    let filtered = list;
+    if (currentTab === 'my-groups') {
+      filtered = filtered.filter(g => (g.members || []).some(m => m.name === user.name));
+    } else if (currentTab === 'popular') {
+      filtered = filtered.filter(g => g.membersCount >= 16);
+    } else if (currentTab === 'recommended') {
+      filtered = filtered.filter(g => g.genre === (user.favoriteGenre || 'Fantasy'));
+    }
+
+    if (query) {
+      filtered = filtered.filter(g => g.name.toLowerCase().includes(query) || g.description.toLowerCase().includes(query) || g.genre.toLowerCase().includes(query));
+    }
+    if (genre !== 'all') {
+      filtered = filtered.filter(g => g.genre.toLowerCase() === genre.toLowerCase());
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('👥', 'No reading groups found', 'Try selecting a different filter or create your own book circle.', 'Create Group', '#')}</div>`;
+      const btn = container.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openCreateGroupModal(); });
+      return;
+    }
+
+    container.innerHTML = filtered.map(g => {
+      const curBook = BookClubStore.getBookById(g.currentBookId) || { title: 'Selected Title', author: 'Author' };
+      const isMember = (g.members || []).some(m => m.name === user.name);
+
+      return `
+        <div class="card group-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="flex-between mb-0">
+              <span class="badge badge-active">${g.activityLevel}</span>
+              <span class="badge badge-member">${g.privacy}</span>
+            </div>
+
+            <h3 style="margin: 12px 0 4px 0; font-size: 1.25rem;">
+              <a href="group-details.html?id=${g.id}">${g.name}</a>
+            </h3>
+
+            <p class="group-current-book">📖 Currently Reading: <a href="book-details.html?id=${curBook.id || 1}" style="text-decoration:underline;">${curBook.title}</a></p>
+
+            <p class="group-desc">${g.description}</p>
+
+            <div class="member-avatars" style="margin-bottom: 12px;">
+              ${(g.members || []).slice(0, 4).map(m => `
+                <div class="avatar-chip" style="background:var(--clay);">${m.avatar || 'M'}</div>
+              `).join('')}
+              ${g.membersCount > 4 ? `<div class="avatar-chip" style="background:#6A4C93;">+${g.membersCount - 4}</div>` : ''}
+            </div>
+
+            <div class="group-meta-row">
+              <span>👥 ${g.membersCount} / ${g.maxMembers} members</span>
+              <span>📅 ${g.meetingSchedule}</span>
+            </div>
+          </div>
+
+          <div class="flex gap-8" style="margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 14px;">
+            <button type="button" class="btn ${isMember ? 'btn-danger' : 'btn-primary'} btn-sm" style="flex:1;" onclick="handleToggleJoinGroup(${g.id})">
+              ${isMember ? 'Leave' : 'Join Group'}
+            </button>
+            <a href="group-details.html?id=${g.id}" class="btn btn-outline btn-sm">Enter Circle →</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.handleToggleJoinGroup = function (id) {
+    const isJoined = BookClubStore.joinGroup(id);
+    if (isJoined) {
+      const g = BookClubStore.getGroupById(id);
+      BookClubUI.showToast(`Joined ${g.name}! 🎉`, 'success');
+      showQuickTrackingDialog(g);
+    } else {
+      BookClubUI.showToast('Left group.', 'info');
+    }
+    renderGroups();
+  };
+
+  function showQuickTrackingDialog(g) {
+    const curBook = BookClubStore.getBookById(g.currentBookId) || { title: 'Current Read', author: '' };
+    BookClubUI.showModal(
+      `🎉 Joined ${g.name}!`,
+      `
+        <div style="background:var(--cream-deep); padding:14px; border-radius:8px; margin-bottom:16px; font-size:0.88rem; line-height:1.6; border:1px solid var(--line);">
+          <div>🗓️ <strong>Next Gathering:</strong> ${g.meetingSchedule || 'Every Saturday'} at 5:00 PM</div>
+          <div>📍 <strong>Location:</strong> ${g.location || 'Community Salon & Online'}</div>
+          <div>📖 <strong>Book:</strong> ${curBook.title}</div>
+          <div style="margin-top:8px; color:var(--clay); font-weight:600;">Track this gathering and receive milestone reminders:</div>
+        </div>
+        <div class="flex gap-8" style="justify-content:center; flex-wrap:wrap; margin-top:12px;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="trackGroupFromList(${g.id}, 'whatsapp')" style="border-color:#25D366; color:#128C7E;">
+            📲 Track on WhatsApp
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="trackGroupFromList(${g.id}, 'email')">
+            ✉️ Track via Email
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="downloadGroupICSFromList(${g.id})">
+            📅 .ics Calendar
+          </button>
+        </div>
+      `,
+      `<button type="button" class="btn btn-primary btn-sm" onclick="BookClubUI.closeModal()">Done</button>`
+    );
+  }
+
+  window.trackGroupFromList = function(groupId, method) {
+    const g = BookClubStore.getGroupById(groupId);
+    if (!g) return;
+    const curBook = BookClubStore.getBookById(g.currentBookId) || { title: 'Current Read', author: '' };
+    if (method === 'whatsapp') {
+      const msg = BookClubStore.formatWhatsAppEventText({
+        groupName: g.name,
+        title: 'Weekly Salon',
+        schedule: g.meetingSchedule,
+        location: g.location || 'Online Salon',
+        bookTitle: curBook.title,
+        bookAuthor: curBook.author,
+        url: `${window.location.origin}/group-details.html?id=${g.id}`
+      });
+      BookClubStore.trackGatheringOrEvent({
+        type: 'group',
+        id: g.id,
+        method: 'whatsapp',
+        details: { title: `${g.name} Gathering` }
+      });
+      BookClubStore.openWhatsAppTracker(msg);
+      BookClubUI.closeModal();
+      BookClubUI.showToast('📲 Gathering details opened in WhatsApp!', 'success');
+    } else {
+      BookClubStore.trackGatheringOrEvent({
+        type: 'group',
+        id: g.id,
+        method: 'email',
+        contact: user.email || 'reader@bookclub.com',
+        details: { title: `${g.name} Gathering` }
+      });
+      BookClubStore.downloadICSFile({
+        title: `${g.name} Gathering`,
+        description: `Reading Salon for ${g.name}`,
+        location: g.location || 'Online Salon',
+        filename: `${g.name}-gathering`
+      });
+      BookClubUI.closeModal();
+      BookClubUI.showToast(`✉️ Gathering details & calendar invite sent to ${user.email}!`, 'success');
+    }
+    renderGroups();
+  };
+
+  window.downloadGroupICSFromList = function(groupId) {
+    const g = BookClubStore.getGroupById(groupId);
+    if (!g) return;
+    BookClubStore.downloadICSFile({
+      title: `${g.name} Gathering`,
+      description: `Reading Salon for ${g.name}`,
+      location: g.location || 'Online Salon',
+      filename: `${g.name}-gathering`
+    });
+    BookClubUI.showToast('📅 Calendar invite (.ics) downloaded!', 'success');
+  };
+
+  function openCreateGroupModal() {
+    BookClubUI.showModal(
+      'Form a New Reading Group',
+      `
+        <div class="field">
+          <label>Group Name</label>
+          <input type="text" id="grpName" placeholder="e.g. Victorian Mystery Society">
+        </div>
+        <div class="field">
+          <label>Description & Focus</label>
+          <textarea id="grpDesc" rows="3" placeholder="What kinds of books will your circle read together?"></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Genre</label>
+            <select id="grpGenre">
+              <option value="Fiction">Fiction</option>
+              <option value="Mystery">Mystery</option>
+              <option value="Fantasy">Fantasy</option>
+              <option value="Non-Fiction">Non-Fiction</option>
+              <option value="Classic">Classic Literature</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Max Members</label>
+            <input type="number" id="grpMax" value="25">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Meeting Schedule</label><input type="text" id="grpSchedule" value="Every Saturday, 5:00 PM"></div>
+          <div class="field">
+            <label>Privacy</label>
+            <select id="grpPrivacy">
+              <option value="Public">Public (Anyone can join)</option>
+              <option value="Invite Only">Private (Invite Only)</option>
+            </select>
+          </div>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSaveNewGroup()">Launch Group</button>
+      `
+    );
+  }
+
+  window.handleSaveNewGroup = function () {
+    const name = document.getElementById('grpName').value.trim();
+    if (!name) { alert('Please enter group name.'); return; }
+    BookClubStore.createGroup({
+      name: name,
+      description: document.getElementById('grpDesc').value,
+      genre: document.getElementById('grpGenre').value,
+      maxMembers: document.getElementById('grpMax').value,
+      meetingSchedule: document.getElementById('grpSchedule').value,
+      privacy: document.getElementById('grpPrivacy').value
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Group "${name}" established!`, 'success');
+    renderGroups();
+  };
+
+  document.querySelectorAll('#groupTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#groupTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      currentTab = this.getAttribute('data-filter');
+      renderGroups();
+    });
+  });
+
+  searchInput.addEventListener('input', renderGroups);
+  genreFilter.addEventListener('change', renderGroups);
+  document.getElementById('btnOpenCreateGroup').addEventListener('click', openCreateGroupModal);
+  document.getElementById('topbarCreateGroupBtn').addEventListener('click', openCreateGroupModal);
+
+  renderGroups();
+});
+</script>
+</body>
+</html>

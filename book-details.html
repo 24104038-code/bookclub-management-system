@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Details — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.star-selector {
+  display: flex;
+  gap: 6px;
+  font-size: 1.5rem;
+  color: var(--gold);
+  cursor: pointer;
+}
+.star-selector span { transition: transform .1s; }
+.star-selector span:hover { transform: scale(1.2); }
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <p class="text-soft mb-30"><a href="books.html">← Back to Catalog</a></p>
+
+    <!-- HERO SECTION -->
+    <div class="book-details-hero">
+      <div id="bookLargeCover">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div>
+        <div class="flex-between">
+          <span class="book-genre" id="detailGenre">Fiction</span>
+          <button type="button" class="btn btn-ghost btn-sm" id="recommendBtn">💌 Recommend to Friend</button>
+        </div>
+
+        <h1 style="margin-top: 10px;" id="detailTitle">Book Title</h1>
+        <p class="text-soft" style="font-size: 1.2rem; margin-bottom: 16px;" id="detailAuthor">by Author Name</p>
+
+        <div class="book-details-meta">
+          <span id="detailYear">📅 Published 2022</span>
+          <span id="detailPages">📄 300 pages</span>
+          <span class="stars" id="detailRating">★★★★☆ 4.2 (128 reviews)</span>
+        </div>
+
+        <p id="detailDescription" style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 24px; max-width: 680px;"></p>
+
+        <!-- Quest Unlock Banner -->
+        <div id="questUnlockBanner" style="display:none; margin-bottom: 24px;"></div>
+
+        <!-- Current shelf status box -->
+        <div id="detailShelfStatusBox" class="card" style="padding: 14px 18px; margin-bottom: 24px; background: var(--cream-deep); border-color: var(--line);">
+          <div class="flex-between">
+            <span style="font-size: 0.9rem; font-weight: 700; color: var(--brown-deep);" id="detailShelfStatus">Status: Not on shelf</span>
+            <div class="flex gap-8" id="quickShelfActions">
+              <button class="btn btn-primary btn-sm" id="btnStartReading">Start Reading</button>
+              <button class="btn btn-outline btn-sm" id="btnWantToRead">Want to Read</button>
+              <button class="btn btn-ghost btn-sm" id="btnMarkRead">Mark as Read</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="book-details-actions">
+          <button class="btn btn-primary btn-sm" id="btnWriteReview">+ Write Review</button>
+          <button class="btn btn-outline btn-sm" id="btnAddNote">+ Add Note</button>
+          <button class="btn btn-outline btn-sm" id="btnAddHighlight">✦ Save Highlight</button>
+          <a href="groups.html" class="btn btn-ghost btn-sm">Join Reading Group 👥</a>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- TABS -->
+    <div class="tabs" id="detailTabs">
+      <span class="tab active" data-tab="about">About & Context</span>
+      <span class="tab" data-tab="progress">My Reading Progress</span>
+      <span class="tab" data-tab="reviews">Reader Reviews</span>
+      <span class="tab" data-tab="discussions">Discussions</span>
+      <span class="tab" data-tab="notes">My Notes & Highlights</span>
+      <span class="tab" data-tab="related">Related Books</span>
+    </div>
+
+    <!-- TAB CONTENTS -->
+    <div id="tabContentAbout" class="tab-pane">
+      <div class="card panel" style="max-width: 800px;">
+        <h3 style="margin-top:0;">Literary Overview & Themes</h3>
+        <p class="text-soft">Curated by the BookClub Editorial Guild</p>
+        <p id="aboutLongText"></p>
+        <div class="grid grid-3" style="margin-top: 24px;">
+          <div><strong>Primary Tone:</strong> <span id="aboutTone">Introspective, Lyrical</span></div>
+          <div><strong>Pacing:</strong> <span id="aboutPacing">Moderate / Measured</span></div>
+          <div><strong>Recommended Drink:</strong> <span>Earl Grey Tea ☕</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tabContentProgress" class="tab-pane" style="display:none;">
+      <div class="card panel" style="max-width: 680px;">
+        <h3>Track Your Reading Pace</h3>
+        <div class="progress-track" style="height: 12px; margin: 16px 0;">
+          <div class="progress-fill" id="paneProgressFill" style="width: 0%;"></div>
+        </div>
+        <div class="flex-between mb-30">
+          <span id="paneProgressLabel">0 / 300 pages</span>
+          <strong id="paneProgressPct" style="font-size: 1.1rem; color: var(--clay);">0%</strong>
+        </div>
+
+        <form id="progressUpdateForm" class="flex gap-12" style="align-items: flex-end;">
+          <div class="field" style="margin: 0; flex: 1;">
+            <label for="inputCurrentPage">Update Current Page</label>
+            <input type="number" id="inputCurrentPage" min="0" value="0">
+          </div>
+          <button type="submit" class="btn btn-primary">Update Progress</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="tabContentReviews" class="tab-pane" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3 style="margin:0;">Community Reviews</h3>
+        <button class="btn btn-primary btn-sm" id="btnWriteReviewTab">+ Write a Review</button>
+      </div>
+      <div class="grid grid-2" id="detailReviewsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <div id="tabContentDiscussions" class="tab-pane" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3 style="margin:0;">Book Conversations</h3>
+        <a href="discussions.html" class="btn btn-primary btn-sm">+ Start Discussion</a>
+      </div>
+      <div class="grid" style="gap: 16px;" id="detailDiscussionsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <div id="tabContentNotes" class="tab-pane" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3 style="margin:0;">Private Notes & Saved Quotes</h3>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" id="btnTabAddNote">+ Note</button>
+          <button class="btn btn-outline btn-sm" id="btnTabAddHl">+ Highlight</button>
+        </div>
+      </div>
+      <div class="grid grid-2" id="detailNotesGrid"></div>
+    </div>
+
+    <div id="tabContentRelated" class="tab-pane" style="display:none;">
+      <h3 style="margin-bottom: 20px;">Readers who enjoyed this also read:</h3>
+      <div class="grid grid-4" id="detailRelatedGrid"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+  BookClubUI.renderSidebar('books');
+
+  // 1. Resolve book identifier from URL query string (?id=..., ?bookId=..., ?book=...)
+  const params = new URLSearchParams(window.location.search);
+  let rawParam = params.get('id') || params.get('bookId') || params.get('book');
+
+  // 2. Check URL pathname for /book-details/:id or /book-details/:slug
+  if (!rawParam) {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const lastPart = pathParts[pathParts.length - 1] || '';
+    if (lastPart && !lastPart.endsWith('.html') && lastPart !== 'book-details') {
+      rawParam = decodeURIComponent(lastPart);
+    }
+  }
+
+  // 3. Check navigation state from sessionStorage/localStorage if user navigated without params
+  if (!rawParam) {
+    try {
+      rawParam = sessionStorage.getItem('selectedBookId') || localStorage.getItem('selectedBookId');
+    } catch (e) {}
+  }
+
+  // 4. Find book using BookClubStore.getBookById (supports numeric ID, string ID, slug, and title)
+  const book = rawParam ? BookClubStore.getBookById(rawParam) : null;
+
+  // 5. Error handling: if no book found, show "Book Not Found" message without crashing or hardcoding
+  if (!book) {
+    document.title = 'Book Not Found — BookClub';
+    BookClubUI.renderTopbar(
+      'Book Not Found',
+      'The book you requested was not found or has been removed from the catalog.',
+      `<a href="books.html" class="btn btn-primary btn-sm">← Back to Catalog</a>`
+    );
+
+    const mainContent = document.getElementById('mainContent');
+    const heroSection = document.querySelector('.book-details-hero');
+    const tabsSection = document.getElementById('detailTabs');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const divider = document.querySelector('.divider');
+
+    if (heroSection) heroSection.style.display = 'none';
+    if (tabsSection) tabsSection.style.display = 'none';
+    if (divider) divider.style.display = 'none';
+    tabPanes.forEach(p => p.style.display = 'none');
+
+    const notFoundCard = document.createElement('div');
+    notFoundCard.className = 'card empty-state';
+    notFoundCard.style.cssText = 'padding: 60px 24px; text-align: center; max-width: 600px; margin: 40px auto;';
+    notFoundCard.innerHTML = `
+      <div style="font-size: 3.5rem; margin-bottom: 16px;">📖</div>
+      <h2 style="font-family: var(--font-display); margin-bottom: 10px; color: var(--ink);">Book Not Found</h2>
+      <p class="text-soft" style="font-size: 1rem; line-height: 1.6; margin-bottom: 24px;">
+        We could not find a book matching <strong>${BookClubUI.escapeHtml(rawParam || 'this link')}</strong> in the catalog.
+      </p>
+      <a href="books.html" class="btn btn-primary">← Return to Books Catalog</a>
+    `;
+    mainContent.appendChild(notFoundCard);
+    return;
+  }
+
+  function fillBookData() {
+    const title = (typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(book, 'title') : (book.title_ta || book.title);
+    const author = (typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(book, 'author') : (book.author_ta || book.author);
+    const genre = (typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(book, 'genre') : (book.genre_ta || book.genre);
+    const desc = (typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(book, 'description') : (book.description_ta || book.description);
+    const byPrefix = (typeof BookForgeI18n !== 'undefined' && BookForgeI18n.t) ? BookForgeI18n.t('books.by', 'by') : 'by';
+    const pagesSuffix = (typeof BookForgeI18n !== 'undefined' && BookForgeI18n.t) ? BookForgeI18n.t('books.pages', 'pages') : 'pages';
+    const allBooksText = (typeof BookForgeI18n !== 'undefined' && BookForgeI18n.t) ? BookForgeI18n.t('bookDetails.allBooks', '← All Books') : '← All Books';
+
+    document.title = `${title} — BookClub`;
+    BookClubUI.renderTopbar(
+      title,
+      `${byPrefix} ${author} · ${genre}`,
+      `<a href="books.html" class="btn btn-outline btn-sm">${allBooksText}</a>`
+    );
+
+    document.getElementById('bookLargeCover').innerHTML = BookClubUI.renderBookCover(book, 'large-cover');
+    document.getElementById('detailGenre').textContent = genre;
+    document.getElementById('detailTitle').textContent = title;
+    document.getElementById('detailAuthor').textContent = `${byPrefix} ${author}`;
+    document.getElementById('detailYear').textContent = `📅 Published ${book.publicationYear}`;
+    document.getElementById('detailPages').textContent = `📄 ${book.totalPages} ${pagesSuffix}`;
+    document.getElementById('detailRating').textContent = `★ ${book.rating} (${book.reviewCount} ratings)`;
+    document.getElementById('detailDescription').textContent = desc;
+    document.getElementById('aboutLongText').textContent = desc;
+  }
+
+  fillBookData();
+  window.addEventListener('bookforge_lang_change', fillBookData);
+
+  // Shelf status
+  function updateShelfUI() {
+    const status = BookClubStore.getBookUserStatus(book.id);
+    const label = document.getElementById('detailShelfStatus');
+    const labels = { reading: 'Currently Reading', want: 'On "Want to Read" shelf', read: 'Completed reading', dnf: 'Did Not Finish' };
+    label.textContent = status.shelf ? `Shelf: ${labels[status.shelf] || status.shelf}` : 'Status: Not on any shelf yet';
+
+    const fill = document.getElementById('paneProgressFill');
+    const pLabel = document.getElementById('paneProgressLabel');
+    const pPct = document.getElementById('paneProgressPct');
+    const input = document.getElementById('inputCurrentPage');
+
+    const cur = status.currentPage || 0;
+    const pct = Math.round((cur / book.totalPages) * 100);
+    if (fill) fill.style.width = `${pct}%`;
+    if (pLabel) pLabel.textContent = `${cur} / ${book.totalPages} pages`;
+    if (pPct) pPct.textContent = `${pct}%`;
+    if (input) {
+      input.value = cur;
+      input.max = book.totalPages;
+    }
+  }
+
+  function checkQuestLockStatus() {
+    const isLocked = (typeof BookClubStore !== 'undefined' && BookClubStore.isBookLocked)
+      ? BookClubStore.isBookLocked(book.id)
+      : !!book.isLocked;
+
+    const questBox = document.getElementById('questUnlockBanner');
+    const shelfBox = document.getElementById('detailShelfStatusBox');
+    const actionsBox = document.querySelector('.book-details-actions');
+
+    if (!isLocked) {
+      if (questBox) questBox.style.display = 'none';
+      if (shelfBox) shelfBox.style.display = 'block';
+      if (actionsBox) actionsBox.style.display = 'flex';
+      return;
+    }
+
+    const quests = BookClubStore.getUserQuests();
+    const quest = quests.find(q => q.book.id === book.id) || {
+      title: book.unlockTask ? book.unlockTask.title : 'Complete Reading Quest',
+      description: book.unlockTask ? book.unlockTask.description : '',
+      current: 0,
+      target: 1,
+      percentage: 0,
+      isCompleted: false,
+      rewardXP: book.rewardXP || 100,
+      rewardBadge: book.rewardBadge || 'Book Hunter'
+    };
+
+    if (shelfBox) shelfBox.style.display = 'none';
+    if (actionsBox) actionsBox.style.display = 'none';
+
+    if (questBox) {
+      questBox.style.display = 'block';
+      questBox.innerHTML = `
+        <div class="card" style="padding: 22px 26px; border: 2px dashed #D9A441; background: linear-gradient(135deg, #FFFDF8 0%, #FFF8EC 100%); border-radius: 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 14px; flex-wrap:wrap; gap:12px;">
+            <div style="flex:1; min-width:250px;">
+              <span class="badge-locked" style="margin-bottom:8px; display:inline-block;">🔒 QUEST REWARD LOCKED</span>
+              <h3 style="margin: 6px 0 8px 0; font-family: var(--font-display); color: #8C5E14; font-size:1.3rem;">
+                ${BookClubUI.escapeHtml(quest.title)}
+              </h3>
+              <p style="margin:0; font-size: 0.95rem; color: #665235; line-height:1.5;">
+                ${BookClubUI.escapeHtml(quest.description)}
+              </p>
+            </div>
+            <div style="text-align: right;">
+              <span class="badge-xp-reward" style="font-size: 0.9rem; padding: 6px 14px;">+${quest.rewardXP} XP</span>
+              <div style="font-size: 0.85rem; font-weight: 700; color: #8C5E14; margin-top: 6px;">🏆 ${BookClubUI.escapeHtml(quest.rewardBadge)}</div>
+            </div>
+          </div>
+
+          <div style="margin: 18px 0 16px 0; background: rgba(0,0,0,0.03); padding:12px 14px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; font-size: 0.88rem; font-weight:700; margin-bottom:6px; color: #734F15;">
+              <span>Quest Progress: ${quest.current} / ${quest.target}</span>
+              <span>${quest.percentage}% Complete</span>
+            </div>
+            <div style="height: 10px; background: rgba(0,0,0,0.08); border-radius: 999px; overflow:hidden;">
+              <div style="height:100%; width: ${quest.percentage}%; background: linear-gradient(90deg, #F59E0B, #10B981); border-radius:999px; transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding-top:4px;">
+            <span style="font-size: 0.88rem; color: #856404; font-weight:600;">
+              ${quest.isCompleted ? '✨ All task requirements are met! Claim your rewards below.' : '💡 Complete the goal above in your Dashboard or Reading Tracker to unlock full access.'}
+            </span>
+            ${quest.isCompleted ? `
+              <button type="button" class="btn btn-warning btn-sm btn-claim-quest" id="btnClaimDetailUnlock" style="font-weight:700; padding: 10px 24px; font-size: 1rem;">
+                🎁 Claim Reward &amp; Unlock Book (+${quest.rewardXP} XP)
+              </button>
+            ` : `
+              <button type="button" class="btn btn-outline btn-sm" disabled style="opacity: 0.7; cursor: not-allowed; padding: 8px 18px;">
+                🔒 Locked Until Task Completed
+              </button>
+            `}
+          </div>
+        </div>
+      `;
+
+      const claimBtn = document.getElementById('btnClaimDetailUnlock');
+      if (claimBtn) {
+        claimBtn.addEventListener('click', () => {
+          const res = BookClubStore.claimQuestAndUnlockBook(book.id);
+          if (res && res.success) {
+            BookClubUI.showToast(`🎉 UNLOCKED! "${res.book.title}" is now available in your personal library! +${res.rewardXP} XP earned!`, 'success');
+            setTimeout(() => {
+              checkQuestLockStatus();
+              updateShelfUI();
+            }, 400);
+          }
+        });
+      }
+    }
+  }
+
+  updateShelfUI();
+  checkQuestLockStatus();
+
+  // Shelf quick buttons
+  document.getElementById('btnStartReading').addEventListener('click', () => {
+    BookClubStore.setBookShelf(book.id, 'reading');
+    BookClubUI.showToast(`Started reading "${book.title}"!`, 'success');
+    updateShelfUI();
+  });
+  document.getElementById('btnWantToRead').addEventListener('click', () => {
+    BookClubStore.setBookShelf(book.id, 'want');
+    BookClubUI.showToast(`Added "${book.title}" to Want to Read shelf.`, 'success');
+    updateShelfUI();
+  });
+  document.getElementById('btnMarkRead').addEventListener('click', () => {
+    BookClubStore.setBookShelf(book.id, 'read');
+    BookClubUI.showToast(`Marked "${book.title}" as Completed! 🎉`, 'success');
+    updateShelfUI();
+  });
+
+  // Progress update form
+  document.getElementById('progressUpdateForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const val = Number(document.getElementById('inputCurrentPage').value);
+    BookClubStore.updateBookProgress(book.id, val);
+    BookClubUI.showToast(`Updated progress to page ${val}!`, 'success');
+    updateShelfUI();
+  });
+
+  // Recommend button
+  document.getElementById('recommendBtn').addEventListener('click', () => {
+    BookClubUI.showModal(
+      'Recommend to a Friend',
+      `
+        <p class="text-soft">Send a recommendation for <strong>${book.title}</strong> to a fellow BookClub reader.</p>
+        <div class="field">
+          <label>Select Reader</label>
+          <select id="recFriendSelect">
+            <option>Aditi Krishnan (@aditi_k)</option>
+            <option>Rahul Thomas (@rahul_t)</option>
+            <option>Meera Joseph (@meera_j)</option>
+            <option>Sam Park (@sampark)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Personal Message</label>
+          <textarea rows="3" placeholder="I thought of you while reading this because..."></textarea>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSendRecommendation()">Send Recommendation</button>
+      `
+    );
+  });
+
+  window.handleSendRecommendation = function () {
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Recommendation sent to friend!`, 'success');
+  };
+
+  // Write Review Modal
+  function openReviewModal() {
+    BookClubUI.showModal(
+      `Write a Review for ${book.title}`,
+      `
+        <div class="field">
+          <label>Overall Rating</label>
+          <div class="star-selector" id="modalStarRow">
+            <span data-star="1">★</span>
+            <span data-star="2">★</span>
+            <span data-star="3">★</span>
+            <span data-star="4">★</span>
+            <span data-star="5">★</span>
+          </div>
+          <input type="hidden" id="modalRatingVal" value="5">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Story Rating (1-5)</label><input type="number" id="mStory" min="1" max="5" value="5"></div>
+          <div class="field"><label>Characters Rating (1-5)</label><input type="number" id="mChar" min="1" max="5" value="5"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Writing Rating (1-5)</label><input type="number" id="mWrit" min="1" max="5" value="5"></div>
+          <div class="field"><label>Pacing Rating (1-5)</label><input type="number" id="mPace" min="1" max="5" value="4"></div>
+        </div>
+        <div class="field">
+          <label for="modalRevText">Review Text</label>
+          <textarea id="modalRevText" rows="4" placeholder="What did you think of the themes, character arcs, and ending?"></textarea>
+        </div>
+        <div class="checkbox-row" style="margin-bottom:12px;">
+          <input type="checkbox" id="modalSpoilerCheck">
+          <label for="modalSpoilerCheck">This review contains plot spoilers</label>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSubmitBookReview()">Publish Review</button>
+      `
+    );
+  }
+  document.getElementById('btnWriteReview').addEventListener('click', openReviewModal);
+  document.getElementById('btnWriteReviewTab').addEventListener('click', openReviewModal);
+
+  window.handleSubmitBookReview = function () {
+    const text = document.getElementById('modalRevText').value.trim();
+    if (!text) { alert('Please enter your review.'); return; }
+    BookClubStore.addReview({
+      bookId: book.id,
+      bookTitle: book.title,
+      overallRating: Number(document.getElementById('modalRatingVal').value) || 5,
+      storyRating: Number(document.getElementById('mStory').value) || 5,
+      characterRating: Number(document.getElementById('mChar').value) || 5,
+      writingRating: Number(document.getElementById('mWrit').value) || 5,
+      pacingRating: Number(document.getElementById('mPace').value) || 4,
+      worldBuildingRating: 5,
+      reviewText: text,
+      hasSpoiler: document.getElementById('modalSpoilerCheck').checked
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Your review has been published!', 'success');
+    renderReviews();
+  };
+
+  // Add Note Modal
+  function openAddNoteModal() {
+    BookClubUI.showModal(
+      `Add Private Note for ${book.title}`,
+      `
+        <div class="field">
+          <label>Page Number</label>
+          <input type="number" id="notePage" min="1" max="${book.totalPages}" value="1">
+        </div>
+        <div class="field">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="noteTags" placeholder="Clues, Symbolism, Character Development">
+        </div>
+        <div class="field">
+          <label>Note Content</label>
+          <textarea id="noteContent" rows="4" placeholder="Your private notes, theories, and reflections..."></textarea>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSubmitNote()">Save Note</button>
+      `
+    );
+  }
+  document.getElementById('btnAddNote').addEventListener('click', openAddNoteModal);
+  document.getElementById('btnTabAddNote').addEventListener('click', openAddNoteModal);
+
+  window.handleSubmitNote = function () {
+    const text = document.getElementById('noteContent').value.trim();
+    if (!text) { alert('Please enter note text.'); return; }
+    BookClubStore.addNote({
+      bookId: book.id,
+      page: document.getElementById('notePage').value,
+      tags: document.getElementById('noteTags').value,
+      note: text
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Note saved to your personal binder!', 'success');
+    renderNotes();
+  };
+
+  // Add Highlight Modal
+  function openAddHlModal() {
+    BookClubUI.showModal(
+      `Save Highlight / Quote from ${book.title}`,
+      `
+        <div class="field">
+          <label>Quote Text</label>
+          <textarea id="hlQuote" rows="3" placeholder="Enter memorable quote..."></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Page Number</label><input type="number" id="hlPage" value="1"></div>
+          <div class="field">
+            <label>Card Color Tint</label>
+            <select id="hlColor">
+              <option value="#E9C6A5">Terracotta Warm</option>
+              <option value="#E3EEE3">Sage Green</option>
+              <option value="#FDF4E3">Antique Gold</option>
+              <option value="#EDE7F6">Soft Lavender</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Personal Reflection (Optional)</label>
+          <input type="text" id="hlNote" placeholder="Why this sentence resonated...">
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="handleSubmitHl()">Save Highlight</button>
+      `
+    );
+  }
+  document.getElementById('btnAddHighlight').addEventListener('click', openAddHlModal);
+  document.getElementById('btnTabAddHl').addEventListener('click', openAddHlModal);
+
+  window.handleSubmitHl = function () {
+    const quote = document.getElementById('hlQuote').value.trim();
+    if (!quote) { alert('Please enter quote text.'); return; }
+    BookClubStore.addHighlight({
+      bookId: book.id,
+      quote: quote,
+      page: document.getElementById('hlPage').value,
+      color: document.getElementById('hlColor').value,
+      userNote: document.getElementById('hlNote').value
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Highlight pinned to your quote wall!', 'success');
+    renderNotes();
+  };
+
+  // Render Reviews
+  function renderReviews() {
+    const reviews = BookClubStore.getReviews().filter(r => r.bookId === book.id);
+    const container = document.getElementById('detailReviewsGrid');
+    if (reviews.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('⭐', 'No reviews yet', 'Be the first reader in the community to review this title.', 'Write Review', '#')}</div>`;
+      const btn = container.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openReviewModal(); });
+      return;
+    }
+    container.innerHTML = reviews.map(r => `
+      <div class="card review-card">
+        <div class="avatar-chip" style="background:var(--clay); margin-left:0;">${r.avatar || 'JR'}</div>
+        <div class="review-body">
+          <div class="flex-between">
+            <strong>${r.user}</strong>
+            <span class="stars">${'★'.repeat(r.overallRating)}${'☆'.repeat(5 - r.overallRating)}</span>
+          </div>
+          <p class="text-soft" style="font-size:0.8rem; margin:2px 0 8px;">${r.date}</p>
+          <p style="margin:0 0 10px;">${r.reviewText}</p>
+          ${r.hasSpoiler ? `
+            <div class="spoiler-box">
+              <strong>⚠️ Spoiler Warning:</strong>
+              <div class="spoiler-blur" id="sp-${r.id}">${r.spoilerText || 'Spoiler content'}</div>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('sp-${r.id}').classList.toggle('revealed')">Reveal Spoiler</button>
+            </div>
+          ` : ''}
+          <div class="flex-between" style="font-size:0.82rem; color:var(--ink-soft); border-top:1px dashed var(--line); padding-top:8px;">
+            <span>Story: ${r.categoryRatings.story}★ · Characters: ${r.categoryRatings.characters}★</span>
+            <button class="btn btn-ghost btn-sm" onclick="BookClubStore.toggleLikeReview(${r.id}); renderReviews();">❤️ ${r.likes}</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderReviews();
+
+  // Render Discussions
+  const disc = BookClubStore.getDiscussions().filter(d => d.bookId === book.id || d.bookTag === book.title);
+  const discGrid = document.getElementById('detailDiscussionsGrid');
+  if (disc.length === 0) {
+    discGrid.innerHTML = `${BookClubUI.renderEmptyState('💬', 'No active discussions for this title', 'Start a reading thread to discuss theories and favorite moments.', 'Start Topic', 'discussions.html')}`;
+  } else {
+    discGrid.innerHTML = disc.map(d => `
+      <div class="card discussion-card">
+        <div class="discussion-top">
+          <span class="discussion-book-tag">${d.category}</span>
+          <span class="text-soft" style="font-size:0.8rem;">${d.timeAgo}</span>
+        </div>
+        <h3 class="discussion-title"><a href="discussion-details.html?id=${d.id}">${d.title}</a></h3>
+        <p class="discussion-content">${d.content}</p>
+        <div class="discussion-footer">
+          <div class="author-line">
+            <div class="avatar-chip" style="background:var(--clay); margin-left:0;">${d.avatar}</div>
+            <span>${d.author}</span>
+          </div>
+          <div class="flex gap-12">
+            <span>💬 ${(d.replies || []).length} replies</span>
+            <span>❤️ ${d.likes}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Render Notes & Highlights
+  function renderNotes() {
+    const notes = BookClubStore.getNotes().filter(n => n.bookId === book.id);
+    const highlights = BookClubStore.getHighlights().filter(h => h.bookId === book.id);
+    const nGrid = document.getElementById('detailNotesGrid');
+
+    let html = '';
+    if (notes.length === 0 && highlights.length === 0) {
+      nGrid.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('📝', 'No personal notes or quotes', 'Capture meaningful sentences and private margin notes while reading.', 'Add First Note', '#')}</div>`;
+      const btn = nGrid.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openAddNoteModal(); });
+      return;
+    }
+
+    notes.forEach(n => {
+      html += `
+        <div class="card panel">
+          <div class="flex-between mb-0">
+            <span class="badge badge-want">Page ${n.page}</span>
+            <span class="text-soft" style="font-size:0.76rem;">${n.createdAt}</span>
+          </div>
+          <p style="margin: 12px 0;">${n.note}</p>
+          <div class="flex gap-8">
+            ${(n.tags || []).map(t => `<span class="badge badge-member">${t}</span>`).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    highlights.forEach(h => {
+      html += `
+        <div class="card quote-card" style="background:${h.color || '#FBF7EF'};">
+          <div class="quote-text">"${h.quote}"</div>
+          <div class="quote-meta">
+            <span>Page ${h.page}</span>
+            <span>${h.userNote || ''}</span>
+          </div>
+        </div>
+      `;
+    });
+    nGrid.innerHTML = html;
+  }
+  renderNotes();
+
+  // Related Books
+  const related = BookClubStore.getBooks().filter(b => b.genre === book.genre && b.id !== book.id).slice(0, 4);
+  const relGrid = document.getElementById('detailRelatedGrid');
+  if (relGrid) {
+    relGrid.innerHTML = related.map(b => BookClubUI.renderBookCard(b)).join('');
+  }
+
+  // Tabs switching logic
+  document.querySelectorAll('#detailTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#detailTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      const tabName = this.getAttribute('data-tab');
+
+      document.getElementById('tabContentAbout').style.display = tabName === 'about' ? 'block' : 'none';
+      document.getElementById('tabContentProgress').style.display = tabName === 'progress' ? 'block' : 'none';
+      document.getElementById('tabContentReviews').style.display = tabName === 'reviews' ? 'block' : 'none';
+      document.getElementById('tabContentDiscussions').style.display = tabName === 'discussions' ? 'block' : 'none';
+      document.getElementById('tabContentNotes').style.display = tabName === 'notes' ? 'block' : 'none';
+      document.getElementById('tabContentRelated').style.display = tabName === 'related' ? 'block' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Library — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- PICK FOR ME BANNER -->
+    <div class="pick-for-me-banner">
+      <div>
+        <h2>✨ Don't know what to read next?</h2>
+        <p>Let the library pick a book from your "Want to Read" shelf based on your current reading mood.</p>
+      </div>
+      <button type="button" class="btn btn-primary" id="btnPickForMe" style="background: var(--shell-gold); color: var(--shell-green-deep);">🎲 Pick For Me</button>
+    </div>
+
+    <!-- CONTROLS & FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-box" style="flex:2;">
+        <span>🔎</span>
+        <input type="text" id="librarySearchInput" placeholder="Filter books in your personal library...">
+      </div>
+
+      <select id="libraryGenreFilter">
+        <option value="all">All Genres</option>
+        <option value="Fiction">Fiction</option>
+        <option value="Mystery">Mystery</option>
+        <option value="Fantasy">Fantasy</option>
+        <option value="Non-Fiction">Non-Fiction</option>
+        <option value="Classic">Classic Literature</option>
+      </select>
+
+      <div class="flex gap-8">
+        <a href="books.html" class="btn btn-outline btn-sm">+ Add More Books</a>
+      </div>
+    </div>
+
+    <!-- VISUAL SHELVES (KANBAN GRID) -->
+    <div class="shelves-container">
+
+      <!-- SHELF: Currently Reading -->
+      <div class="shelf-column" id="col-reading">
+        <div class="shelf-header">
+          <h3 class="shelf-title">📖 Currently Reading</h3>
+          <span class="shelf-count" id="count-reading">0</span>
+        </div>
+        <div class="shelf-book-list" id="list-reading"></div>
+      </div>
+
+      <!-- SHELF: Want to Read -->
+      <div class="shelf-column" id="col-want">
+        <div class="shelf-header">
+          <h3 class="shelf-title">🔖 Want to Read</h3>
+          <span class="shelf-count" id="count-want">0</span>
+        </div>
+        <div class="shelf-book-list" id="list-want"></div>
+      </div>
+
+      <!-- SHELF: Read (Completed) -->
+      <div class="shelf-column" id="col-read">
+        <div class="shelf-header">
+          <h3 class="shelf-title">✅ Finished Reads</h3>
+          <span class="shelf-count" id="count-read">0</span>
+        </div>
+        <div class="shelf-book-list" id="list-read"></div>
+      </div>
+
+      <!-- SHELF: Favorites -->
+      <div class="shelf-column" id="col-favorites">
+        <div class="shelf-header">
+          <h3 class="shelf-title">❤️ All-Time Favorites</h3>
+          <span class="shelf-count" id="count-favorites">0</span>
+        </div>
+        <div class="shelf-book-list" id="list-favorites"></div>
+      </div>
+
+      <!-- SHELF: DNF -->
+      <div class="shelf-column" id="col-dnf">
+        <div class="shelf-header">
+          <h3 class="shelf-title">⏸️ Did Not Finish</h3>
+          <span class="shelf-count" id="count-dnf">0</span>
+        </div>
+        <div class="shelf-book-list" id="list-dnf"></div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('library');
+  BookClubUI.renderTopbar(
+    'My Personal Library',
+    'Organize and track your book life across customizable shelves.',
+    `<a href="reading-progress.html" class="btn btn-primary btn-sm">Reading Tracker 📈</a>`
+  );
+
+  const searchInput = document.getElementById('librarySearchInput');
+  const genreFilter = document.getElementById('libraryGenreFilter');
+  const btnPickForMe = document.getElementById('btnPickForMe');
+
+  function renderLibraryShelves() {
+    const shelves = BookClubStore.getLibraryShelves();
+    const query = searchInput.value.trim().toLowerCase();
+    const genre = genreFilter.value;
+
+    const shelfKeys = ['reading', 'want', 'read', 'favorites', 'dnf'];
+
+    shelfKeys.forEach(key => {
+      const colList = document.getElementById(`list-${key}`);
+      const countEl = document.getElementById(`count-${key}`);
+      let books = shelves[key] || [];
+
+      if (query) {
+        books = books.filter(b => b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query));
+      }
+      if (genre !== 'all') {
+        books = books.filter(b => b.genre.toLowerCase() === genre.toLowerCase());
+      }
+
+      countEl.textContent = books.length;
+
+      if (books.length === 0) {
+        colList.innerHTML = `
+          <div style="text-align:center; padding: 30px 10px; color: var(--ink-soft); font-size: 0.85rem;">
+            No books on this shelf.
+          </div>
+        `;
+        return;
+      }
+
+      colList.innerHTML = books.map(b => `
+        <div class="shelf-book-card" data-book-id="${b.id}">
+          <div class="shelf-mini-cover">
+            ${BookClubUI.renderBookCover(b)}
+          </div>
+          <div class="shelf-book-details">
+            <h4 class="shelf-book-title"><a href="book-details.html?id=${b.id}">${(typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(b, 'title') : (b.title_ta || b.title)}</a></h4>
+            <p class="shelf-book-author">${(typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(b, 'author') : (b.author_ta || b.author)} · ${(typeof BookForgeI18n !== 'undefined' && BookForgeI18n.getBookText) ? BookForgeI18n.getBookText(b, 'genre') : (b.genre_ta || b.genre)}</p>
+
+            ${key === 'reading' ? `
+              <div class="progress-track" style="height:5px; margin-bottom:4px;">
+                <div class="progress-fill" style="width: ${b.percentage}%;"></div>
+              </div>
+              <div class="flex-between" style="font-size:0.72rem; color:var(--ink-soft); margin-bottom:6px;">
+                <span>${b.currentPage}/${b.totalPages}p</span>
+                <strong>${b.percentage}%</strong>
+              </div>
+            ` : ''}
+
+            <select class="shelf-move-select" data-move-book="${b.id}">
+              <option value="" disabled selected>Move shelf...</option>
+              <option value="reading" ${b.userShelf === 'reading' ? 'disabled' : ''}>Currently Reading</option>
+              <option value="want" ${b.userShelf === 'want' ? 'disabled' : ''}>Want to Read</option>
+              <option value="read" ${b.userShelf === 'read' ? 'disabled' : ''}>Finished Read</option>
+              <option value="dnf" ${b.userShelf === 'dnf' ? 'disabled' : ''}>Did Not Finish</option>
+            </select>
+          </div>
+        </div>
+      `).join('');
+    });
+
+    // Hook move dropdowns
+    document.querySelectorAll('[data-move-book]').forEach(sel => {
+      sel.addEventListener('change', function () {
+        const bId = this.getAttribute('data-move-book');
+        const targetShelf = this.value;
+        BookClubStore.setBookShelf(bId, targetShelf);
+        BookClubUI.showToast(`Moved book to '${targetShelf.toUpperCase()}'!`, 'success');
+        renderLibraryShelves();
+      });
+    });
+  }
+
+  // Pick For Me Feature
+  btnPickForMe.addEventListener('click', () => {
+    const shelves = BookClubStore.getLibraryShelves();
+    const wantBooks = shelves.want;
+    if (!wantBooks.length) {
+      BookClubUI.showToast('Your "Want to Read" shelf is empty! Add some books from catalog first.', 'warning');
+      return;
+    }
+    const chosen = wantBooks[Math.floor(Math.random() * wantBooks.length)];
+    BookClubUI.showModal(
+      '🎲 Your Next Read Is...',
+      `
+        <div style="text-align:center; padding: 10px 0;">
+          <div style="width: 140px; height: 200px; margin: 0 auto 16px;">
+            ${BookClubUI.renderBookCover(chosen)}
+          </div>
+          <h2 style="margin: 0 0 4px 0;">${chosen.title}</h2>
+          <p class="text-soft" style="font-size:1.1rem; margin-bottom: 12px;">by ${chosen.author}</p>
+          <span class="badge badge-want">${chosen.genre} · ${chosen.totalPages} pages</span>
+          <p style="margin: 16px auto; max-width: 360px; font-size: 0.92rem;">${chosen.description.slice(0, 120)}...</p>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Keep Searching</button>
+        <button type="button" class="btn btn-primary" onclick="handleStartReadingChosen(${chosen.id})">Start Reading This Now</button>
+      `
+    );
+  });
+
+  window.handleStartReadingChosen = function (id) {
+    BookClubStore.setBookShelf(id, 'reading');
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Book moved to Currently Reading!', 'success');
+    renderLibraryShelves();
+  };
+
+  searchInput.addEventListener('input', renderLibraryShelves);
+  genreFilter.addEventListener('change', renderLibraryShelves);
+  window.addEventListener('bookforge_lang_change', renderLibraryShelves);
+
+  // Initial render
+  renderLibraryShelves();
+});
+</script>
+</body>
+</html>

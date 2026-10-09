@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Goals — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- HERO HEADER BANNER -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, var(--brown-deep), #3E2712); color: #fff;">
+      <div class="flex-between" style="flex-wrap:wrap; gap:16px;">
+        <div>
+          <span class="eyebrow" style="color: var(--shell-gold);">Annual Reading Target</span>
+          <h1 style="color: #fff; margin: 6px 0;">50 Books in 2026</h1>
+          <p style="color: #DCC9AE; margin: 0; max-width: 500px;">You've finished 28 books so far (56%). You are 2 books ahead of your annual schedule!</p>
+        </div>
+        <button type="button" class="btn btn-primary" id="btnCreateNewGoal" style="background: var(--shell-gold); color: var(--shell-green-deep);">+ Set New Reading Goal</button>
+      </div>
+    </div>
+
+    <!-- ACTIVE GOALS GRID -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Active Goals</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">Manage your monthly milestones, genre quests, and daily page habits.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom: 40px;" id="activeGoalsGrid">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- QUEST MILESTONES & LOCKED BOOK REWARD VAULT -->
+    <div class="beginner-rewards-vault" id="goalsQuestVault" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- COMPLETED GOALS & ACHIEVEMENTS -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Completed Goals & History</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">Celebrating the milestones you've conquered this season.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2" id="completedGoalsGrid" style="margin-bottom: 40px;">
+      <div class="card panel">
+        <div class="flex-between mb-0">
+          <span class="badge badge-completed">Completed 100%</span>
+          <span class="text-soft" style="font-size:0.78rem;">April 30, 2026</span>
+        </div>
+        <h3 style="margin: 10px 0 4px;">Spring Reading Sprint 2026</h3>
+        <p class="text-soft" style="margin-bottom:12px;">Target: 8 books in 30 days · Final score: 8/8 books</p>
+        <div class="badge badge-reading">🌸 Spring Bloom Master Badge Awarded</div>
+      </div>
+
+      <div class="card panel">
+        <div class="flex-between mb-0">
+          <span class="badge badge-completed">Completed 100%</span>
+          <span class="text-soft" style="font-size:0.78rem;">June 15, 2026</span>
+        </div>
+        <h3 style="margin: 10px 0 4px;">Non-Fiction Broadening Quest</h3>
+        <p class="text-soft" style="margin-bottom:12px;">Target: 5 books outside fiction · Final score: 5/5 books</p>
+        <div class="badge badge-reading">🧠 Truth Seeker Badge Awarded</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('reading-goals');
+  BookClubUI.renderTopbar(
+    'Reading Goals',
+    'Set ambitious reading targets, build steady habits, and watch your achievements grow.',
+    `<button class="btn btn-primary btn-sm" id="topbarGoalBtn">+ Create Goal</button>`
+  );
+
+  function renderGoalsList() {
+    const goals = BookClubStore.getGoals();
+    const container = document.getElementById('activeGoalsGrid');
+
+    if (goals.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('🎯', 'No active reading goals', 'Set a book target for the month or year to keep your reading momentum alive.', 'Create First Goal', '#')}</div>`;
+      const btn = container.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openCreateGoalModal(); });
+      return;
+    }
+
+    container.innerHTML = goals.map(g => `
+      <div class="card panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="flex-between mb-0">
+            <span class="badge badge-want">${g.type}</span>
+            <span class="text-soft" style="font-size:0.8rem;">⏳ ${g.daysRemaining} days left</span>
+          </div>
+          <h3 style="margin: 12px 0 6px;">${g.title}</h3>
+          <p class="text-soft" style="font-size:0.88rem; margin-bottom:16px;">Deadline: ${g.deadline}</p>
+
+          <div class="progress-track" style="height:10px; margin-bottom:8px;">
+            <div class="progress-fill" style="width: ${g.percentage}%; background:${g.color || 'var(--clay)'};"></div>
+          </div>
+
+          <div class="flex-between" style="font-size:0.85rem; color:var(--ink-soft); margin-bottom:18px;">
+            <span>Current: <strong>${g.current}</strong> / ${g.target} ${g.unit}</span>
+            <strong style="color:var(--brown-deep);">${g.percentage}%</strong>
+          </div>
+        </div>
+
+        <div class="flex gap-8" style="justify-content: flex-end; border-top: 1px dashed var(--line); padding-top: 12px;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="openIncrementGoalModal(${g.id}, '${g.title.replace(/'/g, "\\'")}', ${g.current}, ${g.target})">+ Log Progress</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="handleDeleteGoal(${g.id})">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openCreateGoalModal() {
+    BookClubUI.showModal(
+      'Create New Reading Goal',
+      `
+        <div class="field">
+          <label>Goal Title</label>
+          <input type="text" id="goalTitle" placeholder="e.g. Read 12 Classic Novels This Year">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Goal Type</label>
+            <select id="goalType">
+              <option value="Books per year">Books per year</option>
+              <option value="Pages per year">Pages per year</option>
+              <option value="Books per month">Books per month</option>
+              <option value="Pages per month">Pages per month</option>
+              <option value="Genre challenge">Genre challenge</option>
+              <option value="Weekly goal">Weekly goal</option>
+              <option value="Custom goal">Custom goal</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Unit Label</label>
+            <input type="text" id="goalUnit" placeholder="e.g. books or pages" value="books">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Target Amount</label>
+            <input type="number" id="goalTarget" min="1" value="12">
+          </div>
+          <div class="field">
+            <label>Current Completed</label>
+            <input type="number" id="goalCurrent" min="0" value="0">
+          </div>
+        </div>
+        <div class="field">
+          <label>Target Deadline</label>
+          <input type="date" id="goalDeadline" value="2026-12-31">
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveNewGoal()">Create Goal</button>
+      `
+    );
+  }
+
+  window.saveNewGoal = function () {
+    const title = document.getElementById('goalTitle').value.trim();
+    if (!title) { alert('Please enter a goal title.'); return; }
+    BookClubStore.addGoal({
+      title: title,
+      type: document.getElementById('goalType').value,
+      unit: document.getElementById('goalUnit').value || 'books',
+      target: Number(document.getElementById('goalTarget').value) || 10,
+      current: Number(document.getElementById('goalCurrent').value) || 0,
+      deadline: document.getElementById('goalDeadline').value || '2026-12-31'
+    });
+    BookClubUI.closeModal();
+    BookClubUI.showToast('Reading goal established! 🎯', 'success');
+    renderGoalsList();
+  };
+
+  window.openIncrementGoalModal = function (id, title, current, target) {
+    const add = prompt(`Add to current progress for "${title}" (currently ${current}/${target}):`, "1");
+    if (add !== null) {
+      const num = Number(add);
+      if (!isNaN(num) && num > 0) {
+        const goals = BookClubStore.getGoals();
+        const g = goals.find(x => x.id === id);
+        if (g) {
+          g.current += num;
+          g.percentage = Math.min(100, Math.round((g.current / g.target) * 100));
+          localStorage.setItem('bookclub_goals_data', JSON.stringify(goals));
+          BookClubUI.showToast(`Updated! New progress: ${g.current}/${g.target}`, 'success');
+          renderGoalsList();
+        }
+      }
+    }
+  };
+
+  window.handleDeleteGoal = function (id) {
+    if (confirm('Are you sure you want to delete this goal?')) {
+      BookClubStore.deleteGoal(id);
+      BookClubUI.showToast('Goal deleted.', 'info');
+      renderGoalsList();
+    }
+  };
+
+  function renderGoalsQuests() {
+    const vaultEl = document.getElementById('goalsQuestVault');
+    if (!vaultEl || !BookClubStore.getUserQuests) return;
+
+    const quests = BookClubStore.getUserQuests();
+    const stats = BookClubStore.getUserStats();
+    const unlockedCount = quests.filter(q => q.isUnlocked).length;
+
+    vaultEl.innerHTML = `
+      <div class="vault-header">
+        <div class="vault-title-wrap">
+          <h3>🎁 Goal Milestones &amp; Locked Book Vault (Progressive XP)</h3>
+          <p>
+            Complete your reading goals and platform challenges to unlock prestigious reward books with increasing XP: <strong>100 → 150 → 250 → 350 → 500 → 750 XP</strong>!
+          </p>
+        </div>
+        <div class="vault-level-pill">
+          <span>🔓 ${unlockedCount} / ${quests.length} Unlocked</span>
+          <span>⚡ ${stats.xp} Total XP</span>
+        </div>
+      </div>
+
+      <div class="vault-cards-grid">
+        ${quests.map(q => {
+          const isUnlocked = q.isUnlocked;
+          const isComplete = q.isCompleted;
+
+          return `
+            <div class="vault-quest-card ${isUnlocked ? 'unlocked-card' : ''}">
+              <div>
+                <div class="vault-book-preview">
+                  <div class="vault-book-thumb">
+                    <img src="${q.book.coverImage}" alt="${q.book.title}" onerror="this.src='images/default-cover.jpg';">
+                  </div>
+                  <div class="vault-book-details">
+                    <h4>${BookClubUI.escapeHtml(q.book.title)}</h4>
+                    <p class="vault-author">by ${BookClubUI.escapeHtml(q.book.author)} · <span style="color:#F8E7BE;">${q.book.genre}</span></p>
+                    <span class="vault-reward-pill">⚡ +${q.rewardXP} XP · 🏆 ${BookClubUI.escapeHtml(q.rewardBadge)}</span>
+                  </div>
+                </div>
+
+                <div class="quest-task-label" style="color:#FFFFFF; margin-bottom: 6px;">
+                  🎯 ${BookClubUI.escapeHtml(q.title)}
+                </div>
+                <p class="vault-quest-desc">
+                  ${BookClubUI.escapeHtml(q.description)}
+                </p>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#CAD7CE; font-weight:700; margin-bottom:4px;">
+                  <span>Goal Progress: ${q.current} / ${q.target}</span>
+                  <span>${q.percentage}%</span>
+                </div>
+                <div class="quest-mini-bar-bg" style="background: rgba(255,255,255,0.15);">
+                  <div class="quest-mini-bar-fill" style="width: ${q.percentage}%;"></div>
+                </div>
+
+                <div class="vault-quest-foot">
+                  ${isUnlocked ? `
+                    <span style="font-size:0.8rem; color:#6EE7B7; font-weight:700;">✓ Unlocked</span>
+                    <a href="book-details.html?id=${q.book.id}" class="btn btn-outline btn-sm" style="color:#FFFFFF; border-color:rgba(255,255,255,0.4);">Read Book</a>
+                  ` : isComplete ? `
+                    <button type="button" class="btn btn-warning btn-sm btn-claim-quest" data-unlock-quest="${q.book.id}" style="width:100%; font-weight:700;">
+                      🎁 Claim &amp; Unlock (+${q.rewardXP} XP)
+                    </button>
+                  ` : `
+                    <span style="font-size:0.78rem; color:#FCD34D;">🔒 In Progress</span>
+                    <a href="book-details.html?id=${q.book.id}" class="btn btn-ghost btn-sm" style="color:#CAD7CE; font-size:0.8rem;">View Quest →</a>
+                  `}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  document.getElementById('btnCreateNewGoal').addEventListener('click', openCreateGoalModal);
+  document.getElementById('topbarGoalBtn').addEventListener('click', openCreateGoalModal);
+
+  renderGoalsList();
+  renderGoalsQuests();
+  window.addEventListener('bookforge_lang_change', () => {
+    renderGoalsList();
+    renderGoalsQuests();
+  });
+});
+</script>
+</body>
+</html>

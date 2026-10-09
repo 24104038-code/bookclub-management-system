@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboards — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="lbTabs">
+      <span class="tab active" data-tab="overall">Overall All-Time</span>
+      <span class="tab" data-tab="monthly">This Month (September)</span>
+      <span class="tab" data-tab="weekly">This Week</span>
+      <span class="tab" data-tab="friends">Friends & Circle</span>
+    </div>
+
+    <!-- TOP 3 PODIUM DISPLAY -->
+    <div class="card panel mb-30 text-center">
+      <h3 style="margin-top:0;">Top 3 Reader Podium</h3>
+      <div class="podium-wrap" id="lbPodiumWrap"></div>
+    </div>
+
+    <!-- LEADERBOARD TABLE -->
+    <div class="table-wrap mb-30">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70px;">Rank</th>
+            <th>Reader</th>
+            <th>Level</th>
+            <th>Total XP</th>
+            <th>Books Read</th>
+            <th>Pages Turned</th>
+            <th>Streak</th>
+            <th>Badge</th>
+          </tr>
+        </thead>
+        <tbody id="lbTableBody">
+          <!-- Rows rendered dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('leaderboards');
+  BookClubUI.renderTopbar(
+    'Community Leaderboards',
+    'Honor top readers turning pages, finishing challenges, and inspiring book circles.',
+    `<a href="achievements.html" class="btn btn-outline btn-sm">My Achievements 🏆</a>`
+  );
+
+  let currentTab = 'overall';
+
+  function renderLeaderboard() {
+    const data = (typeof MOCK_LEADERBOARDS !== 'undefined') ? MOCK_LEADERBOARDS[currentTab] || [] : [];
+    const tbody = document.getElementById('lbTableBody');
+    const podium = document.getElementById('lbPodiumWrap');
+
+    // Render Podium
+    if (data.length >= 3) {
+      podium.innerHTML = `
+        <div class="podium-step podium-rank-2">
+          <div class="podium-avatar" style="background:var(--green-shelf);">${data[1].avatar}</div>
+          <div class="podium-name">${data[1].name}</div>
+          <div class="podium-score">${data[1].books} bks · ${data[1].pages} pgs</div>
+          <div class="podium-pillar"><span>#2 🥈</span></div>
+        </div>
+        <div class="podium-step podium-rank-1">
+          <div class="podium-avatar" style="background:var(--shell-gold-deep);">${data[0].avatar}</div>
+          <div class="podium-name">${data[0].name}</div>
+          <div class="podium-score">${data[0].books} bks · ${data[0].pages} pgs</div>
+          <div class="podium-pillar"><span>#1 👑</span></div>
+        </div>
+        <div class="podium-step podium-rank-3">
+          <div class="podium-avatar" style="background:var(--clay);">${data[2].avatar}</div>
+          <div class="podium-name">${data[2].name}</div>
+          <div class="podium-score">${data[2].books} bks · ${data[2].pages} pgs</div>
+          <div class="podium-pillar"><span>#3 🥉</span></div>
+        </div>
+      `;
+    }
+
+    // Render Table
+    tbody.innerHTML = data.map(row => `
+      <tr style="${row.isCurrentUser ? 'background: rgba(217, 164, 65, 0.15); font-weight: 600;' : ''}">
+        <td><strong>#${row.rank}</strong></td>
+        <td>
+          <div class="author-line">
+            <div class="avatar-chip" style="background:var(--clay); margin:0 8px 0 0;">${row.avatar}</div>
+            <div>
+              <strong>${row.name} ${row.isCurrentUser ? '<span class="badge badge-want" style="font-size:0.68rem; margin-left:4px;">You</span>' : ''}</strong>
+              <div class="text-soft" style="font-size:0.78rem;">@${row.username}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-member">Lvl ${row.level}</span></td>
+        <td><strong>${row.xp.toLocaleString()} XP</strong></td>
+        <td>${row.books}</td>
+        <td>${row.pages.toLocaleString()}</td>
+        <td>🔥 ${row.streak}d</td>
+        <td><span class="badge badge-reading">${row.badge}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  document.querySelectorAll('#lbTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#lbTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      currentTab = this.getAttribute('data-tab');
+      renderLeaderboard();
+    });
+  });
+
+  renderLeaderboard();
+});
+</script>
+</body>
+</html>

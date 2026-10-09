@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Progress & Tracker — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.heat-calendar-wrap {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 6px;
+  margin-top: 14px;
+}
+.heat-cell {
+  aspect-ratio: 1 / 1;
+  background: var(--cream-deep);
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  position: relative;
+  cursor: pointer;
+  transition: transform .15s;
+}
+.heat-cell:hover { transform: scale(1.15); z-index: 2; }
+.heat-cell.l1 { background: #D6E3D4; }
+.heat-cell.l2 { background: #9EC09B; }
+.heat-cell.l3 { background: #689E65; }
+.heat-cell.l4 { background: #4C6A50; }
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="grid grid-4" style="margin-bottom: 24px;">
+      <div class="card stat-card">
+        <div class="stat-title">Pages Today</div>
+        <div class="stat-value tone-green" id="statPagesToday">45</div>
+        <div class="stat-delta up">Daily minimum hit ✅</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Pages This Week</div>
+        <div class="stat-value tone-gold" id="statPagesWeek">380</div>
+        <div class="stat-delta">Target: 400 pages</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Pages This Month</div>
+        <div class="stat-value tone-blue" id="statPagesMonth">1,450</div>
+        <div class="stat-delta up">↑ 18% over last month</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Average Daily Pace</div>
+        <div class="stat-value tone-purple" id="statAvgPages">35 pgs</div>
+        <div class="stat-delta">Est. 1 book / 9 days</div>
+      </div>
+    </div>
+
+    <!-- 30-DAY HABIT STREAK & CALENDAR VISUALIZATION -->
+    <div class="card panel mb-30">
+      <div class="flex-between">
+        <div>
+          <h3 style="margin:0 0 4px 0;">Reading Streak Visualization</h3>
+          <p class="text-soft" style="margin:0; font-size:0.88rem;">Current Streak: <strong style="color:var(--clay);">14 Consecutive Days</strong> · Longest Streak: <strong>21 Days</strong></p>
+        </div>
+        <div class="flex gap-8" style="font-size: 0.76rem; color: var(--ink-soft); align-items: center;">
+          <span>Less</span>
+          <span class="heat-cell" style="width:12px; height:12px; display:inline-block;"></span>
+          <span class="heat-cell l1" style="width:12px; height:12px; display:inline-block;"></span>
+          <span class="heat-cell l2" style="width:12px; height:12px; display:inline-block;"></span>
+          <span class="heat-cell l3" style="width:12px; height:12px; display:inline-block;"></span>
+          <span class="heat-cell l4" style="width:12px; height:12px; display:inline-block;"></span>
+          <span>More</span>
+        </div>
+      </div>
+
+      <div class="heat-calendar-wrap" id="streakCalendarGrid">
+        <!-- 30 heat map cells -->
+      </div>
+    </div>
+
+    <!-- CURRENTLY READING TRACKER ITEMS -->
+    <div class="flex-between mb-30">
+      <div>
+        <h2 style="margin:0;">Active Books</h2>
+        <p class="text-soft" style="margin:4px 0 0 0;">Update your page numbers or log a focused reading session.</p>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" id="btnLogQuickSession">+ Log Reading Session</button>
+    </div>
+
+    <div class="grid" style="gap: 18px; margin-bottom: 40px;" id="progressItemsGrid">
+      <!-- In-progress books -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('reading-progress');
+  BookClubUI.renderTopbar(
+    'Reading Progress Tracker',
+    'Track your reading pace, log active sessions, and protect your streak.',
+    `<a href="reading-goals.html" class="btn btn-outline btn-sm">Reading Goals 🎯</a>`
+  );
+
+  // Render 30 Day Heat Map
+  const heatGrid = document.getElementById('streakCalendarGrid');
+  if (heatGrid) {
+    let cellsHtml = '';
+    for (let i = 1; i <= 30; i++) {
+      let level = '';
+      if (i > 16) {
+        const r = (i % 4);
+        level = r === 0 ? 'l4' : (r === 1 ? 'l3' : 'l2');
+      } else if (i > 8) {
+        level = 'l1';
+      }
+      cellsHtml += `<div class="heat-cell ${level}" title="Day ${i}: ${level ? 'Pages logged' : 'Rest day'}"></div>`;
+    }
+    heatGrid.innerHTML = cellsHtml;
+  }
+
+  function renderProgressList() {
+    const shelves = BookClubStore.getLibraryShelves();
+    const reading = shelves.reading;
+    const container = document.getElementById('progressItemsGrid');
+
+    if (reading.length === 0) {
+      container.innerHTML = BookClubUI.renderEmptyState('📖', 'No books currently in progress', 'Pick a book from your library to start tracking.', 'Browse Library', 'library.html');
+      return;
+    }
+
+    container.innerHTML = reading.map(b => {
+      const remainingPages = b.totalPages - b.currentPage;
+      const daysToFinish = Math.max(1, Math.round(remainingPages / 35));
+      const estDate = new Date(Date.now() + daysToFinish * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      return `
+        <div class="card progress-item" style="padding: 22px; display: grid; grid-template-columns: 80px 1fr auto; gap: 20px; align-items: center;">
+          <div class="mini-cover" style="width: 80px; height: 115px;">
+            ${BookClubUI.renderBookCover(b)}
+          </div>
+          <div>
+            <div class="flex-between">
+              <h3 style="margin: 0;"><a href="book-details.html?id=${b.id}">${b.title}</a></h3>
+              <span class="badge badge-reading">Currently Reading</span>
+            </div>
+            <p class="text-soft" style="margin: 2px 0 10px;">${b.author} · ${b.genre}</p>
+
+            <div class="progress-track" style="height: 10px;">
+              <div class="progress-fill" style="width: ${b.percentage}%;"></div>
+            </div>
+
+            <div class="progress-label-row" style="margin-top: 8px;">
+              <span><strong>${b.currentPage}</strong> / ${b.totalPages} pages (${b.percentage}%)</span>
+              <span>Est. completion: <strong>${estDate}</strong> (~${daysToFinish} days left)</span>
+            </div>
+          </div>
+
+          <div class="flex gap-8" style="flex-direction: column;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="openUpdatePageModal(${b.id}, ${b.currentPage}, ${b.totalPages}, '${b.title.replace(/'/g, "\\'")}')">Update Page</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openLogSessionModal(${b.id}, '${b.title.replace(/'/g, "\\'")}')">+ Log Session</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="handleFinishBook(${b.id}, '${b.title.replace(/'/g, "\\'")}')">Mark Complete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Update Page Modal
+  window.openUpdatePageModal = function (bookId, current, total, title) {
+    BookClubUI.showModal(
+      `Update Page: ${title}`,
+      `
+        <div class="field">
+          <label>Current Page (out of ${total})</label>
+          <input type="number" id="quickPageInput" min="0" max="${total}" value="${current}">
+        </div>
+        <div class="progress-track" style="margin-top: 10px;">
+          <div class="progress-fill" id="modalProgressFill" style="width: ${Math.round((current / total) * 100)}%;"></div>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveQuickPage(${bookId}, ${total})">Save Progress</button>
+      `
+    );
+
+    const input = document.getElementById('quickPageInput');
+    const fill = document.getElementById('modalProgressFill');
+    input.addEventListener('input', () => {
+      const val = Number(input.value) || 0;
+      fill.style.width = `${Math.min(100, Math.round((val / total) * 100))}%`;
+    });
+  };
+
+  window.saveQuickPage = function (bookId, total) {
+    const val = Number(document.getElementById('quickPageInput').value);
+    BookClubStore.updateBookProgress(bookId, val);
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Updated to page ${val}!`, 'success');
+    renderProgressList();
+  };
+
+  // Log Reading Session Modal
+  window.openLogSessionModal = function (bookId, title) {
+    BookClubUI.showModal(
+      `Log Reading Session: ${title}`,
+      `
+        <div class="field-row">
+          <div class="field"><label>Pages Read in Session</label><input type="number" id="sessPages" min="1" value="25"></div>
+          <div class="field"><label>Minutes Read</label><input type="number" id="sessMinutes" min="1" value="35"></div>
+        </div>
+        <div class="field">
+          <label>Session Reflection or Margin Note (Optional)</label>
+          <textarea id="sessThoughts" rows="3" placeholder="What happened in the chapter?"></textarea>
+        </div>
+      `,
+      `
+        <button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveReadingSession(${bookId}, '${title}')">Log Session</button>
+      `
+    );
+  };
+
+  window.saveReadingSession = function (bookId, title) {
+    const pages = Number(document.getElementById('sessPages').value) || 20;
+    const thoughts = document.getElementById('sessThoughts').value.trim();
+
+    BookClubStore.addJournalEntry({
+      bookId: bookId,
+      bookTitle: title,
+      pagesRead: pages,
+      thoughts: thoughts || 'Dedicated focused reading session.',
+      mood: '😍',
+      moodLabel: 'Engaged'
+    });
+
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Logged ${pages} pages! Added to your journal and streak. 🔥`, 'success');
+    renderProgressList();
+  };
+
+  window.handleFinishBook = function (bookId, title) {
+    BookClubStore.setBookShelf(bookId, 'read');
+    BookClubUI.showToast(`Congratulations on completing "${title}"! 🎉`, 'success');
+    renderProgressList();
+  };
+
+  // Log Quick Session Button in Topbar
+  document.getElementById('btnLogQuickSession').addEventListener('click', () => {
+    const shelves = BookClubStore.getLibraryShelves();
+    const reading = shelves.reading;
+    if (reading.length === 0) {
+      BookClubUI.showToast('No books currently in progress.', 'warning');
+      return;
+    }
+    openLogSessionModal(reading[0].id, reading[0].title);
+  });
+
+  renderProgressList();
+});
+</script>
+</body>
+</html>

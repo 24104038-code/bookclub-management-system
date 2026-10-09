@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+  <defs>
+    <linearGradient id="bg_obsidian" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#140A26"/>
+      <stop offset="50%" stop-color="#2D124D"/>
+      <stop offset="100%" stop-color="#0A0414"/>
+    </linearGradient>
+    <radialGradient id="glow_obsidian" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#9D4EDD" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="600" fill="url(#bg_obsidian)"/>
+  <rect width="400" height="600" fill="url(#glow_obsidian)"/>
+
+  <rect x="18" y="18" width="364" height="564" fill="none" stroke="#C77DFF" stroke-width="1.8" rx="8" opacity="0.8"/>
+  <rect x="25" y="25" width="350" height="550" fill="none" stroke="#E0AAFF" stroke-width="0.8" rx="5" opacity="0.4"/>
+
+  <!-- Tier Badge -->
+  <rect x="100" y="45" width="200" height="28" rx="14" fill="#240046" stroke="#9D4EDD" stroke-width="1"/>
+  <text x="200" y="64" fill="#E0AAFF" font-family="sans-serif" font-size="11" font-weight="bold" letter-spacing="3" text-anchor="middle">★ BEGINNER QUEST REWARD ★</text>
+
+  <!-- Central Emblem -->
+  <circle cx="200" cy="195" r="65" fill="#10002B" stroke="#9D4EDD" stroke-width="2"/>
+  <circle cx="200" cy="195" r="54" fill="none" stroke="#E0AAFF" stroke-width="0.75" stroke-dasharray="4,3"/>
+  <text x="200" y="210" font-size="46" text-anchor="middle">🔮</text>
+
+  <!-- Title -->
+  <text x="200" y="295" fill="#FFFFFF" font-family="Georgia, serif" font-size="27" font-weight="bold" text-anchor="middle">The Obsidian</text>
+  <text x="200" y="332" fill="#E0AAFF" font-family="Georgia, serif" font-size="32" font-weight="bold" letter-spacing="2" text-anchor="middle">CODEX</text>
+  <text x="200" y="360" fill="#C77DFF" font-family="sans-serif" font-size="14" font-weight="600" text-anchor="middle">கருங்கல் ஏடுகள்</text>
+
+  <line x1="120" y1="380" x2="280" y2="380" stroke="#7B2CBF" stroke-width="1.5"/>
+
+  <text x="200" y="410" fill="#D8BBFF" font-family="sans-serif" font-size="12" text-anchor="middle" opacity="0.9">Ancient Spells & Forgotten Glyphs</text>
+  <text x="200" y="432" fill="#C77DFF" font-family="sans-serif" font-size="11" text-anchor="middle" font-weight="bold">🔒 UNLOCK REWARD: +100 XP</text>
+
+  <!-- Author Box -->
+  <rect x="70" y="475" width="260" height="65" rx="8" fill="#10002B" stroke="#7B2CBF" stroke-width="1" opacity="0.85"/>
+  <text x="200" y="500" fill="#E0AAFF" font-family="sans-serif" font-size="10" font-weight="bold" letter-spacing="2" text-anchor="middle">AUTHOR</text>
+  <text x="200" y="524" fill="#FFFFFF" font-family="Georgia, serif" font-size="17" font-weight="bold" text-anchor="middle">Kaelen Vane</text>
+
+  <text x="200" y="565" fill="#7B2CBF" font-family="sans-serif" font-size="10" letter-spacing="2" text-anchor="middle">BOOK FORGE LEGENDARY VAULT</text>
+</svg>

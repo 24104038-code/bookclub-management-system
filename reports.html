@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moderation Reports & Community Safety — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.report-snippet-preview {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  background: var(--paper);
+  padding: 4px 8px;
+  border-left: 3px solid var(--line);
+  border-radius: 4px;
+  margin-top: 4px;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reason-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(184, 91, 53, 0.12);
+  color: var(--clay);
+}
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+.status-pending {
+  background: rgba(196, 152, 66, 0.2);
+  color: #7D5C14;
+}
+.status-resolved {
+  background: rgba(44, 76, 52, 0.18);
+  color: var(--forest);
+}
+.status-rejected {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--ink-soft);
+}
+</style>
+</head>
+<body data-auth-required="true" data-role-required="admin">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- STATS CARDS -->
+    <div class="grid grid-4" style="margin-bottom: 24px;">
+      <div class="card stat-card">
+        <div class="stat-title">Total Reports</div>
+        <div class="stat-value tone-blue" id="statTotalReports">5</div>
+        <div class="stat-delta">Platform safety logs</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Pending Triage</div>
+        <div class="stat-value" style="color:var(--chart-red);" id="statPendingReports">2</div>
+        <div class="stat-delta">Requires moderator review</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Resolved Cases</div>
+        <div class="stat-value tone-green" id="statResolvedReports">2</div>
+        <div class="stat-delta up">Action taken</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-title">Dismissed / Rejected</div>
+        <div class="stat-value tone-gold" id="statDismissedReports">1</div>
+        <div class="stat-delta">False alarms / Non-issues</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR & TABS -->
+    <div class="tabs" id="reportStatusTabs">
+      <span class="tab active" data-status="all">All Reports (<span id="countTabAll">5</span>)</span>
+      <span class="tab" data-status="Pending">Pending Triage (<span id="countTabPending">2</span>)</span>
+      <span class="tab" data-status="Resolved">Resolved (<span id="countTabResolved">2</span>)</span>
+      <span class="tab" data-status="Rejected">Dismissed (<span id="countTabRejected">1</span>)</span>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-box" style="flex:2;">
+        <span>🔎</span>
+        <input type="text" id="reportSearchInput" placeholder="Filter by target title, author, reporter, or snippet...">
+      </div>
+
+      <select id="reportTypeFilter">
+        <option value="all">All Target Types</option>
+        <option value="Review">Reviews</option>
+        <option value="Discussion">Discussions</option>
+        <option value="Comment">Comments</option>
+        <option value="User">User Profiles</option>
+      </select>
+
+      <button class="btn btn-outline btn-sm" id="btnExportReports">📥 Export Safety Log</button>
+    </div>
+
+    <!-- REPORTS TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Target Content</th>
+            <th>Reported Item Snippet</th>
+            <th>Reported User</th>
+            <th>Reason & Details</th>
+            <th>Reported By / Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="reportsTableTbody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Enforce Admin / Moderator role protection
+  const hasAccess = BookClubAuth.requireRole(['admin', 'organizer'], 'dashboard.html?access_denied=1');
+  if (!hasAccess) return;
+  const user = BookClubAuth.getCurrentUser();
+
+  BookClubUI.renderSidebar('reports');
+  BookClubUI.renderTopbar(
+    'Moderation & Safety Queue',
+    'Review reported book reviews, discussions, spoilers, and user conduct.',
+    `<a href="admin-dashboard.html" class="btn btn-outline btn-sm">🛠️ Admin Dashboard</a>`
+  );
+
+  let currentStatus = 'all';
+  let currentType = 'all';
+  let searchTerm = '';
+
+  const searchInput = document.getElementById('reportSearchInput');
+  const typeFilter = document.getElementById('reportTypeFilter');
+
+  function updateCounts() {
+    const list = BookClubStore.getReports();
+    const total = list.length;
+    const pending = list.filter(r => r.status === 'Pending').length;
+    const resolved = list.filter(r => r.status === 'Resolved').length;
+    const rejected = list.filter(r => r.status === 'Rejected').length;
+
+    document.getElementById('statTotalReports').textContent = total;
+    document.getElementById('statPendingReports').textContent = pending;
+    document.getElementById('statResolvedReports').textContent = resolved;
+    document.getElementById('statDismissedReports').textContent = rejected;
+
+    document.getElementById('countTabAll').textContent = total;
+    document.getElementById('countTabPending').textContent = pending;
+    document.getElementById('countTabResolved').textContent = resolved;
+    document.getElementById('countTabRejected').textContent = rejected;
+  }
+
+  function renderReports() {
+    updateCounts();
+    const list = BookClubStore.getReports();
+
+    const filtered = list.filter(r => {
+      if (currentStatus !== 'all' && r.status !== currentStatus) return false;
+      if (currentType !== 'all' && r.targetType !== currentType) return false;
+      if (searchTerm) {
+        const text = `${r.targetTitle} ${r.reportedItemSnippet} ${r.reportedAuthor} ${r.reportedBy} ${r.reason}`.toLowerCase();
+        if (!text.includes(searchTerm)) return false;
+      }
+      return true;
+    });
+
+    const tbody = document.getElementById('reportsTableTbody');
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-soft" style="padding:32px;">No moderation reports match the current filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(r => {
+      let statusClass = 'status-pending';
+      if (r.status === 'Resolved') statusClass = 'status-resolved';
+      if (r.status === 'Rejected') statusClass = 'status-rejected';
+
+      return `
+        <tr>
+          <td>#${r.id}</td>
+          <td>
+            <strong>${r.targetTitle}</strong>
+            <div><span class="badge badge-member" style="font-size:0.7rem;">${r.targetType}</span></div>
+          </td>
+          <td>
+            <div class="report-snippet-preview" title="${r.reportedItemSnippet || ''}">
+              "${r.reportedItemSnippet || 'No snippet preview'}"
+            </div>
+          </td>
+          <td>
+            <div class="author-line">
+              <span class="avatar-chip" style="width:26px; height:26px; font-size:0.72rem; background:var(--clay);">
+                ${r.reportedAuthor ? r.reportedAuthor.substring(0, 2).toUpperCase() : 'U'}
+              </span>
+              <span><strong>@${r.reportedAuthor}</strong></span>
+            </div>
+          </td>
+          <td>
+            <div class="reason-badge">${r.reason}</div>
+            <div class="text-soft" style="font-size:0.75rem; margin-top:2px;">${r.description || ''}</div>
+          </td>
+          <td>
+            <div style="font-size:0.85rem;"><strong>${r.reportedBy}</strong></div>
+            <div class="text-soft" style="font-size:0.75rem;">${r.date}</div>
+          </td>
+          <td>
+            <span class="status-pill ${statusClass}">${r.status}</span>
+          </td>
+          <td>
+            <button class="btn btn-outline btn-sm" onclick="openInvestigateModal(${r.id})">
+              ${r.status === 'Pending' ? 'Investigate' : 'View Action'}
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Investigate & Action Modal
+  window.openInvestigateModal = function(id) {
+    const list = BookClubStore.getReports();
+    const r = list.find(x => x.id === id);
+    if (!r) return;
+
+    BookClubUI.showModal(
+      `Moderation Review: Report #${r.id}`,
+      `
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:14px;">
+          <span class="badge badge-member">${r.targetType}</span>
+          <span class="reason-badge">${r.reason}</span>
+          <span class="status-pill ${r.status === 'Pending' ? 'status-pending' : (r.status === 'Resolved' ? 'status-resolved' : 'status-rejected')}">${r.status}</span>
+        </div>
+
+        <h4 style="margin:0 0 8px 0; font-family:var(--font-display);">${r.targetTitle}</h4>
+
+        <div class="card" style="background:var(--paper); padding:14px; margin-bottom:14px;">
+          <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--ink-soft); margin-bottom:4px;">Flagged Content Snippet:</div>
+          <div style="font-style:italic; line-height:1.5; color:var(--ink);">"${r.reportedItemSnippet || 'N/A'}"</div>
+          <div style="margin-top:8px; font-size:0.8rem; color:var(--ink-soft);">
+            Author: <strong>@${r.reportedAuthor}</strong> &bull; Reporter: <strong>${r.reportedBy}</strong> (${r.date})
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <strong style="font-size:0.85rem;">Reporter's Complaint:</strong>
+          <p style="font-size:0.88rem; margin:4px 0 0 0; color:var(--ink-soft);">${r.description || 'No additional notes provided.'}</p>
+        </div>
+
+        ${r.resolution ? `
+          <div class="card" style="background:rgba(44,76,52,0.08); border-left:4px solid var(--forest); padding:12px; margin-bottom:14px;">
+            <strong style="color:var(--forest-deep); font-size:0.85rem;">Resolution Logged:</strong>
+            <div style="font-size:0.85rem; color:var(--ink);">${r.resolution}</div>
+          </div>
+        ` : ''}
+
+        ${r.status === 'Pending' ? `
+          <div class="field">
+            <label>Resolution Action / Moderation Note</label>
+            <textarea id="modResolutionNotes" rows="2" placeholder="e.g., Warning issued to member; content tagged with spoiler warning."></textarea>
+          </div>
+        ` : ''}
+      `,
+      r.status === 'Pending' ? `
+        <button class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>
+        <button class="btn btn-outline" style="color:var(--chart-red); border-color:var(--chart-red);" onclick="resolveReportAction(${r.id}, 'Rejected')">Dismiss Flag</button>
+        <button class="btn btn-primary" onclick="resolveReportAction(${r.id}, 'Resolved')">Resolve & Action</button>
+      ` : `
+        <button class="btn btn-primary" onclick="BookClubUI.closeModal()">Close</button>
+      `
+    );
+  };
+
+  window.resolveReportAction = function(id, newStatus) {
+    const noteEl = document.getElementById('modResolutionNotes');
+    const note = noteEl ? noteEl.value.trim() : '';
+    const finalResolution = note || (newStatus === 'Resolved' ? 'Moderator resolved item with policy advisory.' : 'Report dismissed as non-violating.');
+
+    BookClubStore.updateReportStatus(id, newStatus, finalResolution);
+    BookClubUI.closeModal();
+    BookClubUI.showToast(`Report #${id} marked as ${newStatus}!`, 'success');
+    renderReports();
+  };
+
+  // Status Tabs
+  document.querySelectorAll('#reportStatusTabs .tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('#reportStatusTabs .tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      currentStatus = this.getAttribute('data-status');
+      renderReports();
+    });
+  });
+
+  // Type filter & search
+  typeFilter.addEventListener('change', (e) => {
+    currentType = e.target.value;
+    renderReports();
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    searchTerm = e.target.value.toLowerCase().trim();
+    renderReports();
+  });
+
+  document.getElementById('btnExportReports').addEventListener('click', () => {
+    BookClubUI.showToast('Safety moderation log exported to CSV (simulated).', 'success');
+  });
+
+  // Initial render
+  renderReports();
+});
+</script>
+</body>
+</html>

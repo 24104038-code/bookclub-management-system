@@ -1,0 +1,629 @@
+/* =========================================================
+   BOOK FORGE — AI Assistant Stylesheet (css/ai-assistant.css)
+   Polished, responsive, theme-adaptive AI Chatbot Widget
+   ========================================================= */
+
+/* Floating Trigger Button */
+.forge-ai-trigger {
+  position: fixed;
+  bottom: 84px;
+  right: 24px;
+  z-index: 999;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #1C2B22 0%, #2D6A4F 55%, #C5A059 100%);
+  color: #FFFFFF !important;
+  font-family: var(--font-body, 'Source Sans 3', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 25px rgba(28, 43, 34, 0.35), 0 0 14px rgba(197, 160, 89, 0.35);
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none !important;
+  outline: none;
+  user-select: none;
+}
+
+.forge-ai-trigger:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 34px rgba(28, 43, 34, 0.45), 0 0 20px rgba(197, 160, 89, 0.55);
+  border-color: #F4D389;
+}
+
+.forge-ai-trigger:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.forge-ai-trigger-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  font-size: 1.15rem;
+  line-height: 1;
+  animation: forgeAiPulse 3s infinite ease-in-out;
+}
+
+.forge-ai-trigger-label {
+  letter-spacing: 0.3px;
+  display: inline-block;
+}
+
+.forge-ai-trigger-sparkle {
+  color: #F8E7A2;
+  font-size: 0.85rem;
+}
+
+@keyframes forgeAiPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(248, 231, 162, 0.4)); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(248, 231, 162, 0.9)); }
+}
+
+/* Chat Assistant Flyout Window */
+.forge-ai-window {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 430px;
+  max-width: calc(100vw - 32px);
+  height: 640px;
+  max-height: calc(100vh - 44px);
+  background: var(--paper, #FFFFFF);
+  border: 1.5px solid rgba(197, 160, 89, 0.45);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(197, 160, 89, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10000;
+  opacity: 0;
+  transform: translateY(24px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-body, 'Source Sans 3', sans-serif);
+  color: var(--ink, #2E251C);
+}
+
+.forge-ai-window.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Window Header */
+.forge-ai-header {
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #16291F 0%, #1E3A2E 60%, #2A4C3B 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #C5A059;
+  flex-shrink: 0;
+}
+
+.forge-ai-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.forge-ai-avatar {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, #2D6A4F 0%, #16291F 100%);
+  border: 2px solid #C5A059;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.forge-ai-meta h3 {
+  margin: 0;
+  font-family: var(--font-display, 'Fraunces', serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #FDFBF7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.forge-ai-meta p {
+  margin: 2px 0 0 0;
+  font-size: 0.78rem;
+  color: #B9C7BC;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.forge-ai-status-dot {
+  width: 7px;
+  height: 7px;
+  background: #25D366;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px #25D366;
+}
+
+.forge-ai-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.forge-ai-tool-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #FDFBF7;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: background 0.18s;
+}
+
+.forge-ai-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: #FFFFFF;
+}
+
+/* Quick Prompt Suggestions Bar */
+.forge-ai-quick-prompts {
+  padding: 10px 14px;
+  background: var(--cream-deep, #F2EAD9);
+  border-bottom: 1px solid var(--line, #E7DCC8);
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+  scrollbar-width: thin;
+}
+
+.forge-ai-quick-prompts::-webkit-scrollbar {
+  height: 4px;
+}
+
+.forge-ai-quick-prompts::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 4px;
+}
+
+.forge-ai-quick-btn {
+  background: var(--paper, #FFFFFF);
+  border: 1px solid var(--line, #E7DCC8);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft, #5B4E42);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.forge-ai-quick-btn:hover {
+  background: var(--clay, #B5652F);
+  border-color: var(--clay, #B5652F);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Scrollable Messages Stream */
+.forge-ai-messages {
+  flex: 1;
+  padding: 16px 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--cream, #FBF7EF);
+  scroll-behavior: smooth;
+}
+
+/* Message Rows */
+.forge-ai-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 90%;
+  animation: forgeAiFadeIn 0.22s ease-out;
+}
+
+@keyframes forgeAiFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.forge-ai-msg.bot {
+  align-self: flex-start;
+}
+
+.forge-ai-msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.forge-ai-msg-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #1E3A2E;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  border: 1px solid #C5A059;
+}
+
+.forge-ai-msg.user .forge-ai-msg-avatar {
+  background: var(--clay, #B5652F);
+  border-color: var(--cream-deep, #F2EAD9);
+}
+
+/* Message Bubble */
+.forge-ai-bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  word-break: break-word;
+}
+
+.forge-ai-msg.bot .forge-ai-bubble {
+  background: var(--paper, #FFFFFF);
+  color: var(--ink, #2E251C);
+  border: 1px solid var(--line, #E7DCC8);
+  border-top-left-radius: 4px;
+}
+
+.forge-ai-msg.user .forge-ai-bubble {
+  background: linear-gradient(135deg, #A44A3F 0%, #7A4E2D 100%);
+  color: #FFFFFF;
+  border-top-right-radius: 4px;
+}
+
+/* Markdown typography inside Bot Bubble */
+.forge-ai-bubble h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
+  color: var(--shell-green-deep, #16291F);
+  font-family: var(--font-display, 'Fraunces', serif);
+  border-bottom: 1px solid var(--line, #E7DCC8);
+  padding-bottom: 4px;
+}
+
+.forge-ai-bubble h4 {
+  margin: 10px 0 4px 0;
+  font-size: 0.95rem;
+  color: var(--clay, #B5652F);
+  font-weight: 700;
+}
+
+.forge-ai-bubble p {
+  margin: 6px 0;
+}
+
+.forge-ai-bubble ul, .forge-ai-bubble ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.forge-ai-bubble li {
+  margin-bottom: 4px;
+}
+
+.forge-ai-bubble hr {
+  border: none;
+  border-top: 1px dashed var(--line, #E7DCC8);
+  margin: 10px 0;
+}
+
+.forge-ai-bubble code {
+  background: rgba(0,0,0,0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-family: monospace;
+}
+
+/* Action Buttons inside Bot Message */
+.forge-ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line, #E7DCC8);
+}
+
+.forge-ai-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--shell-green, #1E3A2E);
+  color: #FFFFFF !important;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  border: 1px solid #C5A059;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.forge-ai-action-btn:hover {
+  background: var(--clay, #B5652F);
+  border-color: #B5652F;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(181, 101, 47, 0.35);
+}
+
+/* Follow-up suggestions chips below reply */
+.forge-ai-chips-wrap {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.forge-ai-chip {
+  background: var(--cream-deep, #F2EAD9);
+  color: var(--ink-soft, #5B4E42);
+  border: 1px solid var(--line, #E7DCC8);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.forge-ai-chip:hover {
+  background: var(--shell-gold, #D9A441);
+  color: #16291F;
+  border-color: var(--shell-gold-deep, #B9862E);
+}
+
+/* Typing Indicator */
+.forge-ai-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  background: var(--paper, #FFFFFF);
+  border: 1px solid var(--line, #E7DCC8);
+  border-radius: 14px;
+  border-top-left-radius: 4px;
+  width: fit-content;
+  align-self: flex-start;
+  margin-left: 40px;
+}
+
+.forge-ai-typing-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--clay, #B5652F);
+  border-radius: 50%;
+  animation: forgeAiBounce 1.2s infinite ease-in-out;
+}
+
+.forge-ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.forge-ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes forgeAiBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Footer & Input Bar */
+.forge-ai-footer {
+  padding: 12px 14px;
+  background: var(--paper, #FFFFFF);
+  border-top: 1px solid var(--line, #E7DCC8);
+  flex-shrink: 0;
+}
+
+.forge-ai-input-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.forge-ai-input {
+  flex: 1;
+  background: var(--cream, #FBF7EF);
+  border: 1.5px solid var(--line, #E7DCC8);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--ink, #2E251C);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.forge-ai-input:focus {
+  background: #FFFFFF;
+  border-color: var(--shell-gold, #D9A441);
+  box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.18);
+}
+
+.forge-ai-send-btn {
+  background: linear-gradient(135deg, #1E3A2E 0%, #2D6A4F 100%);
+  color: #FFFFFF;
+  border: 1px solid #C5A059;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.forge-ai-send-btn:hover {
+  background: var(--clay, #B5652F);
+  border-color: #B5652F;
+  transform: translateY(-1px);
+}
+
+.forge-ai-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------------------------------------------------------
+   Dark Theme Adaptation
+   --------------------------------------------------------- */
+html[data-theme="dark"] .forge-ai-window,
+body[data-theme="dark"] .forge-ai-window {
+  background: #141F1A;
+  border-color: rgba(197, 160, 89, 0.6);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 20px rgba(197, 160, 89, 0.2);
+}
+
+html[data-theme="dark"] .forge-ai-quick-prompts,
+body[data-theme="dark"] .forge-ai-quick-prompts {
+  background: #0D1410;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .forge-ai-quick-btn,
+body[data-theme="dark"] .forge-ai-quick-btn {
+  background: #192720;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #D5E2D9;
+}
+
+html[data-theme="dark"] .forge-ai-messages,
+body[data-theme="dark"] .forge-ai-messages {
+  background: #0D1410;
+}
+
+html[data-theme="dark"] .forge-ai-msg.bot .forge-ai-bubble,
+body[data-theme="dark"] .forge-ai-msg.bot .forge-ai-bubble {
+  background: #18261F;
+  color: #F5F3EC;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .forge-ai-bubble h3,
+body[data-theme="dark"] .forge-ai-bubble h3 {
+  color: #F8E7A2;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .forge-ai-bubble h4,
+body[data-theme="dark"] .forge-ai-bubble h4 {
+  color: #E29578;
+}
+
+html[data-theme="dark"] .forge-ai-bubble code,
+body[data-theme="dark"] .forge-ai-bubble code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #F8E7A2;
+}
+
+html[data-theme="dark"] .forge-ai-footer,
+body[data-theme="dark"] .forge-ai-footer {
+  background: #141F1A;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .forge-ai-input,
+body[data-theme="dark"] .forge-ai-input {
+  background: #0D1410;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #F5F3EC;
+}
+
+html[data-theme="dark"] .forge-ai-typing,
+body[data-theme="dark"] .forge-ai-typing {
+  background: #18261F;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .forge-ai-chip,
+body[data-theme="dark"] .forge-ai-chip {
+  background: #192720;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #D5E2D9;
+}
+
+/* ---------------------------------------------------------
+   3D Theme Adaptation (Spatial Tactile)
+   --------------------------------------------------------- */
+html[data-theme="3d"] .forge-ai-trigger,
+body[data-theme="3d"] .forge-ai-trigger {
+  box-shadow: 0 8px 0 #0f1c14, 0 16px 25px rgba(0, 0, 0, 0.45);
+  border-width: 2px;
+}
+
+html[data-theme="3d"] .forge-ai-trigger:active,
+body[data-theme="3d"] .forge-ai-trigger:active {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 #0f1c14, 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="3d"] .forge-ai-window,
+body[data-theme="3d"] .forge-ai-window {
+  box-shadow: 0 20px 0 #0d1712, 0 35px 70px rgba(0,0,0,0.5);
+  border: 2px solid #C5A059;
+}
+
+html[data-theme="3d"] .forge-ai-action-btn,
+body[data-theme="3d"] .forge-ai-action-btn {
+  box-shadow: 0 4px 0 #0e1e16;
+}
+
+html[data-theme="3d"] .forge-ai-action-btn:active,
+body[data-theme="3d"] .forge-ai-action-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #0e1e16;
+}
+
+/* Responsive for Mobile */
+@media (max-width: 600px) {
+  .forge-ai-trigger {
+    bottom: 80px;
+    right: 16px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+  }
+  .forge-ai-window {
+    bottom: 12px;
+    right: 12px;
+    width: calc(100vw - 24px);
+    height: calc(100vh - 24px);
+    max-height: calc(100vh - 24px);
+    border-radius: 16px;
+  }
+}

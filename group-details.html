@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group Portal — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <p class="text-soft mb-30"><a href="groups.html">← Back to All Groups</a></p>
+
+    <!-- GROUP HEADER HERO -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, #16291F, #33473A); color: #fff;">
+      <div class="flex-between" style="flex-wrap:wrap; gap: 20px;">
+        <div>
+          <div class="flex gap-8 mb-0" style="align-items:center;">
+            <span class="badge" style="background: var(--shell-gold); color: var(--shell-green-deep);" id="grpGenreBadge">Mystery</span>
+            <span class="badge badge-member" id="grpPrivacyBadge">Public Group</span>
+          </div>
+          <h1 style="color: #fff; margin: 10px 0 6px 0;" id="grpName">Group Name</h1>
+          <p style="color: #B9C7BC; max-width: 600px; margin: 0 0 16px 0;" id="grpDesc"></p>
+          <div class="flex gap-16" style="font-size: 0.9rem; color: #E7D9C6; flex-wrap:wrap;">
+            <span id="grpMembersCount">👥 18 Members</span>
+            <span id="grpSchedule">📅 Every Saturday, 5:00 PM</span>
+            <span id="grpOrganizer">🎤 Lead: Aditi Krishnan</span>
+          </div>
+        </div>
+
+        <div class="flex gap-8" style="flex-direction: column;">
+          <button type="button" class="btn btn-primary btn-sm" id="btnGroupJoinAction">Join Group</button>
+          <a href="#polls" class="btn btn-outline btn-sm" style="color:#fff; border-color:#fff;" onclick="switchToTab('polls')">Active Polls 🗳️</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="groupDetailTabs">
+      <span class="tab active" data-tab="overview">Overview</span>
+      <span class="tab" data-tab="books">Book Shelf</span>
+      <span class="tab" data-tab="members">Members Roster</span>
+      <span class="tab" data-tab="discussions">Group Discussions</span>
+      <span class="tab" data-tab="events">Group Events</span>
+      <span class="tab" data-tab="progress">Reading Pace Chart</span>
+      <span class="tab" data-tab="polls">Book & Meeting Polls 🗳️</span>
+    </div>
+
+    <!-- TAB: Overview -->
+    <div id="tabOverview" class="tab-pane">
+      <div class="grid grid-2" style="gap: 30px; align-items: start;">
+        <div>
+          <div class="card panel mb-30">
+            <div class="panel-head"><h3>Current Reading Selection</h3></div>
+            <div class="reading-card" style="padding: 0;" id="grpCurBookBox">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div class="card panel">
+            <div class="panel-head flex-between">
+              <h3 style="margin:0;">Next Gathering Schedule</h3>
+              <div id="gatheringTrackingBadges" class="flex gap-4"></div>
+            </div>
+            <div class="list-row"><div><h4>Weekly Salon</h4><div class="meta" id="overviewMeetingSchedule">Every Saturday</div></div><div class="meta" id="overviewMeetingTime">5:00 PM</div></div>
+            <div class="list-row"><div><h4>Location / Platform</h4><div class="meta" id="overviewLocation">Community Library Hall, Room 2</div></div></div>
+            <div class="list-row"><div><h4>Current Target Milestone</h4><div class="meta" id="overviewMilestone">Chapters 12–15 before Saturday session</div></div></div>
+
+            <!-- Gathering & Event Tracking Controls -->
+            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line);">
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Track Gathering Event:</span>
+                <span id="gatheringActiveStatusNote" class="text-soft" style="font-size:0.78rem;"></span>
+              </div>
+              <div class="flex gap-8" style="flex-wrap: wrap;">
+                <button type="button" class="btn btn-outline btn-sm" id="btnTrackWhatsApp" style="border-color: #25D366; color: #128C7E; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                  Track on WhatsApp
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" id="btnTrackEmail" style="display: inline-flex; align-items: center; gap: 6px;">
+                  ✉️ Track via Email
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" id="btnDownloadGatheringICS" title="Download Calendar Invite (.ics)">
+                  📅 .ics Calendar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card panel mb-30">
+            <div class="panel-head">
+              <h3>Next Book Voting Spotlight</h3>
+              <a href="#" onclick="switchToTab('polls'); return false;">Vote Now →</a>
+            </div>
+            <p class="text-soft" style="font-size:0.9rem;">What should we read after finishing the current book?</p>
+            <div id="overviewPollPreview"></div>
+          </div>
+
+          <div class="card panel">
+            <div class="panel-head"><h3>Recent Group Chatter</h3></div>
+            <div id="overviewChatterList" class="feed-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Books -->
+    <div id="tabBooks" class="tab-pane" style="display:none;">
+      <h3 style="margin-bottom: 20px;">Group Reading Curriculum</h3>
+      <div class="grid grid-3">
+        <div class="card panel">
+          <span class="badge badge-active">Currently Reading</span>
+          <div id="curBookDisplay" style="margin-top: 14px;"></div>
+        </div>
+        <div class="card panel">
+          <span class="badge badge-want">Upcoming Selection</span>
+          <div id="upcomingBookDisplay" style="margin-top: 14px;"></div>
+        </div>
+        <div class="card panel">
+          <span class="badge badge-completed">Past Finished Reads</span>
+          <div id="pastBooksDisplay" style="margin-top: 14px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Members -->
+    <div id="tabMembers" class="tab-pane" style="display:none;">
+      <div class="card panel">
+        <div class="panel-head">
+          <h3>Group Members & Roles</h3>
+          <span class="text-soft" id="membersTotalCount">18 Members</span>
+        </div>
+        <div class="feed-list" id="groupMembersList"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Discussions -->
+    <div id="tabDiscussions" class="tab-pane" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3 style="margin:0;">Group Circle Threads</h3>
+        <a href="discussions.html" class="btn btn-primary btn-sm">+ Start Thread</a>
+      </div>
+      <div class="grid" style="gap: 16px;" id="grpDiscussionsList"></div>
+    </div>
+
+    <!-- TAB: Events -->
+    <div id="tabEvents" class="tab-pane" style="display:none;">
+      <div class="flex-between mb-30">
+        <h3 style="margin:0;">Upcoming Group Gatherings</h3>
+        <a href="events.html" class="btn btn-primary btn-sm">+ Schedule Meeting</a>
+      </div>
+      <div class="grid grid-2" id="grpEventsList"></div>
+    </div>
+
+    <!-- TAB: Progress -->
+    <div id="tabProgress" class="tab-pane" style="display:none;">
+      <div class="card panel">
+        <h3>Group Reading Progress Chart</h3>
+        <p class="text-soft">Track how closely members are pacing relative to the upcoming Saturday meeting deadline.</p>
+        <div style="margin: 30px 0;" id="groupPaceRows"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Polls -->
+    <div id="tabPolls" class="tab-pane" style="display:none;">
+      <div class="grid grid-2" style="gap: 30px;">
+        <div class="card panel">
+          <div class="flex-between mb-0">
+            <span class="badge badge-reading">Book Selection Poll</span>
+            <span class="badge badge-active">Open</span>
+          </div>
+          <h3 style="margin: 12px 0 6px;" id="pollQuestion">What should we read next month?</h3>
+          <p class="text-soft" style="font-size:0.88rem; margin-bottom: 20px;">Cast your vote to guide next month's reading schedule.</p>
+          <div id="bookPollOptions"></div>
+        </div>
+
+        <div class="card panel">
+          <div class="flex-between mb-0">
+            <span class="badge badge-want">Meeting Time Poll</span>
+            <span class="badge badge-active">Open</span>
+          </div>
+          <h3 style="margin: 12px 0 6px;" id="meetingPollQuestion">Preferred time for next cycle?</h3>
+          <p class="text-soft" style="font-size:0.88rem; margin-bottom: 20px;">Vote on the day and time that best fits your weekly calendar.</p>
+          <div id="meetingPollOptions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gathering & Event Tracking Modal -->
+    <div id="modalEventTracking" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:9999; align-items:center; justify-content:center;">
+      <div class="card" style="max-width:520px; width:92%; background:var(--surface); padding:24px; border-radius:12px; box-shadow:0 14px 40px rgba(0,0,0,0.3); border:1px solid var(--line);">
+        <div class="flex-between" style="margin-bottom:14px;">
+          <h3 style="margin:0; display:flex; align-items:center; gap:8px;">
+            <span id="modalTrackIcon">📲</span> <span id="modalTrackTitle">Track Gathering Event</span>
+          </h3>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnModalCloseX" style="font-size:1.2rem; line-height:1; padding:4px 8px;">✕</button>
+        </div>
+        <div id="modalTrackEventSummary" style="background:var(--cream-deep); padding:14px; border-radius:8px; margin-bottom:16px; font-size:0.88rem; line-height:1.6; border:1px solid var(--line);">
+          <!-- dynamic summary -->
+        </div>
+
+        <div id="modalEmailInputSection" style="margin-bottom:16px; display:none;">
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; color:var(--ink);">Email Address for Calendar Invite:</label>
+          <input type="email" id="modalInputEmail" class="form-control" style="width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:6px;" placeholder="you@example.com">
+          <small class="text-soft" style="display:block; margin-top:4px;">We'll sync gathering milestones and send a calendar invite (.ics).</small>
+        </div>
+
+        <div id="modalPhoneInputSection" style="margin-bottom:16px; display:none;">
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; color:var(--ink);">WhatsApp Number (Optional):</label>
+          <input type="tel" id="modalInputPhone" class="form-control" style="width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:6px;" placeholder="+91 98765 43210">
+          <small class="text-soft" style="display:block; margin-top:4px;">Direct WhatsApp reminder with meeting link and chapters.</small>
+        </div>
+
+        <div class="flex gap-8" id="modalDefaultActions" style="justify-content:flex-end; flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline btn-sm" id="btnModalDismiss">Close</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnModalConfirmWhatsApp" style="border-color:#25D366; background:#25D366; color:#fff;">📲 WhatsApp</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnModalConfirmEmail">✉️ Email</button>
+        </div>
+
+        <div class="flex gap-8" id="modalSubmitAction" style="justify-content:flex-end; display:none;">
+          <button type="button" class="btn btn-outline btn-sm" id="btnModalCancelInput">Back</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnModalSubmitContact">Confirm & Track</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('groups');
+
+  const params = new URLSearchParams(window.location.search);
+  const grpId = Number(params.get('id')) || 1;
+  const group = BookClubStore.getGroupById(grpId) || BookClubStore.getGroups()[0];
+
+  BookClubUI.renderTopbar(
+    group.name,
+    `${group.genre} Reading Circle · ${group.membersCount} Members`,
+    `<a href="groups.html" class="btn btn-outline btn-sm">All Groups</a>`
+  );
+
+  document.getElementById('grpName').textContent = group.name;
+  document.getElementById('grpDesc').textContent = group.description;
+  document.getElementById('grpGenreBadge').textContent = group.genre;
+  document.getElementById('grpPrivacyBadge').textContent = `${group.privacy} Group`;
+  document.getElementById('grpMembersCount').textContent = `👥 ${group.membersCount} Members`;
+  document.getElementById('grpSchedule').textContent = `📅 ${group.meetingSchedule}`;
+  document.getElementById('grpOrganizer').textContent = `🎤 Lead: ${group.organizerName}`;
+  document.getElementById('overviewMeetingSchedule').textContent = group.meetingSchedule;
+  document.getElementById('overviewLocation').textContent = group.location || 'Online Salon';
+
+  const btnJoin = document.getElementById('btnGroupJoinAction');
+  function updateJoinUI() {
+    const isMember = (group.members || []).some(m => m.name === user.name);
+    btnJoin.textContent = isMember ? 'Leave Group' : 'Join Reading Group';
+    btnJoin.className = isMember ? 'btn btn-danger btn-sm' : 'btn btn-primary btn-sm';
+  }
+  updateJoinUI();
+
+    btnJoin.addEventListener('click', () => {
+      const isJoined = BookClubStore.joinGroup(group.id);
+      updateJoinUI();
+      if (isJoined) {
+        BookClubUI.showToast('Welcome to the circle!', 'success');
+        openTrackingModalForGathering('group_joined');
+      } else {
+        BookClubUI.showToast('You left the group.', 'info');
+        setTimeout(() => window.location.reload(), 300);
+      }
+    });
+
+    // Tracking UI Manager
+    function renderGatheringTrackingUI() {
+      const st = BookClubStore.getTrackingStatus('group', group.id);
+      const badgesContainer = document.getElementById('gatheringTrackingBadges');
+      const note = document.getElementById('gatheringActiveStatusNote');
+      let badgesHtml = '';
+
+      if (st.whatsapp) {
+        badgesHtml += `<span class="badge" style="background:#DCFCE7; color:#166534; font-size:0.75rem; border:1px solid #86EFAC;">✓ WhatsApp</span>`;
+      }
+      if (st.email) {
+        badgesHtml += `<span class="badge" style="background:#E0E7FF; color:#3730A3; font-size:0.75rem; border:1px solid #A5B4FC;">✓ Email</span>`;
+      }
+
+      badgesContainer.innerHTML = badgesHtml;
+      if (st.whatsapp && st.email) {
+        note.textContent = 'Tracking active via WhatsApp & Email';
+      } else if (st.whatsapp) {
+        note.textContent = 'Tracking active via WhatsApp';
+      } else if (st.email) {
+        note.textContent = 'Tracking active via Email';
+      } else {
+        note.textContent = 'Get reminders on your phone or inbox';
+      }
+    }
+    renderGatheringTrackingUI();
+
+    // Modal controller
+    const modalEl = document.getElementById('modalEventTracking');
+    const modalIcon = document.getElementById('modalTrackIcon');
+    const modalTitle = document.getElementById('modalTrackTitle');
+    const modalSummary = document.getElementById('modalTrackEventSummary');
+    const emailSec = document.getElementById('modalEmailInputSection');
+    const phoneSec = document.getElementById('modalPhoneInputSection');
+    const defaultActions = document.getElementById('modalDefaultActions');
+    const submitActions = document.getElementById('modalSubmitAction');
+    const inputEmail = document.getElementById('modalInputEmail');
+    const inputPhone = document.getElementById('modalInputPhone');
+
+    let currentTrackContext = null;
+
+    function openTrackingModalForGathering(reason = 'manual') {
+      currentTrackContext = {
+        type: 'group',
+        id: group.id,
+        title: `${group.name} — Gathering`,
+        schedule: group.meetingSchedule || 'Every Saturday',
+        time: '5:00 PM',
+        location: group.location || 'Community Library Hall, Room 2 & Online',
+        milestone: 'Chapters 12–15 before Saturday session',
+        bookTitle: curBook ? curBook.title : 'Current Selection',
+        bookAuthor: curBook ? curBook.author : ''
+      };
+
+      modalIcon.textContent = reason === 'group_joined' ? '🎉' : '📅';
+      modalTitle.textContent = reason === 'group_joined' ? `Joined ${group.name}!` : `Track Gathering Schedule`;
+
+      modalSummary.innerHTML = `
+        <div style="font-weight:700; color:var(--brown-deep); margin-bottom:6px;">Next Group Gathering & Milestone:</div>
+        <div>🗓️ <strong>${group.meetingSchedule || 'Every Saturday'}</strong> at 5:00 PM</div>
+        <div>📍 <strong>Location:</strong> ${group.location || 'Community Library Hall, Room 2 & Online'}</div>
+        <div>📖 <strong>Book:</strong> ${curBook ? curBook.title : 'Current Read'}</div>
+        <div>🎯 <strong>Target:</strong> Chapters 12–15 before Saturday session</div>
+        ${reason === 'group_joined' ? `<div style="margin-top:8px; font-weight:600; color:var(--clay);">Choose how you want to track this event:</div>` : ''}
+      `;
+
+      emailSec.style.display = 'none';
+      phoneSec.style.display = 'none';
+      defaultActions.style.display = 'flex';
+      submitActions.style.display = 'none';
+      modalEl.style.display = 'flex';
+    }
+
+    function closeModal() {
+      modalEl.style.display = 'none';
+      currentTrackContext = null;
+    }
+
+    document.getElementById('btnModalCloseX').addEventListener('click', closeModal);
+    document.getElementById('btnModalDismiss').addEventListener('click', closeModal);
+
+    // Track on WhatsApp button (Card)
+    document.getElementById('btnTrackWhatsApp').addEventListener('click', () => {
+      const msg = BookClubStore.formatWhatsAppEventText({
+        groupName: group.name,
+        title: 'Weekly Salon',
+        schedule: group.meetingSchedule || 'Every Saturday',
+        time: '5:00 PM',
+        location: group.location || 'Community Library Hall, Room 2 & Online',
+        bookTitle: curBook ? curBook.title : '',
+        bookAuthor: curBook ? curBook.author : '',
+        milestone: 'Chapters 12–15 before Saturday session'
+      });
+      BookClubStore.trackGatheringOrEvent({
+        type: 'group',
+        id: group.id,
+        method: 'whatsapp',
+        contact: user.phone || '',
+        details: { title: `${group.name} Gathering` }
+      });
+      BookClubStore.openWhatsAppTracker(msg, user.phone);
+      renderGatheringTrackingUI();
+      BookClubUI.showToast('📲 Gathering details opened in WhatsApp! Tracking saved.', 'success');
+    });
+
+    // Track on Email button (Card)
+    document.getElementById('btnTrackEmail').addEventListener('click', () => {
+      openTrackingModalForGathering('manual_email');
+      emailSec.style.display = 'block';
+      phoneSec.style.display = 'none';
+      defaultActions.style.display = 'none';
+      submitActions.style.display = 'flex';
+      inputEmail.value = user.email || '';
+    });
+
+    // ICS download (Card)
+    document.getElementById('btnDownloadGatheringICS').addEventListener('click', () => {
+      BookClubStore.downloadICSFile({
+        title: `${group.name} - Gathering`,
+        description: `Weekly salon for ${group.name}. Target milestone: Chapters 12–15 before Saturday session.`,
+        location: group.location || 'Community Library Hall, Room 2 & Online',
+        filename: `${group.name}-gathering`
+      });
+      BookClubUI.showToast('📅 Calendar invite (.ics) downloaded!', 'success');
+    });
+
+    // Modal WhatsApp Confirm
+    document.getElementById('btnModalConfirmWhatsApp').addEventListener('click', () => {
+      if (!currentTrackContext) return;
+      const msg = BookClubStore.formatWhatsAppEventText({
+        groupName: currentTrackContext.groupName || group.name,
+        title: currentTrackContext.title || 'Weekly Gathering',
+        schedule: currentTrackContext.schedule || 'Upcoming Session',
+        time: currentTrackContext.time || '5:00 PM',
+        location: currentTrackContext.location || 'Community Salon & Online',
+        bookTitle: currentTrackContext.bookTitle || (curBook ? curBook.title : ''),
+        bookAuthor: currentTrackContext.bookAuthor || (curBook ? curBook.author : ''),
+        milestone: currentTrackContext.milestone || 'Chapters 12–15'
+      });
+      BookClubStore.trackGatheringOrEvent({
+        type: currentTrackContext.type || 'group',
+        id: currentTrackContext.id || group.id,
+        method: 'whatsapp',
+        contact: user.phone || '',
+        details: { title: currentTrackContext.title }
+      });
+      BookClubStore.openWhatsAppTracker(msg, user.phone);
+      renderGatheringTrackingUI();
+      closeModal();
+      BookClubUI.showToast('📲 WhatsApp tracker launched! Gathering saved.', 'success');
+    });
+
+    // Modal Email Trigger
+    document.getElementById('btnModalConfirmEmail').addEventListener('click', () => {
+      emailSec.style.display = 'block';
+      phoneSec.style.display = 'none';
+      defaultActions.style.display = 'none';
+      submitActions.style.display = 'flex';
+      inputEmail.value = user.email || '';
+    });
+
+    // Modal Back
+    document.getElementById('btnModalCancelInput').addEventListener('click', () => {
+      emailSec.style.display = 'none';
+      phoneSec.style.display = 'none';
+      defaultActions.style.display = 'flex';
+      submitActions.style.display = 'none';
+    });
+
+    // Modal Submit Contact (Email/Phone)
+    document.getElementById('btnModalSubmitContact').addEventListener('click', () => {
+      const emailVal = inputEmail.value.trim() || user.email || 'reader@bookclub.com';
+      if (!currentTrackContext) return;
+
+      BookClubStore.trackGatheringOrEvent({
+        type: currentTrackContext.type || 'group',
+        id: currentTrackContext.id || group.id,
+        method: 'email',
+        contact: emailVal,
+        details: {
+          title: currentTrackContext.title,
+          schedule: currentTrackContext.schedule,
+          location: currentTrackContext.location,
+          milestone: currentTrackContext.milestone
+        }
+      });
+
+      BookClubStore.downloadICSFile({
+        title: currentTrackContext.title,
+        description: `Group gathering for ${group.name}. Target: ${currentTrackContext.milestone}`,
+        location: currentTrackContext.location,
+        filename: `${group.name}-event`
+      });
+
+      renderGatheringTrackingUI();
+      closeModal();
+      BookClubUI.showToast(`✉️ Gathering details & calendar invite sent to ${emailVal}!`, 'success');
+    });
+
+    // Events tab tracker function
+    window.trackSpecificEvent = function(eventId, method) {
+      const ev = BookClubStore.getEventById(eventId);
+      if (!ev) return;
+      if (method === 'whatsapp') {
+        const msg = BookClubStore.formatWhatsAppEventText({
+          groupName: group.name,
+          title: ev.title,
+          schedule: `${ev.month} ${ev.day}, 2026`,
+          time: ev.time,
+          location: ev.location,
+          milestone: 'Discussion chapters',
+          url: `${window.location.origin}/event-details.html?id=${ev.id}`
+        });
+        BookClubStore.trackGatheringOrEvent({
+          type: 'event',
+          id: ev.id,
+          method: 'whatsapp',
+          details: { title: ev.title }
+        });
+        BookClubStore.openWhatsAppTracker(msg, user.phone);
+        BookClubUI.showToast(`📲 Opened WhatsApp for "${ev.title}"!`, 'success');
+      } else {
+        BookClubStore.trackGatheringOrEvent({
+          type: 'event',
+          id: ev.id,
+          method: 'email',
+          contact: user.email || 'reader@bookclub.com',
+          details: { title: ev.title, schedule: ev.date, location: ev.location }
+        });
+        BookClubStore.downloadICSFile({
+          title: ev.title,
+          description: ev.description || 'BookClub event session',
+          location: ev.location,
+          filename: `event-${ev.id}`
+        });
+        BookClubUI.showToast(`✉️ Event details & .ics calendar invite sent to ${user.email}!`, 'success');
+      }
+      renderEventsList();
+    };
+
+    function renderEventsList() {
+      const evList = document.getElementById('grpEventsList');
+      if (!evList) return;
+      const evs = BookClubStore.getEvents().slice(0, 2);
+      evList.innerHTML = evs.map(e => {
+        const trk = BookClubStore.getTrackingStatus('event', e.id);
+        return `
+          <div class="card event-card">
+            <div class="event-date-badge"><span class="d">${e.day}</span><span class="m">${e.month}</span></div>
+            <div class="event-info" style="flex:1;">
+              <h4 style="margin:0 0 4px 0;"><a href="event-details.html?id=${e.id}">${e.title}</a></h4>
+              <p class="event-meta">🕒 ${e.time}</p>
+              <p class="event-meta">📍 ${e.location}</p>
+              <div class="flex gap-8" style="margin-top: 10px;">
+                <button type="button" class="btn btn-xs ${trk.whatsapp ? 'btn-primary' : 'btn-outline'}" onclick="trackSpecificEvent(${e.id}, 'whatsapp')" style="font-size:0.75rem; border-color:#25D366; color:${trk.whatsapp ? '#fff' : '#128C7E'};">
+                  ${trk.whatsapp ? '✓ WhatsApp Active' : '📲 WhatsApp'}
+                </button>
+                <button type="button" class="btn btn-xs ${trk.email ? 'btn-primary' : 'btn-outline'}" onclick="trackSpecificEvent(${e.id}, 'email')" style="font-size:0.75rem;">
+                  ${trk.email ? '✓ Email Active' : '✉️ Email'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    renderEventsList();
+
+  // Polls Rendering
+  function renderPolls() {
+    const poll = group.poll;
+    if (poll) {
+      document.getElementById('pollQuestion').textContent = poll.question;
+      const total = poll.totalVotes || 1;
+      const optsContainer = document.getElementById('bookPollOptions');
+
+      optsContainer.innerHTML = (poll.options || []).map(opt => {
+        const pct = Math.round(((opt.votes || 0) / total) * 100);
+        const hasVotedThis = poll.userVotedOptionId === opt.id;
+
+        return `
+          <div class="poll-option-row">
+            <button type="button" class="poll-btn ${hasVotedThis ? 'voted' : ''}" onclick="votePoll('book', ${opt.id})">
+              <div class="poll-fill" style="width: ${pct}%;"></div>
+              <span class="poll-label">${opt.title} ${opt.author ? `<small style="opacity:0.8;">(${opt.author})</small>` : ''}</span>
+              <span class="poll-count">${opt.votes || 0} votes (${pct}%) ${hasVotedThis ? '✓' : ''}</span>
+            </button>
+          </div>
+        `;
+      }).join('') + `<p class="text-soft text-center" style="font-size:0.8rem; margin-top:12px;">Total Community Votes: ${poll.totalVotes}</p>`;
+
+      // Preview on overview
+      const prev = document.getElementById('overviewPollPreview');
+      if (prev) {
+        prev.innerHTML = (poll.options || []).slice(0, 2).map(opt => {
+          const pct = Math.round(((opt.votes || 0) / total) * 100);
+          return `
+            <div style="margin-bottom:8px;">
+              <div class="flex-between" style="font-size:0.82rem; margin-bottom:2px;">
+                <span>${opt.title}</span>
+                <span>${pct}%</span>
+              </div>
+              <div class="progress-track" style="height:6px;"><div class="progress-fill" style="width:${pct}%;"></div></div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    const mPoll = group.meetingPoll;
+    if (mPoll) {
+      document.getElementById('meetingPollQuestion').textContent = mPoll.question;
+      const mTotal = mPoll.totalVotes || 1;
+      const mOpts = document.getElementById('meetingPollOptions');
+
+      mOpts.innerHTML = (mPoll.options || []).map(opt => {
+        const pct = Math.round(((opt.votes || 0) / mTotal) * 100);
+        const hasVotedThis = mPoll.userVotedOptionId === opt.id;
+        return `
+          <div class="poll-option-row">
+            <button type="button" class="poll-btn ${hasVotedThis ? 'voted' : ''}" onclick="votePoll('meeting', ${opt.id})">
+              <div class="poll-fill" style="width: ${pct}%;"></div>
+              <span class="poll-label">${opt.text}</span>
+              <span class="poll-count">${opt.votes || 0} votes (${pct}%) ${hasVotedThis ? '✓' : ''}</span>
+            </button>
+          </div>
+        `;
+      }).join('') + `<p class="text-soft text-center" style="font-size:0.8rem; margin-top:12px;">Total Votes: ${mPoll.totalVotes}</p>`;
+    }
+  }
+
+  window.votePoll = function (type, optionId) {
+    BookClubStore.voteGroupPoll(group.id, type, optionId);
+    BookClubUI.showToast('Your vote was cast! 🗳️', 'success');
+    renderPolls();
+  };
+  renderPolls();
+
+  // Switch Tab Helper
+  window.switchToTab = function (tabName) {
+    document.querySelectorAll('#groupDetailTabs .tab').forEach(tb => {
+      tb.classList.toggle('active', tb.getAttribute('data-tab') === tabName);
+    });
+    document.getElementById('tabOverview').style.display = tabName === 'overview' ? 'block' : 'none';
+    document.getElementById('tabBooks').style.display = tabName === 'books' ? 'block' : 'none';
+    document.getElementById('tabMembers').style.display = tabName === 'members' ? 'block' : 'none';
+    document.getElementById('tabDiscussions').style.display = tabName === 'discussions' ? 'block' : 'none';
+    document.getElementById('tabEvents').style.display = tabName === 'events' ? 'block' : 'none';
+    document.getElementById('tabProgress').style.display = tabName === 'progress' ? 'block' : 'none';
+    document.getElementById('tabPolls').style.display = tabName === 'polls' ? 'block' : 'none';
+  };
+
+  document.querySelectorAll('#groupDetailTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      switchToTab(this.getAttribute('data-tab'));
+    });
+  });
+});
+</script>
+</body>
+</html>

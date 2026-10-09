@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messages & Communication — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* Communications Hub Bespoke Styles */
+.comm-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  height: calc(100vh - 120px);
+  min-height: 620px;
+}
+
+@media (max-width: 900px) {
+  .comm-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+/* Left Contacts Sidebar */
+.comm-contacts-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden;
+  height: 100%;
+}
+
+.comm-contacts-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line, #E7DCC8);
+}
+
+.comm-tabs-row {
+  display: flex;
+  padding: 6px 14px;
+  gap: 6px;
+  border-bottom: 1px solid var(--line, #E7DCC8);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.comm-tab-btn {
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.comm-tab-btn.active {
+  background: var(--shell-gold, #D9A441);
+  color: #16241D;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.comm-search-box {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line, #E7DCC8);
+}
+
+.comm-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.comm-contacts-list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  position: relative;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.contact-item:hover {
+  background: rgba(217, 164, 65, 0.08);
+}
+
+.contact-item.active {
+  background: rgba(217, 164, 65, 0.15);
+  border-left: 4px solid var(--shell-gold, #D9A441);
+}
+
+.contact-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.contact-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--clay, #B5652F);
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.online-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #22C55E;
+  border: 2px solid var(--card-bg, #FFFFFF);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.online-dot.offline {
+  background: #94A3B8;
+}
+
+.contact-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+
+.contact-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-time {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.contact-snippet {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread-badge {
+  background: #EA580C;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  margin-left: 6px;
+}
+
+/* Right Chat Area */
+.comm-chat-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden;
+  height: 100%;
+}
+
+.chat-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line, #E7DCC8);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.chat-partner-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-whatsapp {
+  background: #25D366 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp:hover {
+  background: #1EBE5B !important;
+  transform: translateY(-1px);
+}
+
+.btn-sms {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Chat History Stream */
+.chat-messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.msg-row {
+  display: flex;
+  gap: 10px;
+  max-width: 75%;
+}
+
+.msg-row.sent {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.msg-row.received {
+  align-self: flex-start;
+}
+
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--clay, #B5652F);
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.msg-bubble {
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  position: relative;
+  word-break: break-word;
+}
+
+.msg-row.sent .msg-bubble {
+  background: linear-gradient(135deg, var(--brown-deep, #5C3A1E) 0%, #3B2412 100%);
+  color: #FFFDF9;
+  border-bottom-right-radius: 4px;
+}
+
+body[data-theme="dark"] .msg-row.sent .msg-bubble,
+body[data-theme="3d"] .msg-row.sent .msg-bubble {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #121A15;
+  font-weight: 500;
+}
+
+.msg-row.received .msg-bubble {
+  background: var(--card-bg, #FFFFFF);
+  color: var(--ink, #2E251C);
+  border: 1px solid var(--line, #E7DCC8);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 0.68rem;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+.msg-badge-sync {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(37, 211, 102, 0.2);
+  color: #25D366;
+  padding: 1px 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Attached Book Chip inside message */
+.msg-book-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.msg-book-img {
+  width: 34px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Quick reply pills */
+.quick-replies-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid var(--line, #E7DCC8);
+  overflow-x: auto;
+}
+
+.quick-reply-chip {
+  white-space: nowrap;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 16px;
+  border: 1px solid var(--line, #E7DCC8);
+  background: var(--card-bg, #FFFFFF);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-reply-chip:hover {
+  background: var(--shell-gold, #D9A441);
+  color: #16241D;
+  border-color: var(--shell-gold);
+}
+
+/* Message Composer Dock */
+.chat-composer-dock {
+  padding: 12px 18px;
+  border-top: 1px solid var(--line, #E7DCC8);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg, #FFFFFF);
+}
+
+.composer-input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.composer-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 20px;
+  font-size: 0.92rem;
+  border: 1px solid var(--line, #E7DCC8);
+  background: var(--bg, #FBF7EF);
+  color: var(--ink);
+}
+
+.composer-input:focus {
+  outline: none;
+  border-color: var(--shell-gold, #D9A441);
+}
+
+.typing-indicator {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 20px;
+}
+</style>
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar"></div>
+
+    <!-- Communication Hub Container -->
+    <div class="comm-layout">
+      <!-- Left Contacts & Channels Column -->
+      <div class="card comm-contacts-card">
+        <div class="comm-contacts-header">
+          <div class="flex-between">
+            <h3 style="margin: 0; font-size: 1.15rem;" data-i18n="comm.title">Messages &amp; Chat</h3>
+            <span class="badge badge-reading" style="font-size: 0.72rem;">🟢 WhatsApp Sync</span>
+          </div>
+          <p class="text-soft" style="margin: 4px 0 0 0; font-size: 0.78rem;" data-i18n="comm.subtitle">Connect with readers, organizers &amp; groups.</p>
+        </div>
+
+        <!-- Channel Filter Tabs -->
+        <div class="comm-tabs-row">
+          <button type="button" class="comm-tab-btn active" data-channel-filter="all">All Chats</button>
+          <button type="button" class="comm-tab-btn" data-channel-filter="direct" data-i18n="comm.directMessages">Direct</button>
+          <button type="button" class="comm-tab-btn" data-channel-filter="circles" data-i18n="comm.bookCircles">Circles</button>
+          <button type="button" class="comm-tab-btn" data-channel-filter="announcements" data-i18n="comm.announcements">Alerts</button>
+        </div>
+
+        <!-- Search Contacts -->
+        <div class="comm-search-box">
+          <input type="text" class="comm-search-input" id="contactSearchInput" placeholder="Search conversations &amp; contacts..." data-i18n-placeholder="comm.searchChats">
+        </div>
+
+        <!-- Contacts List -->
+        <ul class="comm-contacts-list" id="contactsListContainer">
+          <!-- Populated dynamically -->
+        </ul>
+      </div>
+
+      <!-- Right Active Conversation Column -->
+      <div class="card comm-chat-card">
+        <!-- Active Chat Header -->
+        <div class="chat-header" id="activeChatHeader">
+          <div class="chat-partner-profile">
+            <div class="contact-avatar-wrap">
+              <div class="contact-avatar" id="activePartnerAvatar">AK</div>
+              <div class="online-dot" id="activePartnerDot"></div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 style="margin: 0; font-size: 1.05rem;" id="activePartnerName">Aditi Krishnan</h3>
+                <span class="badge badge-reading" id="activePartnerRole">Organizer</span>
+              </div>
+              <div class="text-soft" style="font-size: 0.78rem;" id="activePartnerStatus">Reading: The Silent Orchard 📖</div>
+            </div>
+          </div>
+
+          <div class="chat-header-actions">
+            <!-- 1-Click WhatsApp Direct Launcher -->
+            <button type="button" class="btn btn-whatsapp btn-sm" id="btnLaunchWhatsApp" title="Open direct WhatsApp chat">
+              <span>💬</span> <span data-i18n="comm.whatsAppDirect">WhatsApp Chat</span>
+            </button>
+
+            <!-- Normal SMS Trigger -->
+            <button type="button" class="btn btn-sms btn-sm" id="btnLaunchSMS" title="Send standard mobile SMS text">
+              <span>📱</span> <span data-i18n="comm.normalMessage">SMS Text</span>
+            </button>
+
+            <!-- Share Book to WhatsApp -->
+            <button type="button" class="btn btn-outline btn-sm" id="btnShareBookWhatsApp" title="Share current book to WhatsApp">
+              <span>📖 Share Book</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Stream -->
+        <div class="chat-messages-container" id="chatMessagesContainer">
+          <!-- Rendered messages -->
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+          <span>✍️</span> <span id="typingName">Aditi</span> is typing a response...
+        </div>
+
+        <!-- Quick Reply Chips -->
+        <div class="quick-replies-bar">
+          <span class="text-soft" style="font-size: 0.72rem; align-self: center;" data-i18n="comm.quickReply">Quick:</span>
+          <button type="button" class="quick-reply-chip" data-quick-text="Which book should we read next for our group?">📚 Next book?</button>
+          <button type="button" class="quick-reply-chip" data-quick-text="I loved chapter 4! Such an unexpected plot twist.">✨ Loved chapter 4!</button>
+          <button type="button" class="quick-reply-chip" data-quick-text="Are you attending the weekend discussion salon?">📆 Discussion this weekend?</button>
+          <button type="button" class="quick-reply-chip" data-quick-text="Here is my recommendation from my library shelves!">💡 Library pick</button>
+        </div>
+
+        <!-- Message Composer Dock -->
+        <div class="chat-composer-dock">
+          <!-- Book Attachment Button -->
+          <button type="button" class="btn btn-ghost btn-sm" id="btnAttachBook" title="Attach &amp; Recommend a Book" style="font-size: 1.1rem; padding: 6px 10px;">
+            📖
+          </button>
+
+          <!-- WhatsApp Dispatch Toggle -->
+          <label style="display: flex; align-items: center; gap: 4px; font-size: 0.76rem; cursor: pointer; color: #22C55E; font-weight: 700; white-space: nowrap;">
+            <input type="checkbox" id="syncToWhatsAppCheck" checked>
+            <span>WhatsApp Sync</span>
+          </label>
+
+          <div class="composer-input-wrap">
+            <input type="text" class="composer-input" id="messageInput" placeholder="Type a message to your fellow reader..." data-i18n-placeholder="comm.typeMessage">
+          </div>
+
+          <button type="button" class="btn btn-primary btn-sm" id="btnSendMessage" style="border-radius: 20px; padding: 8px 18px;">
+            <span data-i18n="comm.send">Send</span> ➔
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = BookClubAuth.requireAuth('login.html');
+  if (!user) return;
+
+  // Render Shell Navigation
+  BookClubUI.renderSidebar('messages');
+  BookClubUI.renderTopbar(
+    'Communications & Messages 💬',
+    'Direct messaging, reading circles, WhatsApp sync & SMS alerts.',
+    `<a href="settings.html" class="btn btn-outline btn-sm">⚙️ Comm Settings</a>`
+  );
+
+  // Default / Mock contacts with WhatsApp numbers and status
+  let contacts = [
+    {
+      userId: 3,
+      name: "Aditi Krishnan",
+      username: "aditi_k",
+      role: "organizer",
+      avatar: "AK",
+      online: true,
+      phone: "+15552348901",
+      statusMessage: "Reading: The Silent Orchard 📖",
+      lastMessage: "Feel free to message me here anytime or ping on WhatsApp!",
+      lastTime: "10m ago",
+      unreadCount: 1,
+      type: "direct"
+    },
+    {
+      userId: 2,
+      name: "Jordan Rivera",
+      username: "jordanreads",
+      role: "member",
+      avatar: "JR",
+      online: true,
+      phone: "+15553456789",
+      statusMessage: "Tackling the 50-book annual quest! ⚔️",
+      lastMessage: "I saw you are reading The Silent Orchard. No spoilers!",
+      lastTime: "25m ago",
+      unreadCount: 1,
+      type: "direct"
+    },
+    {
+      userId: 101,
+      name: "Mystery Readers Salon",
+      username: "circle_mystery",
+      role: "circle",
+      avatar: "🕵️",
+      online: true,
+      phone: "+15550001122",
+      statusMessage: "Circle chat · 24 active members",
+      lastMessage: "Elena Vance: Next zoom salon scheduled for Friday at 6 PM.",
+      lastTime: "1h ago",
+      unreadCount: 0,
+      type: "circles"
+    },
+    {
+      userId: 102,
+      name: "Sci-Fi Voyagers Channel",
+      username: "circle_scifi",
+      role: "circle",
+      avatar: "🚀",
+      online: true,
+      phone: "+15550003344",
+      statusMessage: "Circle chat · 18 members exploring Space Operas",
+      lastMessage: "Marcus Chen: Just submitted my review for Clockwork Astrolabe!",
+      lastTime: "3h ago",
+      unreadCount: 0,
+      type: "circles"
+    },
+    {
+      userId: 1,
+      name: "Admin User",
+      username: "admin",
+      role: "admin",
+      avatar: "AU",
+      online: true,
+      phone: "+15551234567",
+      statusMessage: "BOOK FORGE Curator & Support 🛡️",
+      lastMessage: "Check out the new Light, Dark & 3D themes in Settings!",
+      lastTime: "1d ago",
+      unreadCount: 0,
+      type: "announcements"
+    }
+  ];
+
+  // Try fetching fresh contacts from API if server is up
+  try {
+    if (typeof BookClubAPI !== 'undefined' && BookClubAPI.messages) {
+      const res = await BookClubAPI.messages.getContacts();
+      if (res && res.success && res.contacts && res.contacts.length > 0) {
+        // Merge with existing rich contact metadata
+        res.contacts.forEach(apiC => {
+          const existing = contacts.find(c => c.userId === apiC.userId);
+          if (existing) {
+            existing.lastMessage = apiC.lastMessage || existing.lastMessage;
+            existing.unreadCount = apiC.unreadCount || 0;
+          } else {
+            contacts.push({
+              userId: apiC.userId,
+              name: apiC.name,
+              username: apiC.username,
+              role: apiC.role || 'member',
+              avatar: apiC.avatar || 'U',
+              online: apiC.online !== undefined ? apiC.online : true,
+              phone: apiC.phone || '+15559876543',
+              statusMessage: apiC.statusMessage || 'BOOK FORGE Member',
+              lastMessage: apiC.lastMessage || 'Start a conversation...',
+              lastTime: 'Active',
+              unreadCount: apiC.unreadCount || 0,
+              type: 'direct'
+            });
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.log('Using local contacts store.');
+  }
+
+  // Active chat state
+  let activeContact = contacts[0];
+  let activeFilter = 'all';
+
+  // In-memory / localStorage conversation store
+  function getLocalConversation(contactId) {
+    const key = `bookforge_chat_${user.userId || user.id || 7}_${contactId}`;
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch(e) {}
+
+    // Default mock history
+    if (contactId === 3) {
+      return [
+        {
+          id: 1,
+          sender: "Aditi Krishnan",
+          isMe: false,
+          avatar: "AK",
+          text: `Hi ${user.name}! Welcome to the reading circle. Are you enjoying your current read?`,
+          time: "10:30 AM",
+          via: "in_app"
+        },
+        {
+          id: 2,
+          sender: user.name,
+          isMe: true,
+          avatar: user.avatar || "ER",
+          text: "Yes, absolutely! The pacing in the first few chapters is incredible.",
+          time: "10:32 AM",
+          via: "in_app"
+        },
+        {
+          id: 3,
+          sender: "Aditi Krishnan",
+          isMe: false,
+          avatar: "AK",
+          text: "Wonderful! You can also reach me on WhatsApp if you want reading notes or discussion reminders.",
+          time: "10:35 AM",
+          via: "whatsapp_sync"
+        }
+      ];
+    } else if (contactId === 2) {
+      return [
+        {
+          id: 1,
+          sender: "Jordan Rivera",
+          isMe: false,
+          avatar: "JR",
+          text: "Hey! Have you checked out 'The Silent Orchard'? I just finished it for the 50-book challenge!",
+          time: "Yesterday",
+          via: "in_app",
+          bookAttachment: {
+            title: "The Silent Orchard",
+            author: "Elena Marsh",
+            cover: "images/books/silent-orchard.jpg"
+          }
+        }
+      ];
+    } else if (contactId === 101) {
+      return [
+        {
+          id: 1,
+          sender: "Elena Vance",
+          isMe: false,
+          avatar: "EV",
+          text: "Hello Mystery Salon members! Don't forget our weekend breakdown of 'Winter's Ledger'.",
+          time: "9:00 AM",
+          via: "in_app"
+        },
+        {
+          id: 2,
+          sender: "Aditi Krishnan",
+          isMe: false,
+          avatar: "AK",
+          text: "I'll be hosting the live room at 6 PM UTC. Everyone is welcome!",
+          time: "9:15 AM",
+          via: "whatsapp_sync"
+        }
+      ];
+    }
+
+    return [
+      {
+        id: 1,
+        sender: activeContact.name,
+        isMe: false,
+        avatar: activeContact.avatar,
+        text: `Hello ${user.name}! Looking forward to connecting on BOOK FORGE.`,
+        time: "Just now",
+        via: "in_app"
+      }
+    ];
+  }
+
+  function saveLocalConversation(contactId, msgs) {
+    const key = `bookforge_chat_${user.userId || user.id || 7}_${contactId}`;
+    try {
+      localStorage.setItem(key, JSON.stringify(msgs));
+    } catch(e) {}
+  }
+
+  // Render contacts list
+  const contactsContainer = document.getElementById('contactsListContainer');
+
+  function renderContactsList() {
+    const searchVal = document.getElementById('contactSearchInput').value.toLowerCase().trim();
+    
+    const filtered = contacts.filter(c => {
+      const matchType = activeFilter === 'all' || c.type === activeFilter;
+      const matchSearch = !searchVal || c.name.toLowerCase().includes(searchVal) || c.statusMessage.toLowerCase().includes(searchVal);
+      return matchType && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      contactsContainer.innerHTML = `
+        <li style="padding: 24px; text-align: center; color: var(--ink-soft); font-size: 0.85rem;">
+          No conversations found.
+        </li>
+      `;
+      return;
+    }
+
+    contactsContainer.innerHTML = filtered.map(c => `
+      <li class="contact-item ${c.userId === activeContact.userId ? 'active' : ''}" data-contact-id="${c.userId}">
+        <div class="contact-avatar-wrap">
+          <div class="contact-avatar" style="${c.role === 'admin' ? 'background: #D9A441; color: #16241D;' : ''}">${c.avatar}</div>
+          <div class="online-dot ${c.online ? '' : 'offline'}"></div>
+        </div>
+        <div class="contact-info">
+          <div class="contact-name-row">
+            <span class="contact-name">${c.name}</span>
+            <span class="contact-time">${c.lastTime || ''}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="contact-snippet">${c.lastMessage}</span>
+            ${c.unreadCount > 0 ? `<span class="unread-badge">${c.unreadCount}</span>` : ''}
+          </div>
+        </div>
+      </li>
+    `).join('');
+
+    // Attach click handlers
+    contactsContainer.querySelectorAll('.contact-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = parseInt(item.getAttribute('data-contact-id'), 10);
+        const selected = contacts.find(c => c.userId === id);
+        if (selected) {
+          activeContact = selected;
+          selected.unreadCount = 0;
+          renderContactsList();
+          loadConversation();
+        }
+      });
+    });
+  }
+
+  // Load and display active conversation
+  const chatMessagesContainer = document.getElementById('chatMessagesContainer');
+
+  async function loadConversation() {
+    // Update active chat header
+    document.getElementById('activePartnerName').textContent = activeContact.name;
+    document.getElementById('activePartnerAvatar').textContent = activeContact.avatar;
+    document.getElementById('activePartnerRole').textContent = activeContact.role.toUpperCase();
+    document.getElementById('activePartnerStatus').textContent = activeContact.statusMessage;
+
+    const dot = document.getElementById('activePartnerDot');
+    if (activeContact.online) dot.classList.remove('offline');
+    else dot.classList.add('offline');
+
+    // Try fetching from backend API
+    let messages = [];
+    try {
+      if (typeof BookClubAPI !== 'undefined' && BookClubAPI.messages && activeContact.type === 'direct') {
+        const res = await BookClubAPI.messages.getMessages(activeContact.userId);
+        if (res && res.success && res.messages && res.messages.length > 0) {
+          messages = res.messages.map(m => ({
+            id: m._id,
+            sender: m.senderName,
+            isMe: m.senderId === (user.userId || user.id || 7),
+            avatar: m.senderAvatar || 'U',
+            text: m.content,
+            time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            via: m.viaPlatform,
+            bookAttachment: m.bookAttachment
+          }));
+        }
+      }
+    } catch(e) {}
+
+    // Fallback to local store
+    if (messages.length === 0) {
+      messages = getLocalConversation(activeContact.userId);
+    }
+
+    // Render message bubbles
+    chatMessagesContainer.innerHTML = messages.map(m => `
+      <div class="msg-row ${m.isMe ? 'sent' : 'received'}">
+        ${!m.isMe ? `<div class="msg-avatar">${m.avatar}</div>` : ''}
+        <div class="msg-bubble">
+          <div>${BookClubUI.escapeHtml(m.text)}</div>
+          
+          ${m.bookAttachment && m.bookAttachment.title ? `
+            <div class="msg-book-chip">
+              <img src="${m.bookAttachment.cover || 'images/books/silent-orchard.jpg'}" alt="Book cover" class="msg-book-img">
+              <div>
+                <strong style="font-size:0.85rem; display:block;">📖 ${BookClubUI.escapeHtml(m.bookAttachment.title)}</strong>
+                <span style="font-size:0.75rem; opacity:0.85;">by ${BookClubUI.escapeHtml(m.bookAttachment.author || 'Author')}</span>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="msg-meta">
+            <span>${m.time}</span>
+            ${m.via === 'whatsapp_sync' ? `<span class="msg-badge-sync">🟢 WhatsApp</span>` : ''}
+            ${m.via === 'sms' ? `<span class="msg-badge-sync" style="color:#60A5FA; background:rgba(96,165,250,0.2);">📱 SMS</span>` : ''}
+            ${m.isMe ? `<span title="Delivered &amp; Read" style="color:#22C55E;">✓✓</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+  }
+
+  // Send message action
+  async function handleSendMessage(customText = null, bookAttachment = null) {
+    const input = document.getElementById('messageInput');
+    const text = customText || input.value.trim();
+    if (!text) return;
+
+    const syncWhatsApp = document.getElementById('syncToWhatsAppCheck').checked;
+    const viaPlatform = syncWhatsApp ? 'whatsapp_sync' : 'in_app';
+
+    const newMsg = {
+      id: Date.now(),
+      sender: user.name,
+      isMe: true,
+      avatar: user.avatar || 'ER',
+      text: text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      via: viaPlatform,
+      bookAttachment: bookAttachment
+    };
+
+    // Update UI immediately
+    const currentMsgs = getLocalConversation(activeContact.userId);
+    currentMsgs.push(newMsg);
+    saveLocalConversation(activeContact.userId, currentMsgs);
+
+    activeContact.lastMessage = text;
+    activeContact.lastTime = "Just now";
+    input.value = '';
+    renderContactsList();
+    loadConversation();
+
+    // Try posting to API
+    try {
+      if (typeof BookClubAPI !== 'undefined' && BookClubAPI.messages) {
+        await BookClubAPI.messages.send({
+          recipientId: activeContact.userId,
+          content: text,
+          bookAttachment: bookAttachment,
+          viaPlatform: viaPlatform
+        });
+      }
+    } catch (e) {}
+
+    // If WhatsApp Sync is checked, provide option to trigger WhatsApp Web / mobile
+    if (syncWhatsApp) {
+      const encodedMsg = encodeURIComponent(`[BOOK FORGE Message to ${activeContact.name}]: ${text}`);
+      const cleanPhone = (activeContact.phone || '+15551234567').replace(/[^0-9]/g, '');
+      const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMsg}`;
+      
+      BookClubUI.showToast(`Message synced to WhatsApp queue. Click 'WhatsApp Chat' to view external conversation.`, 'success');
+    }
+
+    // Interactive realistic reply simulation
+    const typingIndicator = document.getElementById('typingIndicator');
+    document.getElementById('typingName').textContent = activeContact.name.split(' ')[0];
+
+    setTimeout(() => {
+      typingIndicator.style.display = 'flex';
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
+      setTimeout(() => {
+        typingIndicator.style.display = 'none';
+
+        const responses = [
+          `That is a wonderful point! I really appreciate your perspective on that reading topic.`,
+          `I agree completely! That chapter gave me goosebumps. Let's discuss it in our upcoming salon!`,
+          `Thanks for sharing! I've added that to my reading queue on BOOK FORGE.`,
+          `Great note! I'll also post a summary into our WhatsApp reading circle thread for the other members.`
+        ];
+        const randomResp = responses[Math.floor(Math.random() * responses.length)];
+
+        const replyMsg = {
+          id: Date.now() + 1,
+          sender: activeContact.name,
+          isMe: false,
+          avatar: activeContact.avatar,
+          text: randomResp,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          via: syncWhatsApp ? 'whatsapp_sync' : 'in_app'
+        };
+
+        const updatedMsgs = getLocalConversation(activeContact.userId);
+        updatedMsgs.push(replyMsg);
+        saveLocalConversation(activeContact.userId, updatedMsgs);
+
+        activeContact.lastMessage = randomResp;
+        activeContact.lastTime = "Just now";
+        renderContactsList();
+        loadConversation();
+
+        BookClubUI.showToast(`New message from ${activeContact.name}`, 'info');
+      }, 1400);
+    }, 600);
+  }
+
+  // Hook send button and Enter key
+  document.getElementById('btnSendMessage').addEventListener('click', () => handleSendMessage());
+  document.getElementById('messageInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  });
+
+  // Hook Quick Reply chips
+  document.querySelectorAll('.quick-reply-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const text = chip.getAttribute('data-quick-text');
+      handleSendMessage(text);
+    });
+  });
+
+  // Hook WhatsApp direct button
+  document.getElementById('btnLaunchWhatsApp').addEventListener('click', () => {
+    const cleanPhone = (activeContact.phone || '+15551234567').replace(/[^0-9]/g, '');
+    const defaultText = encodeURIComponent(`Hello ${activeContact.name}! Reaching out from BOOK FORGE regarding our reading discussions.`);
+    const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${defaultText}`;
+    window.open(waUrl, '_blank');
+    BookClubUI.showToast(`Launching WhatsApp Chat with ${activeContact.name}...`, 'success');
+  });
+
+  // Hook SMS direct button
+  document.getElementById('btnLaunchSMS').addEventListener('click', () => {
+    const defaultText = encodeURIComponent(`Hi ${activeContact.name}, connecting with you on BOOK FORGE.`);
+    const smsUrl = `sms:${activeContact.phone || ''}?body=${defaultText}`;
+    window.open(smsUrl, '_blank');
+    BookClubUI.showToast(`Triggering SMS text composer for ${activeContact.name}...`, 'info');
+  });
+
+  // Hook Share Book to WhatsApp
+  document.getElementById('btnShareBookWhatsApp').addEventListener('click', () => {
+    const allBooks = BookClubStore.getBooks();
+    const book = allBooks[0] || { title: "The Silent Orchard", author: "Elena Marsh" };
+    
+    const shareText = encodeURIComponent(`🔥 [BOOK FORGE Reading Recommendation]\n"${book.title}" by ${book.author}\nCheck out my reading progress and join the club discussion!`);
+    const waShareUrl = `https://api.whatsapp.com/send?text=${shareText}`;
+    window.open(waShareUrl, '_blank');
+
+    // Also share inside current chat
+    handleSendMessage(`I just shared "${book.title}" to WhatsApp!`, {
+      title: book.title,
+      author: book.author,
+      cover: 'images/books/silent-orchard.jpg'
+    });
+  });
+
+  // Hook Book Attach button
+  document.getElementById('btnAttachBook').addEventListener('click', () => {
+    const allBooks = BookClubStore.getBooks().slice(0, 6);
+    const bookOptions = allBooks.map(b => `
+      <div class="card" style="display:flex; gap:12px; padding:10px; margin-bottom:8px; cursor:pointer;" onclick="selectBookToAttach('${b.title.replace(/'/g, "\\'")}', '${b.author.replace(/'/g, "\\'")}')">
+        <div style="font-size:1.5rem;">📖</div>
+        <div>
+          <strong>${b.title}</strong>
+          <div class="text-soft" style="font-size:0.8rem;">by ${b.author} · ${b.genre}</div>
+        </div>
+      </div>
+    `).join('');
+
+    BookClubUI.showModal('Select a Book to Share in Chat', `
+      <div>
+        <p class="text-soft">Choose a book from the catalog to recommend directly in this conversation:</p>
+        <div>${bookOptions}</div>
+      </div>
+    `, `<button type="button" class="btn btn-ghost" onclick="BookClubUI.closeModal()">Cancel</button>`);
+  });
+
+  window.selectBookToAttach = function (title, author) {
+    BookClubUI.closeModal();
+    handleSendMessage(`I highly recommend reading "${title}" by ${author}!`, {
+      title,
+      author,
+      cover: 'images/books/silent-orchard.jpg'
+    });
+  };
+
+  // Filter Tabs
+  document.querySelectorAll('[data-channel-filter]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('[data-channel-filter]').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeFilter = tab.getAttribute('data-channel-filter');
+      renderContactsList();
+    });
+  });
+
+  // Search input filter
+  document.getElementById('contactSearchInput').addEventListener('input', () => {
+    renderContactsList();
+  });
+
+  // Initial render
+  renderContactsList();
+  loadConversation();
+});
+</script>
+</body>
+</html>

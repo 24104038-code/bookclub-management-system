@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Challenges — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- FILTER TABS -->
+    <div class="tabs" id="challengeTabs">
+      <span class="tab active" data-filter="all">All Challenges</span>
+      <span class="tab" data-filter="joined">My Joined Challenges</span>
+      <span class="tab" data-filter="completed">Completed &amp; Certificates 🏆</span>
+      <span class="tab" data-filter="available">Available to Join</span>
+    </div>
+
+    <!-- CHALLENGES GRID -->
+    <div class="grid grid-3" id="challengesGrid" style="margin-bottom: 40px;">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('challenges');
+  BookClubUI.renderTopbar(
+    'Reading Challenges',
+    'Join community reading quests, earn reward XP, and collect official completion certificates.',
+    `<a href="competitions.html" class="btn btn-outline btn-sm">Reading Competitions 🏁</a>`
+  );
+
+  let currentFilter = 'all';
+
+  function renderChallenges() {
+    const list = BookClubStore.getChallenges();
+    const certs = BookClubStore.getCertificates();
+    const container = document.getElementById('challengesGrid');
+
+    let filtered = list;
+    if (currentFilter === 'joined') {
+      filtered = list.filter(c => c.joined);
+    } else if (currentFilter === 'completed') {
+      filtered = list.filter(c => {
+        const isTargetReached = (c.progress >= c.target);
+        const hasCert = certs.some(crt => crt.challengeId === c.id);
+        return isTargetReached || hasCert;
+      });
+    } else if (currentFilter === 'available') {
+      filtered = list.filter(c => !c.joined);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1 / -1;">${BookClubUI.renderEmptyState('🏆', 'No challenges in this view', 'Explore all community challenges and start a reading quest today.', 'Show All', '#')}</div>`;
+      const btn = container.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); currentFilter = 'all'; renderChallenges(); });
+      return;
+    }
+
+    container.innerHTML = filtered.map(c => {
+      const pct = Math.min(100, Math.round((c.progress / c.target) * 100));
+      const isCompleted = pct >= 100;
+      const cert = certs.find(crt => crt.challengeId === c.id);
+
+      return `
+        <div class="card panel" style="display: flex; flex-direction: column; justify-content: space-between; border: ${isCompleted ? '1.5px solid var(--green-shelf)' : '1px solid var(--line)'};">
+          <div>
+            <div class="flex-between mb-0">
+              ${isCompleted 
+                ? '<span class="badge badge-completed" style="background:#D8F3DC; color:#1B4332; font-weight:700;">Completed ✓</span>'
+                : `<span class="badge ${c.joined ? 'badge-active' : 'badge-want'}">${c.joined ? 'Joined' : 'Open'}</span>`
+              }
+              <span class="badge-xp-tag">+${c.rewardXp} XP</span>
+            </div>
+
+            <div style="font-size: 2.2rem; margin: 12px 0 6px;">${c.badgeIcon}</div>
+            <h3 style="margin: 0 0 4px 0;"><a href="challenge-details.html?id=${c.id}">${c.title}</a></h3>
+            <p class="text-soft" style="font-size: 0.85rem; margin-bottom: 14px;">Badge: <strong>${c.badgeName}</strong></p>
+
+            <p style="font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 18px;">${c.description}</p>
+
+            <div class="progress-track" style="height: 8px; margin-bottom: 6px;">
+              <div class="progress-fill" style="width: ${pct}%; background: ${isCompleted ? 'var(--green-shelf)' : 'var(--shell-gold)'};"></div>
+            </div>
+
+            <div class="flex-between" style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 18px;">
+              <span>${c.progress} / ${c.target} ${c.unit} (${pct}%)</span>
+              <span>⏳ ${c.daysRemaining} days left</span>
+            </div>
+          </div>
+
+          <div class="flex gap-8" style="border-top: 1px dashed var(--line); padding-top: 14px;">
+            ${isCompleted
+              ? `
+                <button type="button" class="btn btn-primary btn-sm" style="flex:1;" onclick="handleChallengeCertFromCard(${c.id})">
+                  ${cert ? '👁️ Certificate' : '🎓 Claim Certificate'}
+                </button>
+              `
+              : `
+                <button type="button" class="btn ${c.joined ? 'btn-outline' : 'btn-primary'} btn-sm" style="flex:1;" onclick="handleToggleChallenge(${c.id})">
+                  ${c.joined ? 'Leave' : 'Join Challenge'}
+                </button>
+              `
+            }
+            <a href="challenge-details.html?id=${c.id}" class="btn btn-ghost btn-sm">Details →</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.handleToggleChallenge = function (id) {
+    const isJoined = BookClubStore.toggleJoinChallenge(id);
+    BookClubUI.showToast(isJoined ? 'You joined the challenge! Good luck! 🎉' : 'You left the challenge.', isJoined ? 'success' : 'info');
+    renderChallenges();
+  };
+
+  window.handleChallengeCertFromCard = async function (id) {
+    let cert = BookClubStore.getCertificates().find(c => c.challengeId === id);
+    if (!cert && typeof BookClubAPI !== 'undefined' && BookClubAPI.getToken()) {
+      try {
+        const res = await BookClubAPI.challenges.generateCertificate(id);
+        if (res && res.success && res.data) {
+          cert = res.data;
+          BookClubStore.addCertificate(cert);
+          BookClubUI.showToast('🎉 Challenge Completion Certificate generated!', 'success');
+        }
+      } catch (err) {
+        console.warn('Backend certificate error, falling back to local generation:', err);
+      }
+    }
+    if (!cert) {
+      cert = BookClubStore.generateChallengeCertificate(id);
+      BookClubUI.showToast('🎉 Challenge Completion Certificate generated!', 'success');
+    }
+    if (cert) {
+      BookClubUI.showCertificateModal(cert);
+      renderChallenges();
+    }
+  };
+
+  document.querySelectorAll('#challengeTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#challengeTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.getAttribute('data-filter');
+      renderChallenges();
+    });
+  });
+
+  renderChallenges();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Fallback redirect to React application -->
+  <script>
+    (function() {
+      var file = window.location.pathname.split('/').pop().replace('.html', '');
+      var targetRoute = file ? ('/' + file) : '/dashboard';
+      window.location.replace(targetRoute + window.location.search + window.location.hash);
+    })();
+  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Competitions — BOOK FORGE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-auth-required="true">
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <div class="topbar">
+      <!-- Rendered by BookClubUI.renderTopbar -->
+    </div>
+
+    <!-- BANNER -->
+    <div class="card panel mb-30" style="background: linear-gradient(135deg, #16291F, #2A4C3B); color: #fff;">
+      <div class="flex-between" style="flex-wrap: wrap; gap: 20px;">
+        <div>
+          <span class="eyebrow" style="color: var(--shell-gold);">Seasonal Championship</span>
+          <h1 style="color: #fff; margin: 8px 0 6px 0;">Official Reading Tournaments</h1>
+          <p style="color: #B9C7BC; max-width: 580px; margin: 0;">Compete with reading circles worldwide. Track verified reading sprints, write top-rated critiques, and race for podium trophies and bookstore vouchers.</p>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 2.2rem; font-weight: 700; color: var(--shell-gold);">$350+</div>
+          <div style="font-size: 0.85rem; color: #B9C7BC;">In Active Tournament Prizes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" id="compTabs">
+      <span class="tab active" data-filter="all">All Tournaments</span>
+      <span class="tab" data-filter="active">Active Now</span>
+      <span class="tab" data-filter="upcoming">Upcoming</span>
+    </div>
+
+    <!-- COMPETITIONS GRID -->
+    <div class="grid grid-2" style="margin-bottom: 40px;" id="competitionsGrid">
+      <!-- Populated dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/data/books.js"></script>
+<script src="js/data/users.js"></script>
+<script src="js/data/groups.js"></script>
+<script src="js/data/events.js"></script>
+<script src="js/data/challenges.js"></script>
+<script src="js/data/competitions.js"></script>
+<script src="js/data/reviews.js"></script>
+<script src="js/data/discussions.js"></script>
+<script src="js/data/goals.js"></script>
+<script src="js/data/notes.js"></script>
+<script src="js/data/journal.js"></script>
+<script src="js/data/notifications.js"></script>
+<script src="js/data/activities.js"></script>
+<script src="js/data/leaderboards.js"></script>
+<script src="js/data/reports.js"></script>
+<script src="js/api.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  BookClubAuth.requireAuth();
+
+  BookClubUI.renderSidebar('competitions');
+  BookClubUI.renderTopbar(
+    'Reading Competitions & Races',
+    'Participate in high-energy reading tournaments, race against the clock, and win prestigious prizes.',
+    `<a href="leaderboards.html" class="btn btn-primary btn-sm">Podium Standings 🏅</a>`
+  );
+
+  let currentFilter = 'all';
+
+  function renderCompetitions() {
+    const list = BookClubStore.getCompetitions();
+    const container = document.getElementById('competitionsGrid');
+
+    let filtered = list;
+    if (currentFilter === 'active') filtered = list.filter(c => c.status === 'Active');
+    else if (currentFilter === 'upcoming') filtered = list.filter(c => c.status === 'Upcoming');
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1;">${BookClubUI.renderEmptyState('🏁', 'No competitions in this filter', 'Check back soon for the next seasonal race series.', 'View All', '#')}</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(cp => `
+      <div class="card panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div class="flex-between mb-0">
+            <span class="badge ${cp.status === 'Active' ? 'badge-completed' : 'badge-want'}">${cp.status}</span>
+            <span class="badge-xp-tag">+${cp.xpReward} XP</span>
+          </div>
+
+          <h3 style="margin: 14px 0 4px 0; font-size: 1.28rem;">
+            <a href="competition-details.html?id=${cp.id}">${cp.title}</a>
+          </h3>
+          <p class="text-soft" style="font-size: 0.85rem; margin-bottom: 12px;">Type: <strong>${cp.type}</strong> · 👥 ${cp.participants} competitors</p>
+
+          <p style="color: var(--ink-soft); font-size: 0.92rem; margin-bottom: 16px;">${cp.description}</p>
+
+          <div class="card" style="background: var(--cream-deep); padding: 12px 16px; margin-bottom: 16px; border-color: var(--line);">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--brown-deep);">🏆 Prize:</div>
+            <div style="font-size: 0.9rem; color: var(--clay); font-weight: 600;">${cp.prize}</div>
+          </div>
+
+          <div class="flex-between" style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 16px;">
+            <span>Dates: ${cp.startDate} – ${cp.endDate}</span>
+            <strong style="color: var(--shell-gold-deep);">⏳ ${cp.countdownDays} days remaining</strong>
+          </div>
+        </div>
+
+        <div class="flex gap-8" style="border-top: 1px dashed var(--line); padding-top: 14px;">
+          <button type="button" class="btn ${cp.joined ? 'btn-outline' : 'btn-primary'} btn-sm" style="flex:1;" onclick="handleToggleComp(${cp.id})">
+            ${cp.joined ? 'Leave Tournament' : 'Join Competition'}
+          </button>
+          <a href="competition-details.html?id=${cp.id}" class="btn btn-outline btn-sm">Tournament Arena →</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.handleToggleComp = function (id) {
+    const isJoined = BookClubStore.toggleJoinCompetition(id);
+    BookClubUI.showToast(isJoined ? 'You entered the tournament! May the best reader win! 🏁' : 'You withdrew from tournament.', isJoined ? 'success' : 'info');
+    renderCompetitions();
+  };
+
+  document.querySelectorAll('#compTabs .tab').forEach(t => {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('#compTabs .tab').forEach(tb => tb.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.getAttribute('data-filter');
+      renderCompetitions();
+    });
+  });
+
+  renderCompetitions();
+});
+</script>
+</body>
+</html>
