@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -94,9 +95,18 @@ app.use('/images', express.static(path.join(rootPath, 'images')));
 app.use('/css', express.static(path.join(rootPath, 'css')));
 app.use('/js', express.static(path.join(rootPath, 'js')));
 
-// 3. Landing page: index.html is the only static HTML entry point
+// 3. Landing page: index.html if present, else JSON status
 app.get(['/', '/index.html'], (req, res) => {
-  res.sendFile(path.join(rootPath, 'index.html'));
+  const landingPath = path.join(rootPath, 'index.html');
+  if (fs.existsSync(landingPath)) {
+    return res.sendFile(landingPath);
+  }
+  return res.json({
+    success: true,
+    message: 'BOOK FORGE Backend API is live and operational.',
+    health: '/api/health',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // 404 Handler for undefined API routes
@@ -107,9 +117,17 @@ app.use('/api', (req, res) => {
   });
 });
 
-// 4. All other application routes are served by the React SPA
+// 4. All other application routes: serve React SPA if present, else JSON 404
 app.use((req, res) => {
-  res.sendFile(path.join(reactDistPath, 'index.html'));
+  const spaPath = path.join(reactDistPath, 'index.html');
+  if (fs.existsSync(spaPath)) {
+    return res.sendFile(spaPath);
+  }
+  return res.status(404).json({
+    success: false,
+    message: 'Route not found. Backend API is active at /api',
+    health: '/api/health'
+  });
 });
 
 // Centralized error handling middleware
