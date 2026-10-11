@@ -167,28 +167,10 @@ export function AuthProvider({ children }) {
         localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: res.data.user.userId, email: res.data.user.email }));
         return { success: true, user: res.data.user };
       }
-    } catch (e) {}
-
-    // Local fallback
-    seedLocalUsers();
-    const users = JSON.parse(localStorage.getItem(USERS_KEY)) || DEMO_USERS;
-    const newId = users.reduce((max, u) => Math.max(max, u.userId || 0), 0) + 1;
-    const newUser = {
-      userId: newId,
-      name: userData.name || userData.fullName,
-      username: userData.username,
-      email: userData.email,
-      password: userData.password,
-      role: 'user',
-      favoriteGenre: userData.favoriteGenre || 'Fiction',
-      bio: userData.bio || '',
-      avatar: (userData.name || 'U').split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase()
-    };
-    users.push(newUser);
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    setUser(newUser);
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: newUser.userId, email: newUser.email }));
-    return { success: true, user: newUser };
+      return { success: false, error: res.message || res.error || 'Registration failed on database server.' };
+    } catch (e) {
+      return { success: false, error: e.message || 'Unable to connect to database server.' };
+    }
   }
 
   async function googleLogin(payload) {

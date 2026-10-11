@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const LoginHistory = require('../models/LoginHistory');
 const Otp = require('../models/Otp');
 const smsService = require('../services/smsService');
 const { OAuth2Client } = require('google-auth-library');
@@ -167,6 +168,18 @@ exports.register = async (req, res, next) => {
 
     await user.save();
 
+    // Log registration & first login in MongoDB
+    await LoginHistory.create({
+      userId: user.userId,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      method: 'local',
+      ip: req.ip || req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      loginAt: new Date()
+    }).catch(e => console.warn('[LoginHistory log error]:', e.message));
+
     const token = generateToken(user);
 
     return res.status(201).json({
@@ -222,6 +235,23 @@ exports.login = async (req, res, next) => {
         message: 'This account does not have Admin privileges.'
       });
     }
+
+    // Update login timestamp and count in MongoDB
+    user.lastLogin = new Date();
+    user.loginCount = (user.loginCount || 0) + 1;
+    await user.save();
+
+    // Record login details in MongoDB LoginHistory collection
+    await LoginHistory.create({
+      userId: user.userId,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      method: 'local',
+      ip: req.ip || req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      loginAt: new Date()
+    }).catch(e => console.warn('[LoginHistory log error]:', e.message));
 
     const token = generateToken(user);
 
@@ -351,6 +381,23 @@ exports.googleAuth = async (req, res, next) => {
       await user.save();
     }
 
+    // Update login timestamp and count
+    user.lastLogin = new Date();
+    user.loginCount = (user.loginCount || 0) + 1;
+    await user.save();
+
+    // Record login details in MongoDB LoginHistory collection
+    await LoginHistory.create({
+      userId: user.userId,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      method: 'google',
+      ip: req.ip || req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      loginAt: new Date()
+    }).catch(e => console.warn('[LoginHistory log error]:', e.message));
+
     const token = generateToken(user);
 
     return res.json({
@@ -478,6 +525,23 @@ exports.verifyOtp = async (req, res, next) => {
 
       await user.save();
     }
+
+    // Update login timestamp and count
+    user.lastLogin = new Date();
+    user.loginCount = (user.loginCount || 0) + 1;
+    await user.save();
+
+    // Record login details in MongoDB LoginHistory collection
+    await LoginHistory.create({
+      userId: user.userId,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      method: 'phone',
+      ip: req.ip || req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      loginAt: new Date()
+    }).catch(e => console.warn('[LoginHistory log error]:', e.message));
 
     const token = generateToken(user);
 

@@ -110,6 +110,14 @@ const userSchema = new mongoose.Schema({
   claimedQuests: {
     type: [String],
     default: []
+  },
+  lastLogin: {
+    type: Date,
+    default: Date.now
+  },
+  loginCount: {
+    type: Number,
+    default: 1
   }
 }, {
   timestamps: true
