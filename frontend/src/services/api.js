@@ -5,7 +5,22 @@
  * =========================================================
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const PROD_BACKEND_URL = 'https://bookforge-backend-lfim.onrender.com/api';
+
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    const isLocal = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
+    if (!isLocal) {
+      return PROD_BACKEND_URL;
+    }
+  }
+  return '/api';
+};
+
+const BASE_URL = getBaseUrl();
 const TOKEN_KEY = 'bookclub_token';
 
 export function getToken() {
@@ -68,32 +83,40 @@ export async function request(endpoint, options = {}) {
 
     return data;
   } catch (err) {
-    // Automatic Direct Failover: If relative /api request failed (e.g. Vite dev proxy dropped),
-    // retry directly to backend server at http://localhost:5000/api
-    if (typeof window !== 'undefined' && !url.includes(':5000')) {
-      try {
-        const directUrl = `http://localhost:5000/api${cleanEndpoint}`;
-        const directRes = await fetch(directUrl, config);
-        const directData = await directRes.json().catch(() => ({}));
+    const isLocal = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1'));
 
-        if (!directRes.ok) {
-          return {
-            success: false,
-            status: directRes.status,
-            message: directData.message || `Request failed with status ${directRes.status}`,
-            error: directData.message || 'Server error'
-          };
+    // Automatic Direct Failover:
+    if (typeof window !== 'undefined') {
+      const failoverBase = isLocal ? 'http://localhost:5000/api' : PROD_BACKEND_URL;
+      const directUrl = `${failoverBase}${cleanEndpoint}`;
+
+      if (url !== directUrl) {
+        try {
+          const directRes = await fetch(directUrl, config);
+          const directData = await directRes.json().catch(() => ({}));
+
+          if (!directRes.ok) {
+            return {
+              success: false,
+              status: directRes.status,
+              message: directData.message || `Request failed with status ${directRes.status}`,
+              error: directData.message || 'Server error'
+            };
+          }
+
+          return directData;
+        } catch (directErr) {
+          console.warn(`[API Direct Failover Notice]: Could not reach ${directUrl}.`, directErr.message);
         }
-
-        return directData;
-      } catch (directErr) {
-        console.warn(`[API Direct Failover Notice]: Could not reach direct URL http://localhost:5000/api${cleanEndpoint}.`, directErr.message);
       }
     }
 
     console.warn(`[API Network Notice]: Could not reach ${url}.`, err.message);
     const userMessage = err.message === 'Failed to fetch'
-      ? 'Unable to connect to the backend server. Please ensure the backend is running on port 5000.'
+      ? (isLocal
+          ? 'Unable to connect to the backend server. Please ensure the backend is running on port 5000.'
+          : 'Unable to reach the backend server on Render. The server may be waking up from idle mode (takes ~30s on free tier). Please retry in a moment.')
       : err.message;
 
     return {
